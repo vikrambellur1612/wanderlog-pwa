@@ -12,7 +12,7 @@ class WanderLogApp {
   }
 
   async init() {
-    console.log('Initializing WanderLog PWA v1.1.0');
+    console.log('Initializing WanderLog PWA v1.2.0');
     
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
@@ -43,10 +43,14 @@ class WanderLogApp {
     });
 
     // Action cards on home
+    const tripsCard = document.getElementById('tripsCard');
     const exploreCard = document.getElementById('exploreCard');
     const logCard = document.getElementById('logCard');
     const favoritesCard = document.getElementById('favoritesCard');
 
+    if (tripsCard) {
+      tripsCard.addEventListener('click', () => this.navigateToView('trips'));
+    }
     if (exploreCard) {
       exploreCard.addEventListener('click', () => this.navigateToView('explore'));
     }
@@ -85,7 +89,7 @@ class WanderLogApp {
     const urlParams = new URLSearchParams(window.location.search);
     const shortcut = urlParams.get('shortcut');
     
-    if (shortcut && ['explore', 'log', 'favorites'].includes(shortcut)) {
+    if (shortcut && ['trips', 'explore', 'log', 'favorites'].includes(shortcut)) {
       this.navigateToView(shortcut);
     }
   }
@@ -142,6 +146,9 @@ class WanderLogApp {
 
   renderCurrentView() {
     switch (this.currentView) {
+      case 'trips':
+        this.renderTripsView();
+        break;
       case 'explore':
         this.renderExploreView();
         break;
@@ -161,6 +168,16 @@ class WanderLogApp {
   renderHomeView() {
     // Home view is mostly static, but we can add dynamic content here
     console.log('Rendering home view');
+  }
+
+  renderTripsView() {
+    // Trip view content is handled by TripUI class
+    console.log('Rendering trips view');
+    
+    // Initialize TripUI if not already done
+    if (!window.tripUI) {
+      window.tripUI = new TripUI();
+    }
   }
 
   renderExploreView() {
