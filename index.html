@@ -370,6 +370,11 @@
             const devScript = document.createElement('script');
             devScript.src = './js/dev-helper.js';
             document.head.appendChild(devScript);
+        } else {
+            // Load debug helper in production to help identify issues
+            const debugScript = document.createElement('script');
+            debugScript.src = './js/debug-helper.js';
+            document.head.appendChild(debugScript);
         }
         
         // Only load service worker registration in production

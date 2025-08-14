@@ -174,10 +174,18 @@ class WanderLogApp {
     // Trip view content is handled by TripUI class
     console.log('Rendering trips view');
     
-    // Initialize TripUI if not already done
-    if (!window.tripUI) {
-      window.tripUI = new TripUI();
-    }
+    // Ensure TripUI is initialized when we navigate to trips view
+    setTimeout(() => {
+      if (typeof window.initializeTripUI === 'function') {
+        window.initializeTripUI();
+      } else if (!window.tripUI && document.getElementById('trip-list')) {
+        // Fallback initialization
+        if (typeof window.TripUI === 'function') {
+          window.tripUI = new window.TripUI();
+          console.log('TripUI initialized via fallback');
+        }
+      }
+    }, 100); // Small delay to ensure DOM is ready
   }
 
   renderExploreView() {

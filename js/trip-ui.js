@@ -786,12 +786,35 @@ class TripUI {
   }
 }
 
-// Initialize trip UI when DOM is loaded
+// Initialize trip UI when DOM is loaded or when needed
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('trip-list')) {
-    window.tripUI = new TripUI();
-  }
+  // Don't auto-initialize, let the app handle it
+  console.log('TripUI module loaded');
 });
 
 // Export for global access
 window.TripUI = TripUI;
+
+// Function to initialize TripUI when needed
+window.initializeTripUI = function() {
+  if (!window.tripUI && document.getElementById('trip-list')) {
+    console.log('Initializing TripUI...');
+    try {
+      window.tripUI = new TripUI();
+      console.log('TripUI initialized successfully');
+    } catch (error) {
+      console.error('Error initializing TripUI:', error);
+    }
+  } else if (!document.getElementById('trip-list')) {
+    console.warn('TripUI: trip-list element not found');
+  }
+};
+
+// Also try to initialize if the element is already present and page is loaded
+if (document.readyState === 'complete') {
+  setTimeout(() => {
+    if (document.getElementById('trip-list') && !window.tripUI) {
+      window.initializeTripUI();
+    }
+  }, 100);
+}
