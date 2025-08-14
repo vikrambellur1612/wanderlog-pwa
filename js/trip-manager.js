@@ -99,6 +99,14 @@ class TripManager {
 
     trip.places.push(place);
     this.updateTrip(tripId, { places: trip.places });
+    
+    // Trigger home page refresh if tripUI is available
+    if (window.tripUI && window.tripUI.renderHomePageTrips) {
+      setTimeout(() => {
+        window.tripUI.renderHomePageTrips();
+      }, 100);
+    }
+    
     return place;
   }
 
@@ -111,6 +119,14 @@ class TripManager {
     if (placeIndex !== -1) {
       trip.places.splice(placeIndex, 1);
       this.updateTrip(tripId, { places: trip.places });
+      
+      // Trigger home page refresh if tripUI is available
+      if (window.tripUI && window.tripUI.renderHomePageTrips) {
+        setTimeout(() => {
+          window.tripUI.renderHomePageTrips();
+        }, 100);
+      }
+      
       return true;
     }
     return false;

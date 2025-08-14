@@ -215,32 +215,35 @@ class AttractionDetailsManager {
     const images = [];
     const name = attractionName.toLowerCase();
     
-    // Use Unsplash placeholder service with relevant keywords
+    // Use reliable placeholder service instead of Unsplash which is having issues
+    const baseUrl = 'https://picsum.photos/800/600';
+    
     if (name.includes('temple') || name.includes('mandir')) {
-      images.push(`https://source.unsplash.com/800x600/?temple,india`);
-      images.push(`https://source.unsplash.com/800x600/?hindu,temple,architecture`);
+      images.push(`${baseUrl}?random=1&sig=temple`);
+      images.push(`${baseUrl}?random=2&sig=architecture`);
     } else if (name.includes('fort') || name.includes('palace')) {
-      images.push(`https://source.unsplash.com/800x600/?fort,india,palace`);
-      images.push(`https://source.unsplash.com/800x600/?indian,architecture,royal`);
+      images.push(`${baseUrl}?random=3&sig=fort`);
+      images.push(`${baseUrl}?random=4&sig=palace`);
     } else if (name.includes('beach')) {
-      images.push(`https://source.unsplash.com/800x600/?beach,india,ocean`);
-      images.push(`https://source.unsplash.com/800x600/?tropical,beach,coast`);
+      images.push(`${baseUrl}?random=5&sig=beach`);
+      images.push(`${baseUrl}?random=6&sig=coast`);
     } else if (name.includes('hill') || name.includes('mountain')) {
-      images.push(`https://source.unsplash.com/800x600/?mountain,india,landscape`);
-      images.push(`https://source.unsplash.com/800x600/?hill,station,nature`);
+      images.push(`${baseUrl}?random=7&sig=mountain`);
+      images.push(`${baseUrl}?random=8&sig=landscape`);
     } else if (name.includes('lake') || name.includes('river')) {
-      images.push(`https://source.unsplash.com/800x600/?lake,india,water`);
-      images.push(`https://source.unsplash.com/800x600/?river,landscape,nature`);
+      images.push(`${baseUrl}?random=9&sig=lake`);
+      images.push(`${baseUrl}?random=10&sig=water`);
     } else if (name.includes('museum') || name.includes('gallery')) {
-      images.push(`https://source.unsplash.com/800x600/?museum,india,art`);
-      images.push(`https://source.unsplash.com/800x600/?gallery,culture,heritage`);
+      images.push(`${baseUrl}?random=11&sig=museum`);
+      images.push(`${baseUrl}?random=12&sig=art`);
     } else if (name.includes('garden') || name.includes('park')) {
-      images.push(`https://source.unsplash.com/800x600/?garden,india,botanical`);
-      images.push(`https://source.unsplash.com/800x600/?park,nature,landscape`);
+      images.push(`${baseUrl}?random=13&sig=garden`);
+      images.push(`${baseUrl}?random=14&sig=nature`);
     } else {
-      // Default Indian landmark images
-      images.push(`https://source.unsplash.com/800x600/?india,landmark,${encodeURIComponent(attractionName)}`);
-      images.push(`https://source.unsplash.com/800x600/?indian,tourism,heritage`);
+      // Default landmark images with unique signatures
+      const attractionHash = attractionName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+      images.push(`${baseUrl}?random=${attractionHash % 100}&sig=landmark`);
+      images.push(`${baseUrl}?random=${(attractionHash + 1) % 100}&sig=heritage`);
     }
     
     return images.slice(0, 3); // Limit to 3 images
@@ -287,7 +290,8 @@ class AttractionDetailsManager {
 
   // Generate fallback image
   generateFallbackImage(attractionName) {
-    return `https://source.unsplash.com/800x600/?india,landmark,heritage`;
+    const attractionHash = attractionName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    return `https://picsum.photos/800/600?random=${attractionHash % 100}&sig=fallback`;
   }
 
   // Generate coordinates

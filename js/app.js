@@ -268,6 +268,11 @@ class WanderLogApp {
         // Clear the form
         this.clearCustomPlaceForm();
         
+        // Refresh home page trip cards to show updated counts
+        if (window.tripUI && window.tripUI.renderHomePageTrips) {
+          window.tripUI.renderHomePageTrips();
+        }
+        
         // Navigate back to trip detail
         window.tripUI.viewTripDetail(parseInt(selectedTripId));
         
@@ -660,6 +665,11 @@ class WanderLogApp {
       
       // Close modal
       this.closeTripSelectionModal();
+      
+      // Refresh home page trip cards to show updated counts
+      if (window.tripUI && window.tripUI.renderHomePageTrips) {
+        window.tripUI.renderHomePageTrips();
+      }
       
       // Navigate to trip detail
       window.tripUI.viewTripDetail(tripId);
