@@ -16,7 +16,7 @@ A Progressive Web App for travel logging and exploration.
 - **Build Tool**: Vite
 - **PWA**: Service Worker, Web App Manifest
 - **Hosting**: Netlify
-- **Version**: 1.0.0
+- **Version**: 1.4.0
 
 ## Getting Started
 
@@ -133,6 +133,10 @@ MIT License - see LICENSE file for details
 
 ## Version History
 
+- **v1.4.0** - Enhanced explore page with trip selection, fixed image loading issues, improved home page refresh
+- **v1.3.0** - Enhanced trip management with comprehensive UI improvements
+- **v1.2.0** - Added interactive map and attraction details
+- **v1.1.0** - Trip creation and management features
 - **v1.0.0** - Initial release with core PWA features
 
 ---

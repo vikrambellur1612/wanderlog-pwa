@@ -1,5 +1,5 @@
 // WanderLog Trip Management Module
-// Version: 1.2.0
+// Version: 1.4.0
 
 class TripManager {
   constructor() {

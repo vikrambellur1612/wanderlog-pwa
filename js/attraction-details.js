@@ -1,5 +1,5 @@
 // WanderLog Attraction Details Module
-// Version: 1.0.0 - Dynamic attraction details with external APIs
+// Version: 1.4.0 - Dynamic attraction details with external APIs
 
 class AttractionDetailsManager {
   constructor() {

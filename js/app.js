@@ -1,5 +1,5 @@
 // WanderLog PWA - Main Application Logic
-// Version: 1.0.0
+// Version: 1.4.0
 
 class WanderLogApp {
   constructor() {
@@ -12,7 +12,7 @@ class WanderLogApp {
   }
 
   async init() {
-    console.log('Initializing WanderLog PWA v1.3.0');
+    console.log('Initializing WanderLog PWA v1.4.0');
     
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {

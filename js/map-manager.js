@@ -1,5 +1,5 @@
-// WanderLog Map Management Module
-// Version: 1.0.0 - Interactive India Map with trip visualization
+// WanderLog Map Manager
+// Version: 1.4.0 - Interactive India Map with trip visualization
 
 class MapManager {
   constructor() {
