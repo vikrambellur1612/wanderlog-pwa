@@ -5,7 +5,9 @@ let deferredPrompt;
 let updateAvailable = false;
 
 // Service Worker Registration
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+if ('serviceWorker' in navigator && isProduction) {
   // Only register service worker in production
   window.addEventListener('load', async () => {
     try {
@@ -43,7 +45,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       console.error('ServiceWorker registration failed:', error);
     }
   });
-} else if ('serviceWorker' in navigator && !import.meta.env.PROD) {
+} else if ('serviceWorker' in navigator && !isProduction) {
   console.log('Service Worker registration skipped in development mode');
 }
 
