@@ -190,55 +190,83 @@ class TripManager {
     const dynamicAttractions = await this.fetchDynamicAttractions(place);
     
     // Combine and deduplicate
-    const allAttractions = [...staticAttractions, ...dynamicAttractions];
-    const uniqueAttractions = [...new Set(allAttractions)];
+    let allAttractions = [];
     
-    return uniqueAttractions.slice(0, 8); // Limit to 8 attractions for UI
+    if (dynamicAttractions.length > 0) {
+      // Prioritize dynamic data but mix in some static data
+      allAttractions = [...dynamicAttractions, ...staticAttractions.slice(0, 2)];
+    } else {
+      // Use static data as primary source
+      allAttractions = staticAttractions;
+    }
+    
+    const uniqueAttractions = [...new Set(allAttractions)];
+    const finalAttractions = uniqueAttractions.slice(0, 8); // Limit to 8 attractions for UI
+    
+    console.log(`Final attractions for ${place.city}:`, finalAttractions);
+    return finalAttractions;
   }
 
   // Static attractions data (fallback)
   getStaticAttractions(cityName) {
     const attractionsMap = {
       'Delhi': [
-        'Red Fort', 'India Gate', 'Qutub Minar', 'Lotus Temple', 'Humayun\'s Tomb'
+        'Red Fort Complex', 'India Gate Memorial', 'Qutub Minar Complex', 'Lotus Temple', 'Humayun\'s Tomb Garden'
       ],
       'Mumbai': [
-        'Gateway of India', 'Marine Drive', 'Elephanta Caves', 'Chhatrapati Shivaji Terminus', 'Bollywood Studios'
+        'Gateway of India', 'Marine Drive Promenade', 'Elephanta Caves', 'Chhatrapati Shivaji Terminus', 'Crawford Market'
       ],
       'Bangalore': [
         'Lalbagh Botanical Garden', 'Bangalore Palace', 'Tipu Sultan\'s Summer Palace', 'Cubbon Park', 'ISKCON Temple'
       ],
       'Jaipur': [
-        'Amber Fort', 'City Palace', 'Hawa Mahal', 'Jantar Mantar', 'Nahargarh Fort'
+        'Amber Fort Palace', 'City Palace Complex', 'Hawa Mahal', 'Jantar Mantar Observatory', 'Nahargarh Fort'
+      ],
+      'Jodhpur': [
+        'Mehrangarh Fort', 'Umaid Bhawan Palace', 'Jaswant Thada', 'Mandore Gardens', 'Clock Tower Market'
+      ],
+      'Jaisalmer': [
+        'Jaisalmer Fort', 'Sam Sand Dunes', 'Patwon Ki Haveli', 'Gadisar Lake', 'Desert Safari'
+      ],
+      'Udaipur': [
+        'City Palace Udaipur', 'Lake Pichola', 'Jag Mandir', 'Saheliyon Ki Bari', 'Fateh Sagar Lake'
       ],
       'Goa': [
-        'Baga Beach', 'Calangute Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Dudhsagar Falls'
-      ],
-      'Kerala': [
-        'Backwaters', 'Munnar Tea Gardens', 'Periyar Wildlife Sanctuary', 'Fort Kochi', 'Kovalam Beach'
+        'Baga Beach', 'Calangute Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Dudhsagar Waterfalls'
       ],
       'Kochi': [
         'Chinese Fishing Nets', 'Mattancherry Palace', 'Jewish Synagogue', 'Fort Kochi Beach', 'St. Francis Church'
       ],
       'Munnar': [
-        'Tea Museum', 'Eravikulam National Park', 'Mattupetty Dam', 'Echo Point', 'Top Station'
+        'Tea Museum', 'Eravikulam National Park', 'Mattupetty Dam', 'Echo Point', 'Top Station Viewpoint'
       ],
       'Agra': [
         'Taj Mahal', 'Agra Fort', 'Fatehpur Sikri', 'Mehtab Bagh', 'Tomb of Itimad-ud-Daulah'
       ],
       'Varanasi': [
-        'Kashi Vishwanath Temple', 'Dashashwamedh Ghat', 'Sarnath', 'Ramnagar Fort', 'Banaras Hindu University'
+        'Kashi Vishwanath Temple', 'Dashashwamedh Ghat', 'Sarnath', 'Ramnagar Fort', 'Assi Ghat'
+      ],
+      'Shimla': [
+        'The Ridge', 'Mall Road', 'Jakhoo Temple', 'Christ Church', 'Viceregal Lodge'
+      ],
+      'Manali': [
+        'Rohtang Pass', 'Solang Valley', 'Hadimba Temple', 'Manu Temple', 'Old Manali'
+      ],
+      'Darjeeling': [
+        'Tiger Hill', 'Darjeeling Himalayan Railway', 'Happy Valley Tea Estate', 'Peace Pagoda', 'Observatory Hill'
       ]
     };
 
     return attractionsMap[cityName] || [
-      'Local Markets', 'Traditional Temples', 'Scenic Viewpoints', 'Cultural Centers'
+      'Local Markets', 'Traditional Temples', 'Scenic Viewpoints', 'Cultural Centers', 'Historical Sites'
     ];
   }
 
   // Fetch dynamic attractions from external APIs
   async fetchDynamicAttractions(place) {
     try {
+      console.log(`Fetching attractions for ${place.city}, ${place.state}...`);
+      
       // Try multiple API sources for comprehensive data
       const attractions = await Promise.allSettled([
         this.fetchFromTripAdvisor(place),
@@ -246,12 +274,29 @@ class TripManager {
         this.fetchFromOpenTripMap(place)
       ]);
 
-      const validAttractions = attractions
-        .filter(result => result.status === 'fulfilled' && result.value.length > 0)
-        .map(result => result.value)
-        .flat();
+      const validAttractions = [];
+      
+      // Process results from each API
+      attractions.forEach((result, index) => {
+        const apiNames = ['TripAdvisor', 'Wikipedia', 'OpenTripMap'];
+        if (result.status === 'fulfilled' && result.value.length > 0) {
+          console.log(`${apiNames[index]} API returned ${result.value.length} attractions for ${place.city}`);
+          validAttractions.push(...result.value);
+        } else if (result.status === 'rejected') {
+          console.warn(`${apiNames[index]} API failed for ${place.city}:`, result.reason);
+        }
+      });
 
-      return [...new Set(validAttractions)]; // Remove duplicates
+      // Remove duplicates and limit results
+      const uniqueAttractions = [...new Set(validAttractions)];
+      
+      if (uniqueAttractions.length > 0) {
+        console.log(`Successfully fetched ${uniqueAttractions.length} unique attractions for ${place.city}`);
+      } else {
+        console.log(`No dynamic attractions found for ${place.city}, will use static data`);
+      }
+      
+      return uniqueAttractions;
     } catch (error) {
       console.warn('Error fetching dynamic attractions:', error);
       return [];
@@ -284,18 +329,88 @@ class TripManager {
       // Rate limiting
       await new Promise(resolve => setTimeout(resolve, config.rateLimitDelay));
 
-      const searchQuery = `${place.city} attractions landmarks`;
-      const url = `${config.baseUrl}/page/search/${encodeURIComponent(searchQuery)}`;
-      
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Wikipedia API error');
-      
-      const data = await response.json();
-      return data.pages?.slice(0, 3).map(page => page.title) || [];
+      // Try multiple Wikipedia API approaches
+      const searchResults = await this.tryMultipleWikipediaEndpoints(place);
+      return searchResults;
     } catch (error) {
       console.warn('Wikipedia API error:', error);
       return [];
     }
+  }
+
+  // Try multiple Wikipedia API endpoints for better reliability
+  async tryMultipleWikipediaEndpoints(place) {
+    const searchQuery = `${place.city} attractions landmarks`;
+    
+    // Method 1: Try the search API with different endpoint
+    try {
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&origin=*&srlimit=3`;
+      const response = await fetch(searchUrl);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.query?.search?.length > 0) {
+          return data.query.search.map(page => page.title).slice(0, 3);
+        }
+      }
+    } catch (error) {
+      console.warn('Wikipedia search API failed:', error);
+    }
+
+    // Method 2: Try the REST API with a different approach
+    try {
+      const restUrl = `https://en.wikipedia.org/api/rest_v1/page/title/${encodeURIComponent(place.city)}`;
+      const response = await fetch(restUrl);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.title) {
+          return [data.title];
+        }
+      }
+    } catch (error) {
+      console.warn('Wikipedia REST API failed:', error);
+    }
+
+    // Method 3: Try OpenSearch API
+    try {
+      const opensearchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(place.city)}&limit=3&format=json&origin=*`;
+      const response = await fetch(opensearchUrl);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[1] && data[1].length > 0) {
+          return data[1].slice(0, 3);
+        }
+      }
+    } catch (error) {
+      console.warn('Wikipedia OpenSearch API failed:', error);
+    }
+
+    // Method 4: Try searching for common attraction types
+    try {
+      const attractionTypes = ['fort', 'palace', 'temple', 'market', 'museum'];
+      const cityAttraction = attractionTypes.find(type => 
+        Math.random() > 0.7 // Simulate finding relevant attraction types
+      );
+      
+      if (cityAttraction) {
+        const typeSearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(place.city + ' ' + cityAttraction)}&format=json&origin=*&srlimit=2`;
+        const response = await fetch(typeSearchUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.query?.search?.length > 0) {
+            return data.query.search.map(page => page.title).slice(0, 2);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Wikipedia attraction type search failed:', error);
+    }
+
+    // If all methods fail, return empty array
+    return [];
   }
 
   // Fetch from OpenTripMap API for POI data

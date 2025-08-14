@@ -661,21 +661,45 @@ class TripUI {
           // Fetch fresh attractions data
           const updatedPlace = await this.tripManager.refreshPlaceAttractions(this.currentTripId, place.id);
           
-          if (updatedPlace) {
-            // Update the display
+          if (updatedPlace && updatedPlace.attractions && updatedPlace.attractions.length > 0) {
+            // Update the display with successful results
             this.refreshPlacesList();
+          } else {
+            // Show that we tried but couldn't find dynamic data
+            if (placeElement) {
+              const attractionsSection = placeElement.querySelector('.place-attractions');
+              if (attractionsSection) {
+                attractionsSection.innerHTML = `
+                  <div class="place-attractions">
+                    <h4 class="attractions-title">Popular attractions in ${place.city}:</h4>
+                    <div class="attractions-list">
+                      <span class="attraction-tag">Local Markets</span>
+                      <span class="attraction-tag">Traditional Temples</span>
+                      <span class="attraction-tag">Scenic Viewpoints</span>
+                      <span class="attraction-tag">Cultural Centers</span>
+                    </div>
+                    <p class="attractions-note">Dynamic data unavailable - showing general attractions</p>
+                  </div>
+                `;
+              }
+            }
           }
         } catch (error) {
           console.error('Error loading attractions:', error);
-          // Show error state
+          // Show basic attractions as fallback
           const placeElement = document.querySelector(`[data-place-id="${place.id}"]`);
           if (placeElement) {
             const attractionsSection = placeElement.querySelector('.place-attractions');
             if (attractionsSection) {
               attractionsSection.innerHTML = `
                 <div class="place-attractions">
-                  <h4 class="attractions-title">Attractions unavailable</h4>
-                  <p class="attractions-error">Unable to load attractions data</p>
+                  <h4 class="attractions-title">Popular attractions in ${place.city}:</h4>
+                  <div class="attractions-list">
+                    <span class="attraction-tag">Local Markets</span>
+                    <span class="attraction-tag">Historical Sites</span>
+                    <span class="attraction-tag">Cultural Centers</span>
+                  </div>
+                  <p class="attractions-error">Unable to load live attraction data</p>
                 </div>
               `;
             }
