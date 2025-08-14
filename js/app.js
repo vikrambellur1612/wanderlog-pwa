@@ -61,13 +61,13 @@ class WanderLogApp {
       favoritesCard.addEventListener('click', () => this.navigateToView('favorites'));
     }
 
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.handleSearch(e.target.value);
-      });
-    }
+    // Search functionality - removed as per requirements
+    // const searchInput = document.getElementById('searchInput');
+    // if (searchInput) {
+    //   searchInput.addEventListener('input', (e) => {
+    //     this.handleSearch(e.target.value);
+    //   });
+    // }
 
     // Log form submission
     const logForm = document.getElementById('logForm');
@@ -168,6 +168,19 @@ class WanderLogApp {
   renderHomeView() {
     // Home view is mostly static, but we can add dynamic content here
     console.log('Rendering home view');
+    
+    // Ensure TripUI is initialized for home page functionality
+    setTimeout(() => {
+      if (typeof window.initializeTripUI === 'function') {
+        window.initializeTripUI();
+      } else if (!window.tripUI && document.getElementById('trip-list')) {
+        // Fallback initialization
+        if (typeof window.TripUI === 'function') {
+          window.tripUI = new window.TripUI();
+          console.log('TripUI initialized for home page');
+        }
+      }
+    }, 100);
   }
 
   renderTripsView() {
@@ -189,48 +202,125 @@ class WanderLogApp {
   }
 
   renderExploreView() {
-    const exploreResults = document.getElementById('exploreResults');
-    if (!exploreResults) return;
+    // Initialize explore map if TripUI is available
+    if (window.tripUI && window.tripUI.initializeExploreMap) {
+      window.tripUI.initializeExploreMap();
+    }
 
-    // Sample places data (in a real app, this would come from an API)
-    const samplePlaces = [
-      {
-        id: 1,
-        name: 'Central Park',
-        description: 'Large public park in Manhattan',
-        rating: 4.5,
-        category: 'Park'
-      },
-      {
-        id: 2,
-        name: 'Times Square',
-        description: 'Famous commercial intersection',
-        rating: 4.2,
-        category: 'Landmark'
-      },
-      {
-        id: 3,
-        name: 'Brooklyn Bridge',
-        description: 'Historic suspension bridge',
-        rating: 4.7,
-        category: 'Bridge'
+    // Populate trip dropdown for custom place form
+    setTimeout(() => {
+      this.populateTripDropdown();
+    }, 100);
+
+    console.log('Rendered explore view with interactive map and custom place form');
+  }
+
+  // Add custom place functionality
+  addCustomPlace() {
+    const name = document.getElementById('customPlaceName').value.trim();
+    const state = document.getElementById('customPlaceState').value;
+    const description = document.getElementById('customPlaceDescription').value.trim();
+    const attractionsText = document.getElementById('customPlaceAttractions').value.trim();
+    const selectedTripId = document.getElementById('selectTripForPlace').value;
+
+    // Validation
+    if (!name) {
+      this.showToast('Please enter a place name', 'error');
+      return;
+    }
+    if (!state) {
+      this.showToast('Please select a state', 'error');
+      return;
+    }
+    if (!attractionsText) {
+      this.showToast('Please add at least one attraction', 'error');
+      return;
+    }
+
+    // Parse attractions
+    const attractions = attractionsText
+      .split('\n')
+      .map(a => a.trim())
+      .filter(a => a.length > 0);
+
+    if (attractions.length === 0) {
+      this.showToast('Please add at least one attraction', 'error');
+      return;
+    }
+
+    // Create custom place object
+    const customPlace = {
+      city: name,
+      state: state,
+      description: description || `Custom destination in ${state}`,
+      attractions: attractions,
+      category: 'Custom',
+      isCustom: true
+    };
+
+    // Check if user selected a trip to add to
+    if (selectedTripId && window.tripUI) {
+      // Add to selected trip
+      try {
+        window.tripUI.tripManager.addPlaceToTrip(parseInt(selectedTripId), customPlace);
+        this.showToast(`"${name}" added to your trip!`, 'success');
+        
+        // Clear the form
+        this.clearCustomPlaceForm();
+        
+        // Navigate back to trip detail
+        window.tripUI.viewTripDetail(parseInt(selectedTripId));
+        
+      } catch (error) {
+        console.error('Error adding custom place to trip:', error);
+        this.showToast('Error adding place to trip', 'error');
       }
-    ];
+    } else {
+      // No trip selected - check if there are any trips available
+      const trips = window.tripUI ? window.tripUI.tripManager.getAllTrips() : [];
+      
+      if (trips.length === 0) {
+        // No trips available - show error and redirect to create trip
+        this.showErrorToastWithAction(
+          'No Trips Available',
+          'You need to create a trip first before adding destinations.',
+          'Create Trip',
+          () => {
+            this.navigateToView('home');
+            setTimeout(() => {
+              const createTripBtn = document.getElementById('createTripBtn');
+              if (createTripBtn) {
+                createTripBtn.click();
+              }
+            }, 100);
+          }
+        );
+        return;
+      }
+      
+      // Show trip selection modal
+      this.showTripSelectionModal(customPlace);
+    }
+  }
 
-    exploreResults.innerHTML = samplePlaces.map(place => `
-      <div class="place-item" data-place-id="${place.id}">
-        <h3>${place.name}</h3>
-        <p>${place.description}</p>
-        <div class="place-rating">
-          ${'★'.repeat(Math.floor(place.rating))} ${place.rating} • ${place.category}
-        </div>
-        <button class="btn secondary-btn" onclick="app.addToFavorites(${place.id})">
-          Add to Favorites
-        </button>
-      </div>
-    `).join('');
+  // Clear custom place form
+  clearCustomPlaceForm() {
+    document.getElementById('customPlaceName').value = '';
+    document.getElementById('customPlaceState').value = '';
+    document.getElementById('customPlaceDescription').value = '';
+    document.getElementById('customPlaceAttractions').value = '';
+    document.getElementById('selectTripForPlace').value = '';
+  }
 
-    console.log('Rendered explore view with sample places');
+  // Load custom places from storage
+  loadCustomPlaces() {
+    try {
+      const places = localStorage.getItem('wanderlog_custom_places');
+      return places ? JSON.parse(places) : [];
+    } catch (error) {
+      console.error('Error loading custom places:', error);
+      return [];
+    }
   }
 
   renderLogView() {
@@ -490,6 +580,169 @@ class WanderLogApp {
       'info': '#2196f3'
     };
     return colors[type] || colors.info;
+  }
+
+  // Show trip selection modal
+  showTripSelectionModal(customPlace) {
+    const modal = document.getElementById('tripSelectionModal');
+    const tripList = document.getElementById('tripSelectionList');
+    
+    if (!modal || !tripList) {
+      console.error('Trip selection modal elements not found');
+      return;
+    }
+
+    // Get all trips
+    const trips = window.tripUI ? window.tripUI.tripManager.getAllTrips() : [];
+    
+    // Clear previous content
+    tripList.innerHTML = '';
+    
+    if (trips.length === 0) {
+      tripList.innerHTML = `
+        <div class="no-trips-message">
+          <h4>No Trips Available</h4>
+          <p>Create your first trip to start adding destinations!</p>
+          <button class="btn-primary" onclick="app.navigateToView('home'); app.closeTripSelectionModal();">
+            Create Trip
+          </button>
+        </div>
+      `;
+    } else {
+      // Render trip options
+      trips.forEach(trip => {
+        const status = this.getTripStatus(trip);
+        const tripElement = document.createElement('div');
+        tripElement.className = 'trip-selection-item';
+        tripElement.innerHTML = `
+          <h4>${trip.name}</h4>
+          <p>${trip.places ? trip.places.length : 0} destinations</p>
+          <span class="trip-status ${status.toLowerCase()}">${status}</span>
+        `;
+        
+        tripElement.addEventListener('click', () => {
+          this.selectTripForPlace(trip.id, customPlace);
+        });
+        
+        tripList.appendChild(tripElement);
+      });
+    }
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    // Store the custom place for later use
+    this.pendingCustomPlace = customPlace;
+  }
+
+  // Close trip selection modal
+  closeTripSelectionModal() {
+    const modal = document.getElementById('tripSelectionModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+    this.pendingCustomPlace = null;
+  }
+
+  // Select trip for custom place
+  selectTripForPlace(tripId, customPlace) {
+    if (!window.tripUI) {
+      this.showToast('Trip manager not available', 'error');
+      return;
+    }
+
+    try {
+      window.tripUI.tripManager.addPlaceToTrip(tripId, customPlace);
+      this.showToast(`"${customPlace.city}" added to your trip!`, 'success');
+      
+      // Clear the form
+      this.clearCustomPlaceForm();
+      
+      // Close modal
+      this.closeTripSelectionModal();
+      
+      // Navigate to trip detail
+      window.tripUI.viewTripDetail(tripId);
+      
+    } catch (error) {
+      console.error('Error adding custom place to trip:', error);
+      this.showToast('Error adding place to trip', 'error');
+    }
+  }
+
+  // Get trip status
+  getTripStatus(trip) {
+    if (!trip.endDate) return 'Upcoming';
+    
+    const endDate = new Date(trip.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return endDate < today ? 'Completed' : 'Upcoming';
+  }
+
+  // Show error toast with action button
+  showErrorToastWithAction(title, message, buttonText, buttonAction) {
+    // Remove existing error toasts
+    const existingToasts = document.querySelectorAll('.error-toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.innerHTML = `
+      <h4>${title}</h4>
+      <p>${message}</p>
+      <div class="toast-actions">
+        <button class="btn-small" onclick="this.parentElement.parentElement.remove()">${buttonText}</button>
+        <button class="btn-small" onclick="this.parentElement.parentElement.remove()">Dismiss</button>
+      </div>
+    `;
+
+    // Add click handler for the action button
+    const actionBtn = toast.querySelector('.btn-small');
+    if (actionBtn && buttonAction) {
+      actionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        buttonAction();
+        toast.remove();
+      });
+    }
+
+    document.body.appendChild(toast);
+
+    // Auto remove after 10 seconds
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.classList.add('hide');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.remove();
+          }
+        }, 300);
+      }
+    }, 10000);
+  }
+
+  // Populate trip dropdown on explore page
+  populateTripDropdown() {
+    const dropdown = document.getElementById('selectTripForPlace');
+    if (!dropdown || !window.tripUI) return;
+
+    // Get all trips
+    const trips = window.tripUI.tripManager.getAllTrips();
+    
+    // Clear existing options (except the first placeholder)
+    while (dropdown.children.length > 1) {
+      dropdown.removeChild(dropdown.lastChild);
+    }
+    
+    // Add trip options
+    trips.forEach(trip => {
+      const option = document.createElement('option');
+      option.value = trip.id;
+      option.textContent = `${trip.name} (${trip.places ? trip.places.length : 0} destinations)`;
+      dropdown.appendChild(option);
+    });
   }
 }
 

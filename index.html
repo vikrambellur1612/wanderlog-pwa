@@ -226,38 +226,28 @@
             <!-- Home View -->
             <section id="homeView" class="view active">
                 <div class="app-content">
-                    <div class="welcome-section">
+                    <div class="home-header">
                         <h2>Welcome to WanderLog</h2>
                         <p>Your personal travel companion for discovering and logging amazing places.</p>
-                        
-                        <div class="action-cards">
-                            <div class="card card-clickable" id="tripsCard">
-                                <div class="card-body">
-                                    <h3>✈️ My Trips</h3>
-                                    <p>Plan and manage your travel itineraries</p>
-                                </div>
-                            </div>
-                            
-                            <div class="card card-clickable" id="exploreCard">
-                                <div class="card-body">
-                                    <h3>🗺️ Explore</h3>
-                                    <p>Discover new places and attractions</p>
-                                </div>
-                            </div>
-                            
-                            <div class="card card-clickable" id="logCard">
-                                <div class="card-body">
-                                    <h3>📝 Log Journey</h3>
-                                    <p>Record your travel experiences</p>
-                                </div>
-                            </div>
-                            
-                            <div class="card card-clickable" id="favoritesCard">
-                                <div class="card-body">
-                                    <h3>⭐ Favorites</h3>
-                                    <p>View your saved places</p>
-                                </div>
-                            </div>
+                        <button class="btn-primary add-trip-btn" id="addTripBtn">
+                            <span class="icon">✈️</span>
+                            Add Trip
+                        </button>
+                    </div>
+                    
+                    <!-- Upcoming Trips Section -->
+                    <div class="trips-section">
+                        <h3 class="section-title">🛫 Upcoming Trips</h3>
+                        <div id="upcomingTripsList" class="trips-grid">
+                            <!-- Upcoming trips will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Completed Trips Section -->
+                    <div class="trips-section">
+                        <h3 class="section-title">✅ Completed Trips</h3>
+                        <div id="completedTripsList" class="trips-grid">
+                            <!-- Completed trips will be dynamically loaded here -->
                         </div>
                     </div>
                 </div>
@@ -275,12 +265,109 @@
             <!-- Explore View -->
             <section id="exploreView" class="view">
                 <div class="app-content">
-                    <h2>Explore Places</h2>
-                    <div class="search-container">
-                        <input type="text" id="searchInput" class="search-input" placeholder="Search for places...">
+                    <div class="explore-header">
+                        <h2>🗺️ Explore India</h2>
+                        <p>Discover amazing destinations across India and add them to your trips</p>
+                        <div id="add-to-trip-info" class="add-to-trip-banner hidden">
+                            <span>Select a destination to add to your trip</span>
+                            <button class="btn-secondary" onclick="tripUI.cancelAddPlace()">Cancel</button>
+                        </div>
                     </div>
-                    <div id="exploreResults" class="places-grid">
-                        <!-- Dynamic content will be loaded here -->
+                    
+                    <!-- Interactive India Map Section -->
+                    <div class="explore-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Interactive Map</h3>
+                            <p class="section-subtitle">Click on states to explore destinations</p>
+                        </div>
+                        <div id="explore-map">
+                            <!-- India map will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Custom Place Addition Section -->
+                    <div class="explore-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Add Custom Destination</h3>
+                            <p class="section-subtitle">Create your own place with attractions</p>
+                        </div>
+                        <div id="custom-place-form" class="custom-place-container">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customPlaceName">Place Name</label>
+                                    <input type="text" id="customPlaceName" class="form-input" placeholder="e.g., My Hometown, Secret Beach">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customPlaceState">State</label>
+                                    <select id="customPlaceState" class="form-input">
+                                        <option value="">Select State</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customPlaceDescription">Description</label>
+                                <textarea id="customPlaceDescription" class="form-input" rows="3" placeholder="Brief description of the place..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="customPlaceAttractions">Attractions (one per line)</label>
+                                <textarea id="customPlaceAttractions" class="form-input" rows="5" placeholder="Enter attractions, one per line:&#10;Beautiful Temple&#10;Local Market&#10;Scenic Viewpoint&#10;Traditional Restaurant&#10;Heritage Museum"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="selectTripForPlace">Add to Trip</label>
+                                <select id="selectTripForPlace" class="form-input">
+                                    <option value="">Select a trip to add this place to</option>
+                                    <!-- Trip options will be populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn-primary" onclick="app.addCustomPlace()">Add Custom Place</button>
+                                <button type="button" class="btn-secondary" onclick="app.clearCustomPlaceForm()">Clear Form</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trip Selection Modal -->
+                    <div id="tripSelectionModal" class="modal hidden">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Select Trip</h3>
+                                <button class="close-btn" onclick="app.closeTripSelectionModal()">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Choose which trip you'd like to add this destination to:</p>
+                                <div id="tripSelectionList" class="trip-selection-list">
+                                    <!-- Trip options will be populated here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -361,6 +448,45 @@
                 <span>Favorites</span>
             </button>
         </nav>
+    </div>
+
+    <!-- Add Trip Modal -->
+    <div id="addTripModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Trip</h3>
+                <button class="close-btn" id="closeAddTripModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addTripForm" class="trip-form">
+                    <div class="form-group">
+                        <label for="tripName">Trip Name</label>
+                        <input type="text" id="tripName" class="form-input" placeholder="e.g., Kerala Backwaters Adventure" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tripStartDate">Start Date</label>
+                            <input type="date" id="tripStartDate" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tripEndDate">End Date</label>
+                            <input type="date" id="tripEndDate" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tripDescription">Description (Optional)</label>
+                        <textarea id="tripDescription" class="form-input" rows="3" placeholder="Brief description of your trip..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelTripBtn">Cancel</button>
+                        <button type="submit" class="btn-primary">Create Trip</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
