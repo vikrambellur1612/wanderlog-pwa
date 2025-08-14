@@ -340,16 +340,18 @@ class TripUI {
             </div>
           </div>
 
-          <!-- Detailed Day by Day Itinerary Section (Coming Soon) -->
+          <!-- Detailed Day by Day Itinerary Section -->
           <div class="trip-section">
             <div class="section-header">
               <h2 class="section-title">📅 Detailed Day by Day Itinerary</h2>
-              <p class="section-subtitle">Coming Soon - Plan your daily activities</p>
+              <div class="section-actions">
+                <button class="btn-primary" onclick="tripUI.showAddItineraryModal()">
+                  ➕ Add Day
+                </button>
+              </div>
             </div>
-            <div class="coming-soon-placeholder">
-              <div class="coming-soon-icon">🚧</div>
-              <h3>Feature Under Development</h3>
-              <p>Soon you'll be able to create detailed daily itineraries with activities, timings, and notes.</p>
+            <div id="itinerary-list">
+              ${this.renderItineraryList(trip.itinerary || [])}
             </div>
           </div>
 
@@ -431,10 +433,6 @@ class TripUI {
                   <option value="Other">Other</option>
                 </select>
               </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="custom-description">Description</label>
-              <textarea id="custom-description" class="form-input" rows="3" placeholder="Brief description of the place..."></textarea>
             </div>
             <div class="form-group">
               <label class="form-label" for="custom-attractions">Must-Visit Places (one per line)</label>
@@ -609,7 +607,7 @@ class TripUI {
     }
   }
 
-  // Save add trip form (new home page form)
+  // Save add trip form (handles both create and edit)
   async saveAddTripForm() {
     const tripData = {
       name: document.getElementById('tripName').value.trim(),
@@ -630,19 +628,23 @@ class TripUI {
     }
 
     try {
-      // Create the trip
-      const newTrip = this.tripManager.createTrip(tripData);
+      if (this.currentTripId) {
+        // Update existing trip
+        this.tripManager.updateTrip(this.currentTripId, tripData);
+        this.showNotification('Trip updated successfully!', 'success');
+      } else {
+        // Create new trip
+        this.tripManager.createTrip(tripData);
+        this.showNotification('Trip created successfully! Now add destinations to your trip.', 'success');
+      }
       
       // Hide modal and refresh display
       this.hideAddTripModal();
       this.renderHomePageTrips();
       
-      // Show success message
-      this.showNotification('Trip created successfully! Now add destinations to your trip.', 'success');
-      
     } catch (error) {
-      console.error('Error creating trip:', error);
-      alert('Error creating trip. Please try again.');
+      console.error('Error saving trip:', error);
+      alert('Error saving trip. Please try again.');
     }
   }
 
@@ -678,78 +680,38 @@ class TripUI {
 
   // Show trip modal
   showTripModal(trip = null) {
-    const modal = document.getElementById('trip-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const saveBtn = document.getElementById('save-trip');
+    const modal = document.getElementById('addTripModal');
+    const modalTitle = modal.querySelector('.modal-header h3');
+    const saveBtn = modal.querySelector('.btn-primary');
     
     if (trip) {
       modalTitle.textContent = 'Edit Trip';
       saveBtn.textContent = 'Update Trip';
-      this.fillTripForm(trip);
+      this.fillEditTripForm(trip);
       this.currentTripId = trip.id;
     } else {
       modalTitle.textContent = 'Create New Trip';
       saveBtn.textContent = 'Create Trip';
-      this.clearTripForm();
+      this.clearAddTripForm();
       this.currentTripId = null;
     }
     
-    modal.classList.add('active');
+    modal.classList.remove('hidden');
   }
 
   // Hide trip modal
   hideTripModal() {
-    const modal = document.getElementById('trip-modal');
-    modal.classList.remove('active');
+    const modal = document.getElementById('addTripModal');
+    modal.classList.add('hidden');
+    this.clearAddTripForm();
   }
 
-  // Fill trip form with existing data
-  fillTripForm(trip) {
-    document.getElementById('trip-name').value = trip.name;
-    document.getElementById('start-date').value = trip.startDate;
-    document.getElementById('end-date').value = trip.endDate;
-  }
-
-  // Clear trip form
-  clearTripForm() {
-    document.getElementById('trip-form').reset();
-  }
-
-  // Save trip form
-  async saveTripForm() {
-    const tripData = {
-      name: document.getElementById('trip-name').value,
-      startDate: document.getElementById('start-date').value,
-      endDate: document.getElementById('end-date').value
-    };
-
-    if (!tripData.name || !tripData.startDate || !tripData.endDate) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    if (new Date(tripData.startDate) > new Date(tripData.endDate)) {
-      alert('End date must be after start date');
-      return;
-    }
-
-    try {
-      if (this.currentTripId) {
-        this.tripManager.updateTrip(this.currentTripId, tripData);
-        this.showNotification('Trip updated successfully!', 'success');
-      } else {
-        this.tripManager.createTrip(tripData);
-        this.showNotification('Trip created successfully!', 'success');
-      }
-      
-      this.hideTripModal();
-      this.refreshTripsList();
-      // Also refresh home page trips
-      this.renderHomePageTrips();
-    } catch (error) {
-      console.error('Error saving trip:', error);
-      alert('Error saving trip. Please try again.');
-    }
+  // Fill edit trip form with existing data
+  fillEditTripForm(trip) {
+    document.getElementById('tripName').value = trip.name;
+    document.getElementById('tripStartDate').value = trip.startDate;
+    document.getElementById('tripEndDate').value = trip.endDate;
+    document.getElementById('tripDescription').value = trip.description || '';
   }
 
   // Update cities dropdown based on selected state
@@ -827,7 +789,6 @@ class TripUI {
   async addCustomPlace() {
     const placeName = document.getElementById('custom-place-name').value.trim();
     const state = document.getElementById('custom-state').value;
-    const description = document.getElementById('custom-description').value.trim();
     const attractionsText = document.getElementById('custom-attractions').value.trim();
     
     if (!placeName) {
@@ -853,7 +814,7 @@ class TripUI {
       const customPlace = {
         city: placeName,
         state: state,
-        description: description || `Custom destination in ${state}`,
+        description: `Custom destination in ${state}`,
         attractions: attractions,
         category: 'Custom',
         isCustom: true
@@ -896,7 +857,6 @@ class TripUI {
   clearCustomForm() {
     document.getElementById('custom-place-name').value = '';
     document.getElementById('custom-state').value = '';
-    document.getElementById('custom-description').value = '';
     document.getElementById('custom-attractions').value = '';
   }
 
@@ -1270,6 +1230,603 @@ class TripUI {
             }
           }
         }
+      }
+    }
+  }
+
+  // ===== ITINERARY MANAGEMENT METHODS =====
+
+  // Render itinerary list
+  renderItineraryList(itinerary) {
+    if (!itinerary || itinerary.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-state-icon">📅</div>
+          <h3 class="empty-state-title">No itinerary planned yet</h3>
+          <p class="empty-state-text">Start planning your daily activities by adding day-by-day plans!</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="itinerary-timeline">
+        ${itinerary.map(item => this.renderItineraryItem(item)).join('')}
+      </div>
+    `;
+  }
+
+  // Render individual itinerary item
+  renderItineraryItem(item) {
+    const date = new Date(item.date);
+    const dayNumber = Math.floor((date - new Date(this.getCurrentTrip().startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const allAttractions = [
+      ...(item.attractions || []).map(name => ({ name, isFromPlace: true })),
+      ...(item.customAttractions || []).map(name => ({ name, isFromPlace: false }))
+    ];
+
+    return `
+      <div class="itinerary-day-card" data-itinerary-id="${item.id}">
+        <div class="itinerary-day-header">
+          <div class="day-info">
+            <div class="day-number">Day ${dayNumber}</div>
+            <div class="day-date">${formattedDate}</div>
+            <div class="day-location">📍 ${item.place}</div>
+          </div>
+          <div class="day-actions">
+            <button class="btn-secondary itinerary-action-btn" onclick="tripUI.editItineraryItem(${item.id})" title="Edit Day">
+              ✏️ Edit
+            </button>
+            <button class="btn-danger itinerary-action-btn" onclick="tripUI.deleteItineraryItem(${item.id})" title="Delete Day">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+        
+        <div class="itinerary-day-content">
+          ${allAttractions.length > 0 ? `
+            <div class="day-attractions">
+              <h4 class="attractions-heading">🎯 Places to Visit</h4>
+              <div class="attractions-grid">
+                ${allAttractions.map(attraction => `
+                  <div class="attraction-item ${attraction.isFromPlace ? 'from-place' : 'custom'}">
+                    <div class="attraction-name">${attraction.name}</div>
+                    ${attraction.isFromPlace ? `
+                      <div class="attraction-description">
+                        ${this.tripManager.getAttractionDescription(attraction.name, { city: item.place })}
+                      </div>
+                    ` : `
+                      <div class="attraction-type">Custom Attraction</div>
+                    `}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="day-attractions">
+              <p class="no-attractions">No attractions planned for this day</p>
+            </div>
+          `}
+          
+          ${item.accommodation ? `
+            <div class="day-accommodation">
+              <h4 class="accommodation-heading">🏨 Accommodation</h4>
+              <div class="accommodation-info">
+                <span class="accommodation-location">${item.accommodation}</span>
+              </div>
+            </div>
+          ` : ''}
+          
+          ${item.notes ? `
+            <div class="day-notes">
+              <h4 class="notes-heading">📝 Notes</h4>
+              <div class="notes-content">${item.notes}</div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // Show add itinerary modal
+  // Show itinerary modal (for add or edit)
+  showItineraryModal(existingItinerary = null) {
+    const trip = this.getCurrentTrip();
+    if (!trip) return;
+    
+    const availableDates = this.tripManager.getAvailableDatesForItinerary(this.currentTripId);
+    
+    // If editing, add the current date to available dates
+    if (existingItinerary) {
+      availableDates.push(existingItinerary.date);
+      availableDates.sort();
+    }
+    
+    if (availableDates.length === 0 && !existingItinerary) {
+      alert('All days in this trip already have itineraries planned!');
+      return;
+    }
+
+    const modal = this.createItineraryModal(availableDates, trip.places, existingItinerary);
+    document.body.appendChild(modal);
+  }
+
+  // Show add itinerary modal (backwards compatibility)
+  showAddItineraryModal() {
+    this.showItineraryModal();
+  }
+
+  // Create itinerary modal
+  createItineraryModal(availableDates, places, existingItinerary = null) {
+    const isEditing = !!existingItinerary;
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'itineraryModal';
+    
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>${isEditing ? 'Edit Daily Itinerary' : 'Add Daily Itinerary'}</h3>
+          <button class="close-btn" onclick="tripUI.closeItineraryModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="itineraryForm">
+            
+            <div class="field-group">
+              <label for="itineraryDate">Date</label>
+              <select id="itineraryDate" required>
+                <option value="">Select date</option>
+                ${availableDates.map(date => `
+                  <option value="${date.date}" ${existingItinerary && existingItinerary.date === date.date ? 'selected' : ''}>${date.displayDate}</option>
+                `).join('')}
+              </select>
+            </div>
+            
+            <div class="field-group">
+              <label for="itineraryPlace">Place to Visit</label>
+              <select id="itineraryPlace" required onchange="tripUI.updateAttractionsList()">
+                <option value="">Select place</option>
+                ${places.map(place => `
+                  <option value="${place.city}" ${existingItinerary && existingItinerary.place === place.city ? 'selected' : ''}>${place.city}, ${place.state}</option>
+                `).join('')}
+              </select>
+            </div>
+            
+            <div class="field-group">
+              <label>Attractions to Visit</label>
+              <div class="attractions-tabs">
+                <button type="button" class="tab-btn active" onclick="tripUI.switchAttractionTab('place')" id="placeAttractionsTab">
+                  Find Places
+                </button>
+                <button type="button" class="tab-btn" onclick="tripUI.switchAttractionTab('custom')" id="customAttractionsTab">
+                  Add Custom
+                </button>
+              </div>
+              
+              <div class="tab-content" id="placeAttractionsContent">
+                <div id="availableAttractionsList">
+                  <p>Please select a place first to see available attractions</p>
+                </div>
+              </div>
+              
+              <div class="tab-content hidden" id="customAttractionsContent">
+                <div class="custom-input">
+                  <input type="text" id="customAttractionInput" placeholder="Enter attraction name...">
+                  <button type="button" onclick="tripUI.addCustomAttraction()">Add</button>
+                </div>
+              </div>
+              
+              <div class="selected-attractions">
+                <h4>Selected Attractions</h4>
+                <div class="selected-list" id="unifiedSelectedContainer">
+                  <div class="no-selections">No attractions selected yet</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="field-group">
+              <label for="itineraryAccommodation">Accommodation (Optional)</label>
+              <select id="itineraryAccommodation">
+                <option value="">Select accommodation location</option>
+                ${places.map(place => 
+                    `<option value="${place.city}" ${existingItinerary && existingItinerary.accommodation === place.city ? 'selected' : ''}>${place.city}, ${place.state}</option>`
+                ).join('')}
+              </select>
+            </div>
+            
+            <div class="field-group">
+              <label for="itineraryNotes">Notes (Optional)</label>
+              <textarea id="itineraryNotes" placeholder="Any special notes for this day..." rows="3">${existingItinerary ? existingItinerary.notes || '' : ''}</textarea>
+            </div>
+            
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="tripUI.closeItineraryModal()">Cancel</button>
+          <button type="button" class="btn-primary" onclick="tripUI.saveItineraryForm()">${isEditing ? 'Update' : 'Add'} Day Plan</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add click handler to close modal when clicking background
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.closeItineraryModal();
+      }
+    });
+    
+    // Pre-populate data if editing
+    if (existingItinerary) {
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        this.prePopulateItineraryData(existingItinerary);
+      }, 100);
+    }
+    
+    return modal;
+  }
+
+  // Pre-populate itinerary data for editing
+  prePopulateItineraryData(itinerary) {
+    // Update attractions list first
+    this.updateAttractionsList();
+    
+    const selectedContainer = document.getElementById('unifiedSelectedContainer');
+    const noSelections = selectedContainer.querySelector('.no-selections');
+    if (noSelections) noSelections.remove();
+    
+    // Pre-populate custom attractions
+    if (itinerary.customAttractions && itinerary.customAttractions.length > 0) {
+      itinerary.customAttractions.forEach(attraction => {
+        const attractionItem = document.createElement('div');
+        attractionItem.className = 'selected-item custom-item';
+        attractionItem.dataset.attractionName = attraction;
+        attractionItem.dataset.attractionType = 'custom';
+        attractionItem.innerHTML = `
+          <div class="selected-item-content">
+            <div class="selected-attraction-name custom-attraction-name">${attraction}</div>
+            <div class="selected-attraction-desc">Custom attraction</div>
+            <div class="attraction-source">Custom</div>
+          </div>
+          <button type="button" class="remove-btn" onclick="tripUI.removeSelectedAttraction(this)">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        selectedContainer.appendChild(attractionItem);
+      });
+    }
+    
+    // Pre-populate selected attractions
+    setTimeout(() => {
+      if (itinerary.attractions && itinerary.attractions.length > 0) {
+        const availableCards = document.querySelectorAll('#availableAttractionsList .attraction-card');
+        
+        itinerary.attractions.forEach(attractionName => {
+          const card = Array.from(availableCards).find(card => {
+            const attraction = JSON.parse(card.dataset.attraction);
+            return attraction.name === attractionName;
+          });
+          
+          if (card) {
+            this.addSelectedAttraction(card);
+          }
+        });
+      }
+    }, 200);
+  }
+
+  // Update attractions list based on selected place
+  updateAttractionsList() {
+    const placeSelect = document.getElementById('itineraryPlace');
+    const availableList = document.getElementById('availableAttractionsList');
+    const placeTab = document.getElementById('placeAttractionsTab');
+    const dateSelect = document.getElementById('itineraryDate');
+    
+    if (!placeSelect.value) {
+      availableList.innerHTML = '<p class="select-place-first">Please select a place first to see available attractions</p>';
+      placeTab.textContent = 'Find Places';
+      return;
+    }
+
+    const attractions = this.tripManager.getPlaceAttractions(this.currentTripId, placeSelect.value);
+    placeTab.textContent = `Find Places (${attractions.length})`;
+    
+    if (attractions.length === 0) {
+      availableList.innerHTML = '<p class="no-attractions-available">No attractions available for this place</p>';
+      return;
+    }
+
+    // Get already selected attractions from other days to mask them
+    const currentTrip = this.tripManager.getTrip(this.currentTripId);
+    const selectedAttractionsOtherDays = new Set();
+    const currentDate = dateSelect.value;
+    
+    if (currentTrip && currentTrip.itinerary) {
+      currentTrip.itinerary.forEach(dayPlan => {
+        if (dayPlan.date !== currentDate && dayPlan.selectedAttractions) {
+          dayPlan.selectedAttractions.forEach(attraction => {
+            selectedAttractionsOtherDays.add(attraction);
+          });
+        }
+      });
+    }
+
+    availableList.innerHTML = `
+      <div class="attractions-header">
+        <h4>Available Attractions</h4>
+        <div class="select-actions">
+          <button type="button" class="btn-small" onclick="tripUI.selectAllAttractions()">
+            Add All Available
+          </button>
+        </div>
+      </div>
+      <div class="attractions-grid">
+        ${attractions.map((attraction, index) => {
+          const isAlreadySelected = selectedAttractionsOtherDays.has(attraction.name);
+          const cardClass = isAlreadySelected ? 'attraction-card disabled' : 'attraction-card';
+          const onClickHandler = isAlreadySelected ? '' : 'onclick="tripUI.addSelectedAttraction(this)"';
+          
+          return `
+            <div class="${cardClass}" data-attraction='${JSON.stringify(attraction)}' ${onClickHandler}>
+              <div class="attraction-card-content">
+                <div class="attraction-name">${attraction.name}</div>
+                <div class="attraction-desc">${attraction.description}</div>
+                ${isAlreadySelected ? '<div class="already-selected-label">Already selected for another day</div>' : ''}
+              </div>
+              <div class="attraction-add-btn">
+                <i class="fas fa-${isAlreadySelected ? 'check' : 'plus'}"></i>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Switch between attraction tabs
+  switchAttractionTab(tabType) {
+    const placeTab = document.getElementById('placeAttractionsTab');
+    const customTab = document.getElementById('customAttractionsTab');
+    const placeContent = document.getElementById('placeAttractionsContent');
+    const customContent = document.getElementById('customAttractionsContent');
+    
+    if (tabType === 'place') {
+      placeTab.classList.add('active');
+      customTab.classList.remove('active');
+      placeContent.classList.remove('hidden');
+      customContent.classList.add('hidden');
+    } else {
+      customTab.classList.add('active');
+      placeTab.classList.remove('active');
+      customContent.classList.remove('hidden');
+      placeContent.classList.add('hidden');
+    }
+  }
+
+  // Add custom attraction
+  addCustomAttraction() {
+    const nameInput = document.getElementById('customAttractionInput');
+    const selectedContainer = document.getElementById('unifiedSelectedContainer');
+    const noSelections = selectedContainer.querySelector('.no-selections');
+    
+    if (!nameInput.value.trim()) return;
+    
+    // Remove no selections message
+    if (noSelections) {
+      noSelections.remove();
+    }
+    
+    // Check if already selected
+    if (selectedContainer.querySelector(`[data-attraction-name="${nameInput.value.trim()}"]`)) {
+      alert('This attraction is already selected!');
+      nameInput.value = '';
+      return;
+    }
+    
+    const attractionItem = document.createElement('div');
+    attractionItem.className = 'selected-item custom-item';
+    attractionItem.dataset.attractionName = nameInput.value.trim();
+    attractionItem.dataset.attractionType = 'custom';
+    attractionItem.innerHTML = `
+      <div class="selected-item-content">
+        <div class="selected-attraction-name custom-attraction-name">${nameInput.value.trim()}</div>
+        <div class="selected-attraction-desc">Custom attraction</div>
+        <div class="attraction-source">Custom</div>
+      </div>
+      <button type="button" class="remove-btn" onclick="tripUI.removeSelectedAttraction(this)">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+    
+    selectedContainer.appendChild(attractionItem);
+    nameInput.value = '';
+  }
+  
+  // Add selected attraction
+  addSelectedAttraction(card) {
+    const attraction = JSON.parse(card.dataset.attraction);
+    const selectedContainer = document.getElementById('unifiedSelectedContainer');
+    const noSelections = selectedContainer.querySelector('.no-selections');
+    
+    // Remove no selections message
+    if (noSelections) {
+      noSelections.remove();
+    }
+    
+    // Check if already selected
+    if (selectedContainer.querySelector(`[data-attraction-name="${attraction.name}"]`)) {
+      return; // Already selected
+    }
+    
+    // Create selected item
+    const selectedItem = document.createElement('div');
+    selectedItem.className = 'selected-item';
+    selectedItem.dataset.attractionName = attraction.name;
+    selectedItem.dataset.attractionType = 'existing';
+    selectedItem.innerHTML = `
+      <div class="selected-item-content">
+        <div class="selected-attraction-name">${attraction.name}</div>
+        <div class="selected-attraction-desc">${attraction.description}</div>
+        <div class="attraction-source">From ${document.getElementById('itineraryPlace').selectedOptions[0]?.text || 'Selected Place'}</div>
+      </div>
+      <button type="button" class="remove-btn" onclick="tripUI.removeSelectedAttraction(this)">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+    
+    selectedContainer.appendChild(selectedItem);
+    
+    // Hide the card in available list
+    card.style.display = 'none';
+  }
+  
+  // Remove selected attraction
+  removeSelectedAttraction(button) {
+    const selectedItem = button.closest('.selected-item');
+    const attractionName = selectedItem.dataset.attractionName;
+    const attractionType = selectedItem.dataset.attractionType;
+    const selectedContainer = document.getElementById('unifiedSelectedContainer');
+    const availableList = document.getElementById('availableAttractionsList');
+    
+    // Remove from selected list
+    selectedItem.remove();
+    
+    // If it's an existing attraction, show it back in available list
+    if (attractionType === 'existing') {
+      const hiddenCard = availableList.querySelector(`[data-attraction*='"name":"${attractionName}"']`);
+      if (hiddenCard) {
+        hiddenCard.style.display = 'block';
+      }
+    }
+    
+    // Show no selections message if empty
+    if (selectedContainer.children.length === 0) {
+      selectedContainer.innerHTML = '<div class="no-selections">No attractions selected yet</div>';
+    }
+  }
+
+  // Select/Deselect all attractions
+  selectAllAttractions() {
+    const availableCards = document.querySelectorAll('#availableAttractionsList .attraction-card:not([style*="display: none"])');
+    availableCards.forEach(card => this.addSelectedAttraction(card));
+  }
+
+  // Save itinerary form
+  async saveItineraryForm() {
+    const form = document.getElementById('itineraryForm');
+    const saveButton = form.closest('.modal').querySelector('.btn-primary');
+    const isEditing = saveButton.dataset.editing === 'true';
+    const itineraryId = saveButton.dataset.itineraryId;
+    
+    const date = document.getElementById('itineraryDate').value;
+    const place = document.getElementById('itineraryPlace').value;
+    const accommodation = document.getElementById('itineraryAccommodation').value;
+    const notes = document.getElementById('itineraryNotes').value;
+    
+    if (!date || !place) {
+      alert('Please select both date and place');
+      return;
+    }
+
+    // Get selected attractions (both existing and custom)
+    const allSelectedItems = Array.from(document.querySelectorAll('#unifiedSelectedContainer .selected-item'));
+    const selectedAttractions = allSelectedItems
+      .filter(item => item.dataset.attractionType === 'existing')
+      .map(item => item.dataset.attractionName);
+    
+    const customAttractions = allSelectedItems
+      .filter(item => item.dataset.attractionType === 'custom')
+      .map(item => item.dataset.attractionName);
+
+    const itineraryData = {
+      date,
+      place,
+      attractions: selectedAttractions,
+      customAttractions,
+      accommodation: accommodation || null,
+      notes: notes.trim() || ''
+    };
+
+    try {
+      let result;
+      if (isEditing) {
+        result = this.tripManager.updateDailyItinerary(this.currentTripId, itineraryId, itineraryData);
+        if (result) {
+          this.closeItineraryModal();
+          this.refreshItineraryList();
+          this.showNotification(`Daily itinerary updated for ${place}!`, 'success');
+        } else {
+          throw new Error('Failed to update itinerary');
+        }
+      } else {
+        result = this.tripManager.addDailyItinerary(this.currentTripId, itineraryData);
+        if (result) {
+          this.closeItineraryModal();
+          this.refreshItineraryList();
+          this.showNotification(`Daily itinerary added for ${place}!`, 'success');
+        } else {
+          throw new Error('Failed to add itinerary');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving itinerary:', error);
+      alert('Error saving itinerary. Please try again.');
+    }
+  }
+
+  // Close itinerary modal
+  closeItineraryModal() {
+    const modal = document.getElementById('itineraryModal');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
+  // Refresh itinerary list
+  refreshItineraryList() {
+    const trip = this.getCurrentTrip();
+    if (trip) {
+      const itineraryList = document.getElementById('itinerary-list');
+      if (itineraryList) {
+        itineraryList.innerHTML = this.renderItineraryList(trip.itinerary || []);
+      }
+    }
+  }
+
+  // Edit itinerary item
+  editItineraryItem(itineraryId) {
+    const trip = this.getCurrentTrip();
+    if (!trip) return;
+    
+    const itinerary = trip.itinerary.find(item => item.id === itineraryId);
+    if (!itinerary) return;
+    
+    // Show the itinerary modal with pre-filled data
+    this.showItineraryModal(itinerary);
+  }
+
+  // Delete itinerary item
+  deleteItineraryItem(itineraryId) {
+    const trip = this.getCurrentTrip();
+    if (!trip) return;
+    
+    const itinerary = trip.itinerary.find(item => item.id === itineraryId);
+    if (!itinerary) return;
+    
+    const date = new Date(itinerary.date).toLocaleDateString();
+    
+    if (confirm(`Are you sure you want to delete the itinerary for ${date} in ${itinerary.place}?`)) {
+      if (this.tripManager.deleteDailyItinerary(this.currentTripId, itineraryId)) {
+        this.refreshItineraryList();
+        this.showNotification('Day plan deleted!', 'success');
       }
     }
   }

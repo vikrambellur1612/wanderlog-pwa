@@ -38,6 +38,7 @@ class TripManager {
       startDate: tripData.startDate,
       endDate: tripData.endDate,
       places: [],
+      itinerary: [], // Array of daily itinerary objects
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -195,6 +196,153 @@ class TripManager {
       attractions: dynamicAttractions,
       category: 'General'
     };
+  }
+
+  // ===== DAILY ITINERARY MANAGEMENT =====
+
+  // Add daily itinerary item
+  addDailyItinerary(tripId, itineraryData) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return null;
+
+    const dailyItinerary = {
+      id: Date.now(),
+      date: itineraryData.date,
+      place: itineraryData.place,
+      attractions: itineraryData.attractions || [],
+      customAttractions: itineraryData.customAttractions || [],
+      accommodation: itineraryData.accommodation || null,
+      notes: itineraryData.notes || '',
+      createdAt: new Date().toISOString()
+    };
+
+    if (!trip.itinerary) {
+      trip.itinerary = [];
+    }
+
+    trip.itinerary.push(dailyItinerary);
+    
+    // Sort itinerary by date
+    trip.itinerary.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    this.updateTrip(tripId, { itinerary: trip.itinerary });
+    return dailyItinerary;
+  }
+
+  // Update daily itinerary item
+  updateDailyItinerary(tripId, itineraryId, updates) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.itinerary) return null;
+
+    const itineraryIndex = trip.itinerary.findIndex(item => item.id === itineraryId);
+    if (itineraryIndex !== -1) {
+      trip.itinerary[itineraryIndex] = {
+        ...trip.itinerary[itineraryIndex],
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Re-sort if date was updated
+      trip.itinerary.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      this.updateTrip(tripId, { itinerary: trip.itinerary });
+      return trip.itinerary[itineraryIndex];
+    }
+    return null;
+  }
+
+  // Delete daily itinerary item
+  deleteDailyItinerary(tripId, itineraryId) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.itinerary) return false;
+
+    const itineraryIndex = trip.itinerary.findIndex(item => item.id === itineraryId);
+    if (itineraryIndex !== -1) {
+      trip.itinerary.splice(itineraryIndex, 1);
+      this.updateTrip(tripId, { itinerary: trip.itinerary });
+      return true;
+    }
+    return false;
+  }
+
+  // Get available dates for adding new itinerary (dates not yet covered)
+  getAvailableDatesForItinerary(tripId) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return [];
+
+    const startDate = new Date(trip.startDate);
+    const endDate = new Date(trip.endDate);
+    const existingDates = new Set(
+      (trip.itinerary || []).map(item => item.date)
+    );
+
+    const availableDates = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const dateString = currentDate.toISOString().split('T')[0];
+      if (!existingDates.has(dateString)) {
+        availableDates.push({
+          date: dateString,
+          displayDate: currentDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        });
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return availableDates;
+  }
+
+  // Get daily itinerary for a specific date
+  getDailyItinerary(tripId, date) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.itinerary) return null;
+
+    return trip.itinerary.find(item => item.date === date) || null;
+  }
+
+  // Get all attractions for a specific place (for dropdown in itinerary form)
+  getPlaceAttractions(tripId, placeName) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return [];
+
+    const place = trip.places.find(p => p.city === placeName);
+    if (place && place.attractions) {
+      return place.attractions.map(attraction => ({
+        name: attraction,
+        description: this.getAttractionDescription(attraction, place),
+        isFromPlace: true
+      }));
+    }
+
+    return [];
+  }
+
+  // Get a brief description for an attraction
+  getAttractionDescription(attractionName, place) {
+    // This could be enhanced with more detailed descriptions
+    const name = attractionName.toLowerCase();
+    
+    if (name.includes('temple') || name.includes('mandir')) {
+      return `Sacred temple with beautiful architecture and spiritual significance in ${place.city}`;
+    } else if (name.includes('fort') || name.includes('palace')) {
+      return `Historic fortification showcasing the royal heritage of ${place.city}`;
+    } else if (name.includes('museum')) {
+      return `Cultural museum featuring artifacts and history of ${place.city}`;
+    } else if (name.includes('beach')) {
+      return `Scenic beach offering relaxation and water activities in ${place.city}`;
+    } else if (name.includes('garden') || name.includes('park')) {
+      return `Beautiful garden perfect for nature walks and peaceful moments in ${place.city}`;
+    } else if (name.includes('market') || name.includes('bazaar')) {
+      return `Vibrant local market for shopping and experiencing local culture in ${place.city}`;
+    } else {
+      return `Popular attraction offering unique experiences in ${place.city}`;
+    }
   }
 
   // Get attractions for a place (now with dynamic fetching capability)

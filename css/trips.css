@@ -617,6 +617,12 @@
     grid-template-columns: 1fr;
   }
   
+  /* Keep trip creation date fields side by side on mobile */
+  .trip-form .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
   .form-actions {
     flex-direction: column;
   }
@@ -681,5 +687,1290 @@
   .tab-btn {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
+  }
+}
+
+/* ===== ITINERARY STYLES ===== */
+
+.itinerary-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.itinerary-day-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.itinerary-day-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.itinerary-day-header {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.day-number {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.day-date {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.day-location {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.day-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.itinerary-action-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.itinerary-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.itinerary-day-content {
+  padding: 1.5rem;
+}
+
+.day-attractions {
+  margin-bottom: 1.5rem;
+}
+
+.attractions-heading,
+.accommodation-heading,
+.notes-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attractions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.attraction-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 4px solid #4CAF50;
+  transition: all 0.2s ease;
+}
+
+.attraction-item.custom {
+  border-left-color: #ff9800;
+  background: #fff8e1;
+}
+
+.attraction-item:hover {
+  background: #e8f5e8;
+  transform: translateX(2px);
+}
+
+.attraction-item.custom:hover {
+  background: #ffecb3;
+}
+
+.attraction-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.attraction-description {
+  font-size: 0.85rem;
+  color: #5a6c7d;
+  line-height: 1.4;
+}
+
+.attraction-type {
+  font-size: 0.8rem;
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.no-attractions {
+  color: #5a6c7d;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.day-accommodation {
+  margin-bottom: 1.5rem;
+}
+
+.accommodation-info {
+  background: #e3f2fd;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.accommodation-location {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.day-notes {
+  background: #fff3e0;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+}
+
+.notes-content {
+  color: #5a6c7d;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+/* ===== ITINERARY MODAL STYLES - DISABLED ===== */
+/*
+#itineraryModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+#itineraryModal .modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+}
+
+/* Ensure modal body and content flow properly */
+#itineraryModal .modal-body {
+  padding: 1.5rem;
+  display: block;
+}
+
+#itineraryModal .modal-header {
+  padding: 1.5rem 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#itineraryModal .modal-footer {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.itinerary-form {
+  display: block;
+  width: 100%;
+}
+
+.itinerary-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.itinerary-form .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+/* Modern Form Inputs */
+.itinerary-form .form-input, 
+.itinerary-form .form-select, 
+.itinerary-form .form-textarea {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  color: #2c3e50;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.itinerary-form .form-input:focus,
+.itinerary-form .form-select:focus,
+.itinerary-form .form-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.itinerary-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.itinerary-form .form-group label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.itinerary-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  transform: translateY(-1px);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.form-row {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* Attractions Selection in Modal */
+#itineraryModal .attractions-selection {
+  border: 2px solid #e1e5e9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+#itineraryModal .attraction-types-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+#itineraryModal .attraction-types-tabs .tab-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: #5a6c7d;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+#itineraryModal .attraction-types-tabs .tab-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+#itineraryModal .attraction-tab-content {
+  padding: 1.5rem;
+}
+
+#itineraryModal .attraction-tab-content.hidden {
+  display: none;
+}
+
+#itineraryModal .custom-attraction-input {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+#itineraryModal .custom-attraction-input input {
+  flex: 1;
+}
+
+#itineraryModal .btn-add {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+#itineraryModal .btn-add:hover {
+  background: #45a049;
+}
+
+#itineraryModal .selected-items-container {
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+#itineraryModal .selected-item {
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+#itineraryModal .selected-item:last-child {
+  margin-bottom: 0;
+}
+
+#itineraryModal .selected-item.custom-item {
+  border-left: 4px solid #ff9800;
+  background: #fff8e1;
+}
+
+#itineraryModal .remove-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.attraction-types-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+.attraction-types-tabs .tab-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  color: #5a6c7d;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.attraction-types-tabs .tab-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+.attraction-types-tabs .tab-btn:not(.active):hover {
+  background: #e9ecef;
+  color: #2c3e50;
+}
+
+.attraction-tab-content {
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.attraction-tab-content.hidden {
+  display: none;
+}
+
+/* Available Attractions */
+.available-attractions {
+  margin-bottom: 2rem;
+}
+
+.attractions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.attractions-header h4 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.select-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.attractions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.attraction-card {
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.attraction-card:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
+  transform: translateY(-2px);
+}
+
+.attraction-card-content {
+  flex: 1;
+}
+
+.attraction-card .attraction-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.attraction-card .attraction-desc {
+  color: #5a6c7d;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.attraction-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4CAF50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.attraction-card:hover .attraction-add-btn {
+  background: #45a049;
+  transform: scale(1.1);
+}
+
+/* Selected Attractions */
+.selected-attractions, .custom-attractions-section {
+  margin-top: 1.5rem;
+}
+
+.selected-title {
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #4CAF50;
+  border-radius: 2px;
+}
+
+.selected-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 60px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px solid #e1e5e9;
+}
+
+.selected-item {
+  background: #ffffff;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  animation: slideInUp 0.3s ease;
+}
+
+.selected-item.custom-item {
+  border-left: 4px solid #ff9800;
+  background: #fff8e1;
+}
+
+.selected-item:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.selected-item-content {
+  flex: 1;
+}
+
+.selected-attraction-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.selected-attraction-desc {
+  color: #5a6c7d;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.remove-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #ff4757;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.remove-btn:hover {
+  background: #ff3838;
+  transform: scale(1.1);
+}
+
+.no-selections {
+  color: #8e9297;
+  font-style: italic;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Attraction Source Indicators */
+.selected-attraction-desc {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.custom-attraction-name {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+/* Custom Attractions Input */
+.custom-input-section {
+  margin-bottom: 2rem;
+}
+
+.custom-input-section h4 {
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.custom-attraction-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-add {
+  padding: 0.875rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-add:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  border: 2px solid #e1e5e9;
+  background: #ffffff;
+  color: #5a6c7d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-small:hover {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+  transform: translateY(-1px);
+}
+
+/* Messages */
+.select-place-first,
+.no-attractions-available {
+  text-align: center;
+  color: #8e9297;
+  font-style: italic;
+  padding: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Buttons */
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f3f4;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f3f4;
+}
+
+/* Ensure buttons work in itinerary modal */
+#itineraryModal .btn-primary,
+#itineraryModal .btn-secondary {
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  min-width: 110px;
+  border: none;
+}
+
+#itineraryModal .btn-primary {
+  background: #4CAF50;
+  color: white;
+}
+
+#itineraryModal .btn-primary:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+#itineraryModal .btn-secondary {
+  background: #ffffff;
+  color: #5a6c7d;
+  border: 2px solid #e1e5e9;
+}
+
+#itineraryModal .btn-secondary:hover {
+  background: #f8f9fa;
+  border-color: #d1d5db;
+}
+
+.btn-primary {
+  padding: 1rem 2rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  min-width: 120px;
+}
+
+/* Full width buttons in modal-buttons container */
+.modal-buttons .btn-primary {
+  flex: 1;
+}
+
+.btn-primary:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+}
+
+.btn-secondary {
+  padding: 1rem 2rem;
+  background: #ffffff;
+  color: #5a6c7d;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  min-width: 120px;
+}
+
+/* Full width buttons in modal-buttons container */
+.modal-buttons .btn-secondary {
+  flex: 1;
+}
+
+.btn-secondary:hover {
+  background: #f8f9fa;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+*/
+
+/* ===== RESPONSIVE DESIGN - MOBILE FIRST ===== */
+
+/* Mobile Styles (Default) */
+@media (max-width: 767px) {
+  #itineraryModal {
+    padding: 0.5rem;
+  }
+  
+  #itineraryModal .modal-content {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    border-radius: 12px;
+    max-height: 95vh;
+  }
+  
+  .itinerary-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  #itineraryModal .attraction-types-tabs .tab-btn {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  #itineraryModal .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  #itineraryModal .btn-primary,
+  #itineraryModal .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+  #itineraryModal .modal-content {
+    max-width: 700px;
+  }
+  
+  .itinerary-form .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  #itineraryModal .modal-footer {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+/* Itinerary Timeline Responsive Styles */
+.itinerary-day-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.day-actions {
+  align-self: stretch;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.attractions-grid {
+  grid-template-columns: 1fr;
+}
+
+.itinerary-modal .modal-content {
+  width: 95vw;
+  max-width: none;
+  margin: 0.5rem;
+  border-radius: 12px;
+  max-height: 95vh;
+}
+
+.form-row {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.attraction-types-tabs {
+  flex-direction: row;
+}
+
+.attraction-types-tabs .tab-btn {
+  padding: 0.875rem 1rem;
+  font-size: 0.9rem;
+}
+
+.attractions-grid {
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.custom-attraction-input {
+  gap: 0.75rem;
+}
+
+.modal-buttons {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.selected-items-container {
+  max-height: 150px;
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) {
+  .itinerary-day-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 1.5rem;
+  }
+  
+  .day-actions {
+    align-self: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  
+  .attractions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  
+  .itinerary-modal .modal-content {
+    width: 90vw;
+    max-width: 600px;
+    margin: 2rem auto;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .modal-buttons {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .selected-items-container {
+    max-height: 200px;
+  }
+  
+  .custom-attraction-input {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .custom-attraction-input input {
+    flex: 1;
+  }
+  
+  .btn-add {
+    flex-shrink: 0;
+    min-width: 120px;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1024px) {
+  .itinerary-modal .modal-content {
+    width: 85vw;
+    max-width: 700px;
+  }
+  
+  .attractions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .itinerary-day-content {
+    padding: 2rem;
+  }
+  
+  .day-actions {
+    gap: 0.75rem;
+  }
+  
+  .itinerary-action-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Large Desktop Styles */
+@media (min-width: 1200px) {
+  .attractions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  
+  .itinerary-modal .modal-content {
+    max-width: 750px;
+  }
+}
+
+/* Touch-friendly interactions for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .attraction-card,
+  .selected-item,
+  .remove-btn,
+  .attraction-add-btn {
+    min-height: 44px;
+  }
+  
+  .remove-btn,
+  .attraction-add-btn {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  .btn-small {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Accessibility improvements */
+.attraction-card:focus,
+.selected-item:focus,
+.remove-btn:focus,
+.btn-add:focus,
+.btn-small:focus {
+  outline: 3px solid #4CAF50;
+  outline-offset: 2px;
+}
+
+/* ===== ENHANCED MODERN STYLES ===== */
+
+/* Enhanced Button Styles */
+.btn-primary, .btn-secondary, .btn-add {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before, .btn-secondary::before, .btn-add::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-primary:active::before, .btn-secondary:active::before, .btn-add:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Enhanced Form Focus States */
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  animation: inputFocus 0.3s ease;
+}
+
+@keyframes inputFocus {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  }
+}
+
+/* Enhanced Card Animations */
+.attraction-card, .selected-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attraction-card:hover {
+  animation: cardHover 0.3s ease;
+}
+
+@keyframes cardHover {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Enhanced Modal Entrance */
+.modal {
+  animation: modalEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced Loading States */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Smooth Scrolling */
+.selected-items-container, .attraction-tab-content {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+.selected-items-container::-webkit-scrollbar,
+.attraction-tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-items-container::-webkit-scrollbar-track,
+.attraction-tab-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.selected-items-container::-webkit-scrollbar-thumb,
+.attraction-tab-content::-webkit-scrollbar-thumb {
+  background: #4CAF50;
+  border-radius: 3px;
+}
+
+.selected-items-container::-webkit-scrollbar-thumb:hover,
+.attraction-tab-content::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
+}
+
+/* Enhanced Typography */
+.selected-attraction-name, .attraction-name {
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.selected-attraction-desc, .attraction-desc {
+  line-height: 1.4;
+  color: #64748b;
+}
+
+/* Enhanced Spacing and Rhythm */
+.modal-content {
+  line-height: 1.6;
+}
+
+.form-group + .form-group {
+  margin-top: 1.5rem;
+}
+
+/* Dark Mode Preparation */
+@media (prefers-color-scheme: dark) {
+  .attraction-card, .selected-item {
+    border-color: #374151;
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .form-input, .form-select, .form-textarea {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .modal-content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .selected-items-container {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .attraction-card, .selected-item {
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+  .btn-primary, .btn-add {
+    border: 2px solid #000000;
+  }
+  
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: 3px solid #000000;
+    outline-offset: 2px;
   }
 }

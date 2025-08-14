@@ -1,0 +1,302 @@
+/* Clean and Simple Itinerary Modal - Override all existing styles */
+#itineraryModal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#itineraryModal .modal-content {
+  background: white !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  width: 90% !important;
+  max-width: 600px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  display: block !important;
+  margin: 0 !important;
+  position: relative !important;
+}
+
+#itineraryModal .modal-header {
+  padding: 20px !important;
+  border-bottom: 1px solid #eee !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+#itineraryModal .modal-header h3 {
+  margin: 0 !important;
+  color: #333 !important;
+  font-size: 1.2rem !important;
+}
+
+#itineraryModal .close-btn {
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  cursor: pointer !important;
+  color: #999 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+#itineraryModal .modal-body {
+  padding: 20px !important;
+  display: block !important;
+}
+
+#itineraryModal .field-group {
+  margin-bottom: 20px !important;
+  display: block !important;
+}
+
+#itineraryModal label {
+  display: block !important;
+  margin-bottom: 5px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+  font-size: 14px !important;
+}
+
+#itineraryModal select,
+#itineraryModal input,
+#itineraryModal textarea {
+  width: 100% !important;
+  padding: 10px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  box-sizing: border-box !important;
+  background: white !important;
+  color: #333 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+#itineraryModal .attractions-tabs {
+  display: flex !important;
+  margin-bottom: 15px !important;
+  border-bottom: 1px solid #eee !important;
+  padding: 0 !important;
+}
+
+#itineraryModal .tab-btn {
+  background: none !important;
+  border: none !important;
+  padding: 10px 15px !important;
+  cursor: pointer !important;
+  border-bottom: 2px solid transparent !important;
+  color: #666 !important;
+  font-size: 14px !important;
+}
+
+#itineraryModal .tab-btn.active {
+  border-bottom-color: #007bff !important;
+  color: #007bff !important;
+}
+
+#itineraryModal .tab-content {
+  padding: 15px 0 !important;
+  display: block !important;
+}
+
+#itineraryModal .tab-content.hidden {
+  display: none !important;
+}
+
+#itineraryModal .custom-input {
+  display: flex !important;
+  gap: 10px !important;
+  margin-bottom: 15px !important;
+}
+
+#itineraryModal .custom-input input {
+  flex: 1 !important;
+}
+
+#itineraryModal .custom-input button {
+  background: #007bff !important;
+  color: white !important;
+  border: none !important;
+  padding: 10px 15px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+}
+
+#itineraryModal .selected-attractions h4 {
+  margin: 15px 0 10px 0 !important;
+  color: #333 !important;
+  font-size: 16px !important;
+}
+
+#itineraryModal .selected-list {
+  border: 1px solid #eee !important;
+  border-radius: 4px !important;
+  padding: 15px !important;
+  min-height: 60px !important;
+  background: white !important;
+}
+
+#itineraryModal .no-selections {
+  color: #999 !important;
+  text-align: center !important;
+  font-style: italic !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#itineraryModal .selected-item {
+  background: #f8f9fa !important;
+  padding: 10px !important;
+  margin-bottom: 5px !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border: 1px solid #eee !important;
+}
+
+#itineraryModal .remove-btn {
+  background: #dc3545 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#itineraryModal .modal-footer {
+  padding: 20px !important;
+  border-top: 1px solid #eee !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+#itineraryModal .btn-cancel {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1px solid #ddd !important;
+  padding: 10px 20px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+}
+
+#itineraryModal .btn-primary {
+  background: #007bff !important;
+  color: white !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+}
+
+/* Attraction cards */
+#itineraryModal .attraction-card {
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  padding: 10px !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s !important;
+  background: white !important;
+  display: block !important;
+}
+
+#itineraryModal .attraction-card:hover:not(.disabled) {
+  border-color: #007bff !important;
+}
+
+#itineraryModal .attraction-card.selected {
+  border-color: #007bff !important;
+  background-color: #e7f3ff !important;
+}
+
+#itineraryModal .attraction-card.disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: #f8f9fa !important;
+  border-color: #ddd !important;
+}
+
+#itineraryModal .attraction-card h5 {
+  margin: 0 0 5px 0 !important;
+  color: #333 !important;
+  font-size: 14px !important;
+}
+
+#itineraryModal .attraction-card p {
+  margin: 0 !important;
+  color: #666 !important;
+  font-size: 12px !important;
+}
+
+#itineraryModal .attraction-name {
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin-bottom: 5px !important;
+}
+
+#itineraryModal .attraction-desc {
+  color: #666 !important;
+  font-size: 12px !important;
+}
+
+#itineraryModal .already-selected-label {
+  color: #ff6b35 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  margin-top: 5px !important;
+  text-transform: uppercase !important;
+}
+
+#itineraryModal .attraction-add-btn {
+  text-align: center !important;
+  margin-top: 8px !important;
+}
+
+#itineraryModal .attraction-add-btn i {
+  color: #007bff !important;
+  font-size: 16px !important;
+}
+
+#itineraryModal .attraction-card.disabled .attraction-add-btn i {
+  color: #28a745 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #itineraryModal .modal-content {
+    width: 95% !important;
+    margin: 10px !important;
+  }
+  
+  #itineraryModal .modal-header,
+  #itineraryModal .modal-body,
+  #itineraryModal .modal-footer {
+    padding: 15px !important;
+  }
+}
