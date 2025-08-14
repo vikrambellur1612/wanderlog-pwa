@@ -292,20 +292,212 @@ class AttractionDetailsManager {
 
   // Generate coordinates
   generateCoordinates(place) {
-    const baseCoords = {
+    // Comprehensive coordinate mapping for Indian cities
+    const cityCoordinates = {
+      // Major Metropolitan Cities
       'Delhi': { lat: 28.6139, lng: 77.2090 },
       'Mumbai': { lat: 19.0760, lng: 72.8777 },
       'Bangalore': { lat: 12.9716, lng: 77.5946 },
+      'Kolkata': { lat: 22.5726, lng: 88.3639 },
+      'Chennai': { lat: 13.0827, lng: 80.2707 },
+      'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+      'Pune': { lat: 18.5204, lng: 73.8567 },
+      'Ahmedabad': { lat: 23.0225, lng: 72.5714 },
+      
+      // Rajasthan
       'Jaipur': { lat: 26.9124, lng: 75.7873 },
-      'Kerala': { lat: 10.8505, lng: 76.2711 }
+      'Udaipur': { lat: 24.5854, lng: 73.7125 },
+      'Jodhpur': { lat: 26.2389, lng: 73.0243 },
+      'Jaisalmer': { lat: 26.9157, lng: 70.9083 },
+      'Pushkar': { lat: 26.4899, lng: 74.5511 },
+      'Mount Abu': { lat: 24.5925, lng: 72.7156 },
+      'Bikaner': { lat: 28.0229, lng: 73.3119 },
+      'Ajmer': { lat: 26.4499, lng: 74.6399 },
+      
+      // Kerala
+      'Kochi': { lat: 9.9312, lng: 76.2673 },
+      'Thiruvananthapuram': { lat: 8.5241, lng: 76.9366 },
+      'Munnar': { lat: 10.0889, lng: 77.0595 },
+      'Alleppey': { lat: 9.4981, lng: 76.3388 },
+      'Kozhikode': { lat: 11.2588, lng: 75.7804 },
+      'Thekkady': { lat: 9.5916, lng: 77.1603 },
+      'Wayanad': { lat: 11.6854, lng: 76.1320 },
+      'Kumarakom': { lat: 9.6174, lng: 76.4299 },
+      
+      // Goa
+      'Panaji': { lat: 15.4909, lng: 73.8278 },
+      'Margao': { lat: 15.2700, lng: 73.9500 },
+      'Calangute': { lat: 15.5435, lng: 73.7550 },
+      'Baga': { lat: 15.5557, lng: 73.7519 },
+      'Anjuna': { lat: 15.5735, lng: 73.7400 },
+      
+      // Himachal Pradesh
+      'Shimla': { lat: 31.1048, lng: 77.1734 },
+      'Manali': { lat: 32.2396, lng: 77.1887 },
+      'Dharamshala': { lat: 32.2190, lng: 76.3234 },
+      'Dalhousie': { lat: 32.5448, lng: 75.9318 },
+      'Kasauli': { lat: 30.8977, lng: 76.9647 },
+      'Kullu': { lat: 31.9578, lng: 77.1093 },
+      'Spiti': { lat: 32.2460, lng: 78.0413 },
+      
+      // Maharashtra
+      'Aurangabad': { lat: 19.8762, lng: 75.3433 },
+      'Nashik': { lat: 19.9975, lng: 73.7898 },
+      'Lonavala': { lat: 18.7537, lng: 73.4063 },
+      'Mahabaleshwar': { lat: 17.9244, lng: 73.6578 },
+      'Ajanta': { lat: 20.5520, lng: 75.7033 },
+      'Ellora': { lat: 20.0263, lng: 75.1799 },
+      
+      // Karnataka
+      'Mysore': { lat: 12.2958, lng: 76.6394 },
+      'Hampi': { lat: 15.3350, lng: 76.4600 },
+      'Coorg': { lat: 12.3375, lng: 75.8069 },
+      'Chikmagalur': { lat: 13.3161, lng: 75.7720 },
+      'Badami': { lat: 15.9149, lng: 75.6769 },
+      'Bijapur': { lat: 16.8302, lng: 75.7100 },
+      
+      // Tamil Nadu
+      'Madurai': { lat: 9.9252, lng: 78.1198 },
+      'Ooty': { lat: 11.4064, lng: 76.6932 },
+      'Kodaikanal': { lat: 10.2381, lng: 77.4892 },
+      'Thanjavur': { lat: 10.7870, lng: 79.1378 },
+      'Kanyakumari': { lat: 8.0883, lng: 77.5385 },
+      'Pondicherry': { lat: 11.9416, lng: 79.8083 },
+      'Mamallapuram': { lat: 12.6208, lng: 80.1982 },
+      
+      // Uttar Pradesh
+      'Agra': { lat: 27.1767, lng: 78.0081 },
+      'Varanasi': { lat: 25.3176, lng: 82.9739 },
+      'Lucknow': { lat: 26.8467, lng: 80.9462 },
+      'Allahabad': { lat: 25.4358, lng: 81.8463 },
+      'Mathura': { lat: 27.4924, lng: 77.6737 },
+      'Vrindavan': { lat: 27.5820, lng: 77.7064 },
+      
+      // West Bengal
+      'Darjeeling': { lat: 27.0360, lng: 88.2627 },
+      'Kalimpong': { lat: 27.0669, lng: 88.4685 },
+      'Siliguri': { lat: 26.7271, lng: 88.3953 },
+      'Digha': { lat: 21.6197, lng: 87.5064 },
+      
+      // Gujarat
+      'Gandhinagar': { lat: 23.2156, lng: 72.6369 },
+      'Vadodara': { lat: 22.3072, lng: 73.1812 },
+      'Surat': { lat: 21.1702, lng: 72.8311 },
+      'Dwarka': { lat: 22.2394, lng: 68.9678 },
+      'Somnath': { lat: 20.8880, lng: 70.4017 },
+      'Kutch': { lat: 23.7337, lng: 69.8597 },
+      
+      // Punjab
+      'Amritsar': { lat: 31.6340, lng: 74.8723 },
+      'Chandigarh': { lat: 30.7333, lng: 76.7794 },
+      'Ludhiana': { lat: 30.9010, lng: 75.8573 },
+      'Patiala': { lat: 30.3398, lng: 76.3869 },
+      
+      // Andhra Pradesh & Telangana
+      'Tirupati': { lat: 13.6288, lng: 79.4192 },
+      'Vijayawada': { lat: 16.5062, lng: 80.6480 },
+      'Visakhapatnam': { lat: 17.6868, lng: 83.2185 },
+      'Warangal': { lat: 17.9689, lng: 79.5941 },
+      
+      // Madhya Pradesh
+      'Bhopal': { lat: 23.2599, lng: 77.4126 },
+      'Indore': { lat: 22.7196, lng: 75.8577 },
+      'Gwalior': { lat: 26.2183, lng: 78.1828 },
+      'Ujjain': { lat: 23.1765, lng: 75.7885 },
+      'Khajuraho': { lat: 24.8318, lng: 79.9199 },
+      'Sanchi': { lat: 23.4793, lng: 77.7398 },
+      
+      // Odisha
+      'Bhubaneswar': { lat: 20.2961, lng: 85.8245 },
+      'Puri': { lat: 19.8135, lng: 85.8312 },
+      'Konark': { lat: 19.8947, lng: 86.0946 },
+      'Cuttack': { lat: 20.4625, lng: 85.8828 },
+      
+      // Assam & Northeast
+      'Guwahati': { lat: 26.1445, lng: 91.7362 },
+      'Shillong': { lat: 25.5788, lng: 91.8933 },
+      'Imphal': { lat: 24.8170, lng: 93.9368 },
+      'Agartala': { lat: 23.8315, lng: 91.2868 },
+      'Aizawl': { lat: 23.7367, lng: 92.7173 },
+      
+      // Jammu & Kashmir / Ladakh
+      'Srinagar': { lat: 34.0837, lng: 74.7973 },
+      'Jammu': { lat: 32.7266, lng: 74.8570 },
+      'Leh': { lat: 34.1526, lng: 77.5771 },
+      'Gulmarg': { lat: 34.0484, lng: 74.3803 },
+      'Pahalgam': { lat: 34.0115, lng: 75.3314 },
+      
+      // Uttarakhand
+      'Dehradun': { lat: 30.3165, lng: 78.0322 },
+      'Haridwar': { lat: 29.9457, lng: 78.1642 },
+      'Rishikesh': { lat: 30.0869, lng: 78.2676 },
+      'Nainital': { lat: 29.3803, lng: 79.4636 },
+      'Mussoorie': { lat: 30.4598, lng: 78.0664 },
+      'Badrinath': { lat: 30.7433, lng: 79.4938 },
+      'Kedarnath': { lat: 30.7346, lng: 79.0669 },
+      
+      // Bihar & Jharkhand
+      'Patna': { lat: 25.5941, lng: 85.1376 },
+      'Bodh Gaya': { lat: 24.6959, lng: 84.9910 },
+      'Rajgir': { lat: 25.0285, lng: 85.4219 },
+      'Ranchi': { lat: 23.3441, lng: 85.3096 }
     };
-    
-    const base = baseCoords[place?.city] || baseCoords[place?.state] || { lat: 20.5937, lng: 78.9629 };
-    
-    return {
-      lat: base.lat + (Math.random() - 0.5) * 0.1,
-      lng: base.lng + (Math.random() - 0.5) * 0.1
+
+    // First try to get exact city coordinates
+    const exactCoords = cityCoordinates[place?.city];
+    if (exactCoords) {
+      return {
+        lat: exactCoords.lat,
+        lng: exactCoords.lng
+      };
+    }
+
+    // State-level fallback coordinates (major cities in each state)
+    const stateCoordinates = {
+      'Rajasthan': { lat: 26.9124, lng: 75.7873 }, // Jaipur
+      'Kerala': { lat: 9.9312, lng: 76.2673 }, // Kochi
+      'Goa': { lat: 15.4909, lng: 73.8278 }, // Panaji
+      'Himachal Pradesh': { lat: 31.1048, lng: 77.1734 }, // Shimla
+      'Maharashtra': { lat: 19.0760, lng: 72.8777 }, // Mumbai
+      'Karnataka': { lat: 12.9716, lng: 77.5946 }, // Bangalore
+      'Tamil Nadu': { lat: 13.0827, lng: 80.2707 }, // Chennai
+      'Uttar Pradesh': { lat: 27.1767, lng: 78.0081 }, // Agra
+      'Delhi': { lat: 28.6139, lng: 77.2090 }, // Delhi
+      'West Bengal': { lat: 22.5726, lng: 88.3639 }, // Kolkata
+      'Gujarat': { lat: 23.0225, lng: 72.5714 }, // Ahmedabad
+      'Punjab': { lat: 31.6340, lng: 74.8723 }, // Amritsar
+      'Andhra Pradesh': { lat: 13.6288, lng: 79.4192 }, // Tirupati
+      'Telangana': { lat: 17.3850, lng: 78.4867 }, // Hyderabad
+      'Madhya Pradesh': { lat: 23.2599, lng: 77.4126 }, // Bhopal
+      'Odisha': { lat: 20.2961, lng: 85.8245 }, // Bhubaneswar
+      'Assam': { lat: 26.1445, lng: 91.7362 }, // Guwahati
+      'Jammu and Kashmir': { lat: 34.0837, lng: 74.7973 }, // Srinagar
+      'Ladakh': { lat: 34.1526, lng: 77.5771 }, // Leh
+      'Uttarakhand': { lat: 30.3165, lng: 78.0322 }, // Dehradun
+      'Bihar': { lat: 25.5941, lng: 85.1376 }, // Patna
+      'Jharkhand': { lat: 23.3441, lng: 85.3096 }, // Ranchi
+      'Chhattisgarh': { lat: 21.2787, lng: 81.8661 }, // Raipur
+      'Haryana': { lat: 30.7333, lng: 76.7794 }, // Chandigarh
+      'Meghalaya': { lat: 25.5788, lng: 91.8933 }, // Shillong
+      'Manipur': { lat: 24.8170, lng: 93.9368 }, // Imphal
+      'Tripura': { lat: 23.8315, lng: 91.2868 }, // Agartala
+      'Mizoram': { lat: 23.7367, lng: 92.7173 }, // Aizawl
+      'Nagaland': { lat: 26.1584, lng: 94.5624 }, // Kohima
+      'Arunachal Pradesh': { lat: 27.0844, lng: 93.6053 }, // Itanagar
+      'Sikkim': { lat: 27.3389, lng: 88.6065 } // Gangtok
     };
+
+    // Use state coordinates as fallback
+    const stateCoords = stateCoordinates[place?.state];
+    if (stateCoords) {
+      return {
+        lat: stateCoords.lat,
+        lng: stateCoords.lng
+      };
+    }
+
+    // Ultimate fallback - center of India
+    return { lat: 20.5937, lng: 78.9629 };
   }
 
   // Generate opening hours
@@ -461,7 +653,7 @@ class AttractionDetailsManager {
               <div class="attraction-location">
                 <h4>📍 Location</h4>
                 <p>${place?.city}, ${place?.state}</p>
-                <button class="view-map-btn" onclick="window.open('https://www.google.com/maps?q=${details.coordinates.lat},${details.coordinates.lng}', '_blank')">
+                <button class="view-map-btn" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(attractionName + ', ' + place?.city + ', ' + place?.state)}/@${details.coordinates.lat},${details.coordinates.lng},15z', '_blank')">
                   View on Maps
                 </button>
               </div>
