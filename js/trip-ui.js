@@ -12,6 +12,31 @@ class TripUI {
   init() {
     this.createTripListView();
     this.attachEventListeners();
+    
+    // Initialize map manager
+    this.initializeMapManager();
+    
+    // Initialize attraction details manager
+    this.initializeAttractionManager();
+  }
+
+  // Initialize map manager
+  initializeMapManager() {
+    if (window.MapManager) {
+      this.mapManager = new window.MapManager();
+      this.mapManager.setPlacesData(this.tripManager.placesData);
+      // Make it globally accessible for onclick handlers
+      window.mapManager = this.mapManager;
+    }
+  }
+
+  // Initialize attraction details manager
+  initializeAttractionManager() {
+    if (window.AttractionDetailsManager) {
+      this.attractionDetailsManager = new window.AttractionDetailsManager();
+      // Make it globally accessible for onclick handlers
+      window.attractionDetailsManager = this.attractionDetailsManager;
+    }
   }
 
   // Create main trip list view
@@ -148,6 +173,17 @@ class TripUI {
         </div>
         
         <div class="trip-sections">
+          <!-- Interactive India Map Section -->
+          <div class="trip-section">
+            <div class="section-header">
+              <h2 class="section-title">🗺️ Trip Map</h2>
+              <p class="section-subtitle">Click on states to explore destinations</p>
+            </div>
+            <div id="trip-map">
+              ${this.renderTripMap()}
+            </div>
+          </div>
+          
           <div class="trip-section">
             <div class="section-header">
               <h2 class="section-title">Places to Visit</h2>
@@ -165,6 +201,11 @@ class TripUI {
         </div>
       </div>
     `;
+  }
+
+  // Render trip map
+  renderTripMap() {
+    return `<div id="india-map-placeholder">Loading interactive map...</div>`;
   }
 
   // Create add place form
@@ -315,9 +356,15 @@ class TripUI {
         </h4>
         <div class="attractions-list ${place.isCustom ? 'static-attractions' : 'dynamic-attractions'}">
           ${place.attractions.map(attraction => `
-            <span class="attraction-tag">${attraction}</span>
+            <span class="attraction-tag clickable" onclick="window.attractionDetailsManager?.showAttractionDetails('${attraction.replace(/'/g, "\\'")}', ${JSON.stringify(place).replace(/"/g, '&quot;')})" title="Click for details about ${attraction}">
+              ${attraction}
+              <span class="attraction-icon">🔍</span>
+            </span>
           `).join('')}
         </div>
+        ${place.attractions.length > 0 ? `
+          <p class="attractions-hint">💡 Click on any attraction to see details, photos, and visit information</p>
+        ` : ''}
       </div>
     `;
   }
@@ -590,6 +637,27 @@ class TripUI {
     
     const container = document.getElementById('trip-list');
     container.innerHTML = this.createTripDetailView(trip);
+    
+    // Initialize map after view is rendered
+    this.initializeTripMap(trip);
+  }
+
+  // Initialize map for current trip
+  initializeTripMap(trip) {
+    setTimeout(() => {
+      const mapPlaceholder = document.getElementById('india-map-placeholder');
+      if (mapPlaceholder && this.mapManager) {
+        // Replace placeholder with actual map
+        const mapContainer = this.mapManager.createMapContainer();
+        mapPlaceholder.parentNode.replaceChild(mapContainer, mapPlaceholder);
+        
+        // Initialize the map
+        this.mapManager.initializeMap();
+        
+        // Update map with current trip data
+        this.mapManager.updateMapWithTrip(trip);
+      }
+    }, 100);
   }
 
   // Back to trips list
@@ -707,6 +775,14 @@ class TripUI {
         }
       }
     }
+  }
+
+  // Get current trip data
+  getCurrentTrip() {
+    if (this.currentTripId) {
+      return this.tripManager.getTrip(this.currentTripId);
+    }
+    return null;
   }
 }
 

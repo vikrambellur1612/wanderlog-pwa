@@ -1,0 +1,996 @@
+/* WanderLog Map and Modal Styles */
+/* Version: 1.0.0 - Interactive India Map and Attraction Modals */
+
+/* ===== INDIA MAP STYLES ===== */
+.india-map-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.map-header {
+  text-align: center;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.map-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.map-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.india-map-svg {
+  background: transparent;
+  border-radius: 10px;
+  padding: 20px;
+  overflow: visible;
+}
+.india-destinations-interface {
+  padding: 0;
+}
+
+.section-title {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Top Destinations Grid */
+.top-destinations-section {
+  margin-bottom: 30px;
+}
+
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.destination-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.destination-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #4A90E2;
+  background: white;
+}
+
+.destination-card.selected-destination {
+  border-color: #4CAF50;
+  background: #f8fff8;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+}
+
+.destination-emoji {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.destination-info {
+  flex: 1;
+}
+
+.destination-name {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.destination-description {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.destination-arrow {
+  font-size: 1.5rem;
+  color: #4A90E2;
+  font-weight: bold;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.destination-card:hover .destination-arrow {
+  transform: translateX(5px);
+}
+
+.destination-counter {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #4CAF50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Other States Dropdown Section */
+.other-states-section {
+  margin-bottom: 30px;
+}
+
+.dropdown-container {
+  position: relative;
+  max-width: 400px;
+}
+
+.states-dropdown {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.states-dropdown:hover,
+.states-dropdown:focus {
+  border-color: #4A90E2;
+  background: white;
+  outline: none;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  font-size: 1.2rem;
+}
+
+/* Trip Visualization Section */
+.trip-visualization-section {
+  margin-top: 20px;
+}
+
+.trip-map-visualization {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 120px;
+}
+
+.empty-trip-message {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin: 40px 0;
+}
+
+.trip-states-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.trip-state-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  border-left: 4px solid #4CAF50;
+}
+
+.trip-state-name {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.trip-places-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.trip-place-tag {
+  background: #4CAF50;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.trip-state-count {
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.trip-summary {
+  text-align: center;
+  padding: 15px;
+  background: #e8f5e8;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.trip-summary p {
+  margin: 0;
+  color: #2e7d32;
+  font-size: 1rem;
+}
+
+.trip-summary strong {
+  color: #1b5e20;
+}
+
+/* Map legend */
+.map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 0.85rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 15px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.legend-color.selected {
+  background: #4CAF50;
+}
+
+.legend-color.available {
+  background: #e8f4f8;
+}
+
+/* State tooltip */
+.state-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== PLACES MODAL STYLES ===== */
+.places-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.places-modal {
+  background: white;
+  border-radius: 15px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.places-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.places-modal-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.close-modal:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.places-modal-content {
+  padding: 25px;
+  max-height: calc(80vh - 80px);
+  overflow-y: auto;
+}
+
+.places-modal-description {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Places grid */
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.place-card {
+  border: 1px solid #e1e8ed;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.place-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #4A90E2;
+}
+
+.place-info h4 {
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.place-category {
+  display: inline-block;
+  background: #4A90E2;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+}
+
+.place-description {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 15px 0;
+}
+
+.select-place-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.select-place-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Place Card States */
+.place-card.already-selected {
+  opacity: 0.7;
+  border: 2px solid #28a745;
+  background: #f8fff8;
+}
+
+.select-place-btn.disabled {
+  background: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.select-place-btn.disabled:hover {
+  background: #6c757d !important;
+  transform: none !important;
+}
+
+/* Modal Footer Styling */
+.places-modal-footer {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0 0 12px 12px;
+}
+
+.selection-info {
+  color: #6c757d;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.close-modal.secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.3s ease;
+}
+
+.close-modal.secondary:hover {
+  background: #5a6268;
+}
+
+/* Temporary Message Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.temp-message {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.temp-message-loading::before {
+  content: '⏳ ';
+}
+
+.temp-message-success::before {
+  content: '✅ ';
+}
+
+.temp-message-error::before {
+  content: '❌ ';
+}
+
+.temp-message-info::before {
+  content: 'ℹ️ ';
+}
+
+/* No places message */
+.no-places-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-places-message p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.add-custom-place-btn {
+  background: linear-gradient(135deg, #FF6B6B 0%, #ee5a52 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.add-custom-place-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* ===== ATTRACTION MODAL STYLES ===== */
+.attraction-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  animation: fadeIn 0.3s ease;
+}
+
+.attraction-modal {
+  background: white;
+  border-radius: 15px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.3s ease;
+}
+
+.attraction-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.attraction-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.attraction-modal-content {
+  max-height: calc(90vh - 80px);
+  overflow-y: auto;
+}
+
+/* Loading state */
+.loading-state {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4A90E2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+.loading-sources {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.loading-source {
+  padding: 8px 15px;
+  background: #f5f5f5;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.loading-source.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.loading-source.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Attraction images */
+.attraction-images {
+  padding: 20px 25px 0 25px;
+}
+
+.main-image {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.main-image img:hover {
+  transform: scale(1.05);
+}
+
+.thumbnail-images {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.thumbnail-images img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail-images img:hover {
+  border-color: #4A90E2;
+  transform: scale(1.1);
+}
+
+/* Attraction info */
+.attraction-info {
+  padding: 25px;
+}
+
+.attraction-info h4 {
+  margin: 0 0 15px 0;
+  color: #1a1a1a;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attraction-description p {
+  color: #555;
+  line-height: 1.6;
+  font-size: 1rem;
+  margin: 0 0 25px 0;
+}
+
+.attraction-rating {
+  margin-bottom: 25px;
+}
+
+.attraction-rating p {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4A90E2;
+  margin: 5px 0 0 0;
+}
+
+/* Visit info grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4A90E2;
+}
+
+.info-item strong {
+  color: #333;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.info-item span {
+  color: #666;
+  text-align: right;
+  flex: 1;
+}
+
+/* Location and map */
+.attraction-location {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.view-map-btn {
+  background: linear-gradient(135deg, #4A90E2 0%, #357abd 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.view-map-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* Data sources */
+.data-sources {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.data-sources small {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+/* Error state */
+.error-state {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.error-state p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #FF6B6B 0%, #ee5a52 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .india-map-container {
+    margin: 15px 0;
+    padding: 15px;
+  }
+  
+  .destinations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .destination-card {
+    padding: 15px;
+  }
+  
+  .destination-emoji {
+    font-size: 2rem;
+  }
+  
+  .destination-name {
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .trip-states-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .places-modal,
+  .attraction-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .places-modal-header,
+  .attraction-modal-header {
+    padding: 15px 20px;
+  }
+  
+  .places-modal-header h3,
+  .attraction-modal-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .places-modal-content,
+  .attraction-info {
+    padding: 20px;
+  }
+  
+  .places-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .map-legend {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+  }
+  
+  .main-image {
+    height: 200px;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .info-item strong {
+    min-width: auto;
+  }
+  
+  .info-item span {
+    text-align: left;
+  }
+  
+  .loading-sources {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .destination-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .destination-arrow {
+    transform: rotate(90deg);
+  }
+  
+  .destination-card:hover .destination-arrow {
+    transform: rotate(90deg) translateY(-5px);
+  }
+  
+  .states-dropdown {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .trip-place-tag {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+  
+  .attraction-images {
+    padding: 15px 20px 0 20px;
+  }
+  
+  .main-image {
+    height: 180px;
+  }
+  
+  .thumbnail-images {
+    gap: 8px;
+  }
+  
+  .thumbnail-images img {
+    width: 60px;
+    height: 45px;
+  }
+  
+  .loading-state,
+  .error-state {
+    padding: 40px 20px;
+  }
+}

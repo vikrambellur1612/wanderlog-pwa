@@ -390,12 +390,48 @@
 }
 
 .attraction-tag {
-  background: var(--accent-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 500;
+  margin: 4px 6px 4px 0;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.attraction-tag.clickable {
+  cursor: pointer;
+}
+
+.attraction-tag.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.attraction-tag .attraction-icon {
+  opacity: 0;
+  font-size: 0.7rem;
+  transition: opacity 0.2s ease;
+}
+
+.attraction-tag.clickable:hover .attraction-icon {
+  opacity: 1;
+}
+
+/* Attractions hint */
+.attractions-hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 8px;
+  font-style: italic;
 }
 
 /* Add Place Form */
