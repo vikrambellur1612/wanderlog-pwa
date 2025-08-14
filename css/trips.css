@@ -406,11 +406,106 @@
   margin-bottom: 1rem;
 }
 
+.place-search-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.tab-btn:hover {
+  color: var(--primary-color);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
 .place-search {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 1rem;
   align-items: end;
+}
+
+.custom-place-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.custom-place-form .form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.custom-place-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.attractions-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.attractions-loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.attraction-source {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  margin-left: 0.5rem;
+}
+
+.dynamic-attractions {
+  border-left: 3px solid var(--secondary-color);
+  padding-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.static-attractions {
+  border-left: 3px solid var(--accent-color);
+  padding-left: 0.5rem;
+}
+
+.attractions-error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-style: italic;
 }
 
 /* Empty States */
@@ -486,12 +581,42 @@
     grid-template-columns: 1fr;
   }
   
+  .custom-place-form .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .place-search-tabs {
+    flex-direction: column;
+  }
+  
+  .tab-btn {
+    text-align: center;
+    border-bottom: none;
+    border-right: 2px solid transparent;
+    margin-bottom: 0;
+    margin-right: -2px;
+  }
+  
+  .tab-btn.active {
+    border-bottom: none;
+    border-right-color: var(--primary-color);
+  }
+  
   .trip-detail-header {
     padding: 1.5rem;
   }
   
   .trip-detail-name {
     font-size: 1.5rem;
+  }
+  
+  .attractions-list {
+    gap: 0.25rem;
+  }
+  
+  .attraction-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
   }
 }
 
@@ -503,5 +628,14 @@
   
   .trip-container {
     padding: 0.5rem;
+  }
+  
+  .place-search-tabs {
+    margin-bottom: 1rem;
+  }
+  
+  .tab-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
 }

@@ -173,25 +173,73 @@ class TripUI {
     
     return `
       <div class="add-place-form">
-        <div class="place-search">
-          <div class="form-group">
-            <label class="form-label" for="place-state">State</label>
-            <select id="place-state" class="form-select">
-              <option value="">Select State</option>
-              ${states.map(state => `<option value="${state}">${state}</option>`).join('')}
-            </select>
+        <div class="place-search-tabs">
+          <button class="tab-btn active" id="preset-tab" onclick="tripUI.switchTab('preset')">
+            🗺️ Select from List
+          </button>
+          <button class="tab-btn" id="custom-tab" onclick="tripUI.switchTab('custom')">
+            ✏️ Add Custom Place
+          </button>
+        </div>
+        
+        <!-- Preset Places Tab -->
+        <div id="preset-form" class="tab-content active">
+          <div class="place-search">
+            <div class="form-group">
+              <label class="form-label" for="place-state">State</label>
+              <select id="place-state" class="form-select">
+                <option value="">Select State</option>
+                ${states.map(state => `<option value="${state}">${state}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="place-city">City</label>
+              <select id="place-city" class="form-select" disabled>
+                <option value="">Select City</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">&nbsp;</label>
+              <button type="button" class="btn-primary" onclick="tripUI.addPlaceToTrip()" disabled id="add-place-btn">
+                Add Place
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="place-city">City</label>
-            <select id="place-city" class="form-select" disabled>
-              <option value="">Select City</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">&nbsp;</label>
-            <button type="button" class="btn-primary" onclick="tripUI.addPlaceToTrip()" disabled id="add-place-btn">
-              Add Place
-            </button>
+        </div>
+        
+        <!-- Custom Place Tab -->
+        <div id="custom-form" class="tab-content">
+          <div class="custom-place-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="custom-place-name">Place Name *</label>
+                <input type="text" id="custom-place-name" class="form-input" placeholder="e.g., My Hometown" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="custom-state">State *</label>
+                <select id="custom-state" class="form-select">
+                  <option value="">Select State</option>
+                  ${states.map(state => `<option value="${state}">${state}</option>`).join('')}
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="custom-description">Description</label>
+              <textarea id="custom-description" class="form-input" rows="3" placeholder="Brief description of the place..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="custom-attractions">Must-Visit Places (one per line)</label>
+              <textarea id="custom-attractions" class="form-input" rows="4" placeholder="Local Market&#10;Beautiful Temple&#10;Scenic Viewpoint&#10;Traditional Restaurant"></textarea>
+            </div>
+            <div class="form-group">
+              <button type="button" class="btn-primary" onclick="tripUI.addCustomPlace()" id="add-custom-btn">
+                Add Custom Place
+              </button>
+              <button type="button" class="btn-secondary" onclick="tripUI.clearCustomForm()" style="margin-left: 0.5rem;">
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -219,11 +267,13 @@ class TripUI {
 
   // Render individual place item
   renderPlaceItem(place) {
+    const customBadge = place.isCustom ? '<span class="place-tag" style="background: #9c27b0; color: white;">Custom</span>' : '';
+    
     return `
       <div class="place-item">
         <div class="place-header">
           <div>
-            <h3 class="place-name">${place.city}</h3>
+            <h3 class="place-name">${place.city} ${customBadge}</h3>
             <p class="place-location">${place.state}, India</p>
           </div>
           <button class="btn-danger" onclick="tripUI.removePlace(${place.id})">
@@ -231,18 +281,53 @@ class TripUI {
           </button>
         </div>
         <p class="place-description">${place.description}</p>
-        ${place.attractions && place.attractions.length > 0 ? `
-          <div class="place-attractions">
-            <h4 class="attractions-title">Must-visit attractions:</h4>
-            <div class="attractions-list">
-              ${place.attractions.map(attraction => `
-                <span class="attraction-tag">${attraction}</span>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
+        ${this.renderAttractionsSection(place)}
       </div>
     `;
+  }
+
+  // Render attractions section with loading states
+  renderAttractionsSection(place) {
+    if (!place.attractions) {
+      return `
+        <div class="place-attractions">
+          <div class="attractions-loading">
+            <span>Loading attractions...</span>
+          </div>
+        </div>
+      `;
+    }
+
+    if (place.attractions.length === 0) {
+      return `
+        <div class="place-attractions">
+          <h4 class="attractions-title">Attractions information unavailable</h4>
+          <p class="attractions-error">Try refreshing or check your internet connection</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="place-attractions">
+        <h4 class="attractions-title">
+          Must-visit attractions:
+          <span class="attraction-source">${this.getAttractionsSource(place)}</span>
+        </h4>
+        <div class="attractions-list ${place.isCustom ? 'static-attractions' : 'dynamic-attractions'}">
+          ${place.attractions.map(attraction => `
+            <span class="attraction-tag">${attraction}</span>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // Get attractions source indicator
+  getAttractionsSource(place) {
+    if (place.isCustom) {
+      return '(Custom)';
+    }
+    return '(Live Data)';
   }
 
   // Attach event listeners
@@ -415,6 +500,78 @@ class TripUI {
     }
   }
 
+  // Add custom place to current trip
+  async addCustomPlace() {
+    const placeName = document.getElementById('custom-place-name').value.trim();
+    const state = document.getElementById('custom-state').value;
+    const description = document.getElementById('custom-description').value.trim();
+    const attractionsText = document.getElementById('custom-attractions').value.trim();
+    
+    if (!placeName) {
+      alert('Please enter a place name');
+      return;
+    }
+    
+    if (!state) {
+      alert('Please select a state');
+      return;
+    }
+
+    try {
+      const addBtn = document.getElementById('add-custom-btn');
+      addBtn.textContent = 'Adding...';
+      addBtn.disabled = true;
+
+      // Parse attractions from textarea
+      const attractions = attractionsText 
+        ? attractionsText.split('\n').map(a => a.trim()).filter(a => a.length > 0)
+        : [];
+
+      const customPlace = {
+        city: placeName,
+        state: state,
+        description: description || `Custom destination in ${state}`,
+        attractions: attractions,
+        category: 'Custom',
+        isCustom: true
+      };
+
+      await this.tripManager.addPlaceToTrip(this.currentTripId, customPlace);
+      
+      // Clear form and refresh
+      this.clearCustomForm();
+      document.getElementById('add-place-section').style.display = 'none';
+      this.refreshPlacesList();
+      
+      addBtn.textContent = 'Add Custom Place';
+      addBtn.disabled = false;
+    } catch (error) {
+      console.error('Error adding custom place:', error);
+      alert('Error adding custom place. Please try again.');
+      document.getElementById('add-custom-btn').textContent = 'Add Custom Place';
+      document.getElementById('add-custom-btn').disabled = false;
+    }
+  }
+
+  // Clear custom place form
+  clearCustomForm() {
+    document.getElementById('custom-place-name').value = '';
+    document.getElementById('custom-state').value = '';
+    document.getElementById('custom-description').value = '';
+    document.getElementById('custom-attractions').value = '';
+  }
+
+  // Switch between preset and custom tabs
+  switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${tabName}-form`).classList.add('active');
+  }
+
   // Remove place from trip
   removePlace(placeId) {
     if (confirm('Are you sure you want to remove this place from your trip?')) {
@@ -476,6 +633,54 @@ class TripUI {
       const placesList = document.getElementById('places-list');
       if (placesList) {
         placesList.innerHTML = this.renderPlacesList(trip.places);
+        
+        // Start loading attractions for places that don't have them yet
+        this.loadMissingAttractions(trip.places);
+      }
+    }
+  }
+
+  // Load attractions for places that are missing them
+  async loadMissingAttractions(places) {
+    for (const place of places) {
+      if (!place.attractions || place.attractions.length === 0) {
+        try {
+          // Show loading state
+          const placeElement = document.querySelector(`[data-place-id="${place.id}"]`);
+          if (placeElement) {
+            const attractionsSection = placeElement.querySelector('.place-attractions');
+            if (attractionsSection) {
+              attractionsSection.innerHTML = `
+                <div class="attractions-loading">
+                  <span>Loading attractions for ${place.city}...</span>
+                </div>
+              `;
+            }
+          }
+
+          // Fetch fresh attractions data
+          const updatedPlace = await this.tripManager.refreshPlaceAttractions(this.currentTripId, place.id);
+          
+          if (updatedPlace) {
+            // Update the display
+            this.refreshPlacesList();
+          }
+        } catch (error) {
+          console.error('Error loading attractions:', error);
+          // Show error state
+          const placeElement = document.querySelector(`[data-place-id="${place.id}"]`);
+          if (placeElement) {
+            const attractionsSection = placeElement.querySelector('.place-attractions');
+            if (attractionsSection) {
+              attractionsSection.innerHTML = `
+                <div class="place-attractions">
+                  <h4 class="attractions-title">Attractions unavailable</h4>
+                  <p class="attractions-error">Unable to load attractions data</p>
+                </div>
+              `;
+            }
+          }
+        }
       }
     }
   }

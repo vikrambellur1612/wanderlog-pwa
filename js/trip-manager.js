@@ -116,34 +116,88 @@ class TripManager {
     return false;
   }
 
+  // Refresh attractions for a specific place
+  async refreshPlaceAttractions(tripId, placeId) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return null;
+
+    const place = trip.places.find(p => p.id === placeId);
+    if (!place) return null;
+
+    try {
+      // Fetch fresh attractions data
+      const updatedAttractions = await this.getAttractions(place);
+      
+      // Update the place with new attractions
+      place.attractions = updatedAttractions;
+      place.lastUpdated = new Date().toISOString();
+      
+      // Save the updated trip
+      this.updateTrip(tripId, { places: trip.places });
+      
+      return place;
+    } catch (error) {
+      console.error('Error refreshing attractions:', error);
+      return null;
+    }
+  }
+
   // Get place details with attractions
   async getPlaceDetails(placeInfo) {
+    // Handle custom places
+    if (placeInfo.isCustom) {
+      return {
+        city: placeInfo.city,
+        state: placeInfo.state,
+        description: placeInfo.description || `Custom destination in ${placeInfo.state}`,
+        attractions: placeInfo.attractions || [],
+        category: 'Custom',
+        isCustom: true
+      };
+    }
+
     const basePlace = this.placesData.find(place => 
       place.city === placeInfo.city && place.state === placeInfo.state
     );
 
     if (basePlace) {
+      const attractions = await this.getAttractions(basePlace);
       return {
         ...basePlace,
         ...placeInfo,
-        attractions: await this.getAttractions(basePlace),
+        attractions: attractions,
         description: basePlace.description || await this.getPlaceDescription(basePlace)
       };
     }
 
-    // If not found in local data, create basic entry
+    // If not found in local data, create basic entry and try to fetch dynamic data
+    const dynamicAttractions = await this.fetchDynamicAttractions(placeInfo);
     return {
       city: placeInfo.city,
       state: placeInfo.state,
-      description: `Beautiful destination in ${placeInfo.state}`,
-      attractions: [],
+      description: placeInfo.description || `Beautiful destination in ${placeInfo.state}`,
+      attractions: dynamicAttractions,
       category: 'General'
     };
   }
 
-  // Get attractions for a place (simulated - in real app would fetch from API)
+  // Get attractions for a place (now with dynamic fetching capability)
   async getAttractions(place) {
-    // Simulated attraction data - in real app this would be fetched from an API
+    // First try to get from local static data
+    const staticAttractions = this.getStaticAttractions(place.city);
+    
+    // Then try to fetch dynamic attractions
+    const dynamicAttractions = await this.fetchDynamicAttractions(place);
+    
+    // Combine and deduplicate
+    const allAttractions = [...staticAttractions, ...dynamicAttractions];
+    const uniqueAttractions = [...new Set(allAttractions)];
+    
+    return uniqueAttractions.slice(0, 8); // Limit to 8 attractions for UI
+  }
+
+  // Static attractions data (fallback)
+  getStaticAttractions(cityName) {
     const attractionsMap = {
       'Delhi': [
         'Red Fort', 'India Gate', 'Qutub Minar', 'Lotus Temple', 'Humayun\'s Tomb'
@@ -162,12 +216,192 @@ class TripManager {
       ],
       'Kerala': [
         'Backwaters', 'Munnar Tea Gardens', 'Periyar Wildlife Sanctuary', 'Fort Kochi', 'Kovalam Beach'
+      ],
+      'Kochi': [
+        'Chinese Fishing Nets', 'Mattancherry Palace', 'Jewish Synagogue', 'Fort Kochi Beach', 'St. Francis Church'
+      ],
+      'Munnar': [
+        'Tea Museum', 'Eravikulam National Park', 'Mattupetty Dam', 'Echo Point', 'Top Station'
+      ],
+      'Agra': [
+        'Taj Mahal', 'Agra Fort', 'Fatehpur Sikri', 'Mehtab Bagh', 'Tomb of Itimad-ud-Daulah'
+      ],
+      'Varanasi': [
+        'Kashi Vishwanath Temple', 'Dashashwamedh Ghat', 'Sarnath', 'Ramnagar Fort', 'Banaras Hindu University'
       ]
     };
 
-    return attractionsMap[place.city] || [
+    return attractionsMap[cityName] || [
       'Local Markets', 'Traditional Temples', 'Scenic Viewpoints', 'Cultural Centers'
     ];
+  }
+
+  // Fetch dynamic attractions from external APIs
+  async fetchDynamicAttractions(place) {
+    try {
+      // Try multiple API sources for comprehensive data
+      const attractions = await Promise.allSettled([
+        this.fetchFromTripAdvisor(place),
+        this.fetchFromWikipedia(place),
+        this.fetchFromOpenTripMap(place)
+      ]);
+
+      const validAttractions = attractions
+        .filter(result => result.status === 'fulfilled' && result.value.length > 0)
+        .map(result => result.value)
+        .flat();
+
+      return [...new Set(validAttractions)]; // Remove duplicates
+    } catch (error) {
+      console.warn('Error fetching dynamic attractions:', error);
+      return [];
+    }
+  }
+
+  // Fetch from TripAdvisor-like API (using a mock implementation for now)
+  async fetchFromTripAdvisor(place) {
+    try {
+      // In a real implementation, you would use TripAdvisor's API
+      // For now, we'll simulate with a comprehensive attractions database
+      const response = await this.simulateTripAdvisorAPI(place);
+      return response.attractions || [];
+    } catch (error) {
+      console.warn('TripAdvisor API error:', error);
+      return [];
+    }
+  }
+
+  // Fetch from Wikipedia API for landmarks and notable places
+  async fetchFromWikipedia(place) {
+    try {
+      // Check if Wikipedia API is enabled
+      if (!window.API_CONFIG?.wikipedia.enabled) {
+        return [];
+      }
+
+      const config = window.API_CONFIG.wikipedia;
+      
+      // Rate limiting
+      await new Promise(resolve => setTimeout(resolve, config.rateLimitDelay));
+
+      const searchQuery = `${place.city} attractions landmarks`;
+      const url = `${config.baseUrl}/page/search/${encodeURIComponent(searchQuery)}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Wikipedia API error');
+      
+      const data = await response.json();
+      return data.pages?.slice(0, 3).map(page => page.title) || [];
+    } catch (error) {
+      console.warn('Wikipedia API error:', error);
+      return [];
+    }
+  }
+
+  // Fetch from OpenTripMap API for POI data
+  async fetchFromOpenTripMap(place) {
+    try {
+      // Check if API is configured
+      if (!window.API_CONFIG?.openTripMap.enabled) {
+        return this.simulateOpenTripMapAPI(place);
+      }
+
+      const config = window.API_CONFIG.openTripMap;
+      const apiKey = config.apiKey;
+      
+      if (!apiKey || apiKey === 'YOUR_OPENTRIPMAP_API_KEY') {
+        console.warn('OpenTripMap API key not configured, using simulated data');
+        return this.simulateOpenTripMapAPI(place);
+      }
+
+      // Rate limiting
+      await new Promise(resolve => setTimeout(resolve, config.rateLimitDelay));
+
+      const url = `${config.baseUrl}/geoname?name=${encodeURIComponent(place.city)}&apikey=${apiKey}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) throw new Error('OpenTripMap API error');
+      
+      const locationData = await response.json();
+      if (!locationData.lat || !locationData.lon) return [];
+
+      // Get attractions near the city
+      const attractionsUrl = `${config.baseUrl}/radius?radius=10000&lon=${locationData.lon}&lat=${locationData.lat}&kinds=historic,museums,architecture,cultural&limit=5&apikey=${apiKey}`;
+      const attractionsResponse = await fetch(attractionsUrl);
+      
+      if (!attractionsResponse.ok) throw new Error('OpenTripMap attractions API error');
+      
+      const attractionsData = await attractionsResponse.json();
+      return attractionsData.features?.map(feature => feature.properties.name).filter(name => name) || [];
+    } catch (error) {
+      console.warn('OpenTripMap API error:', error);
+      return this.simulateOpenTripMapAPI(place);
+    }
+  }
+
+  // Simulate TripAdvisor API with comprehensive data
+  async simulateTripAdvisorAPI(place) {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const attractionsDatabase = {
+      'Delhi': [
+        'Red Fort Complex', 'India Gate Memorial', 'Qutub Minar Complex', 'Lotus Temple', 'Humayun\'s Tomb Garden',
+        'Chandni Chowk Market', 'Jama Masjid', 'National Museum', 'Rajghat', 'Akshardham Temple'
+      ],
+      'Mumbai': [
+        'Gateway of India', 'Marine Drive Promenade', 'Elephanta Caves', 'Chhatrapati Shivaji Terminus',
+        'Crawford Market', 'Hanging Gardens', 'Juhu Beach', 'Sanjay Gandhi National Park'
+      ],
+      'Bangalore': [
+        'Lalbagh Botanical Garden', 'Bangalore Palace', 'Cubbon Park', 'ISKCON Temple Bangalore',
+        'UB City Mall', 'Wonderla Amusement Park', 'Nandi Hills', 'Bull Temple'
+      ],
+      'Jaipur': [
+        'Amber Fort Palace', 'City Palace Complex', 'Hawa Mahal', 'Jantar Mantar Observatory',
+        'Nahargarh Fort', 'Jaigarh Fort', 'Albert Hall Museum', 'Birla Mandir'
+      ],
+      'Goa': [
+        'Baga Beach', 'Calangute Beach', 'Basilica of Bom Jesus', 'Fort Aguada',
+        'Dudhsagar Waterfalls', 'Anjuna Beach', 'Old Goa Churches', 'Spice Plantations'
+      ],
+      'Kochi': [
+        'Chinese Fishing Nets', 'Mattancherry Palace', 'Jewish Synagogue', 'Fort Kochi Beach',
+        'St. Francis Church', 'Kerala Folklore Museum', 'Marine Drive Kochi'
+      ],
+      'Munnar': [
+        'Tea Museum', 'Eravikulam National Park', 'Mattupetty Dam', 'Echo Point',
+        'Top Station Viewpoint', 'Kundala Lake', 'Rose Garden', 'Photo Point'
+      ],
+      'Agra': [
+        'Taj Mahal', 'Agra Fort', 'Fatehpur Sikri', 'Mehtab Bagh', 'Tomb of Itimad-ud-Daulah',
+        'Akbar\'s Tomb', 'Jama Masjid Agra', 'Chini Ka Rauza'
+      ]
+    };
+
+    const attractions = attractionsDatabase[place.city] || 
+      attractionsDatabase[place.city.split(' ')[0]] || // Try first word if full name not found
+      [];
+
+    return { attractions: attractions.slice(0, 6) };
+  }
+
+  // Simulate OpenTripMap API
+  async simulateOpenTripMapAPI(place) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const poiDatabase = {
+      'Delhi': ['National Gallery of Modern Art', 'Raj Ghat Gandhi Memorial'],
+      'Mumbai': ['Prince of Wales Museum', 'Dhobi Ghat'],
+      'Bangalore': ['Government Museum', 'Vidhana Soudha'],
+      'Jaipur': ['Amber Palace Museum', 'Central Museum'],
+      'Goa': ['Museum of Christian Art', 'Naval Aviation Museum'],
+      'Kochi': ['Hill Palace Museum', 'Indo-Portuguese Museum'],
+      'Munnar': ['Carmelagiri Elephant Park', 'Spice Gardens'],
+      'Agra': ['Archaeological Museum', 'Wildlife SOS']
+    };
+
+    return poiDatabase[place.city] || [];
   }
 
   // Get place description (simulated - in real app would use external API)
