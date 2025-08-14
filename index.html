@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WanderLog - Your personal travel companion PWA">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WanderLog">
+    
+    <title>WanderLog - Travel Companion</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="./icons/favicon.svg">
+    <link rel="icon" type="image/png" href="./icons/favicon.png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    
+    <!-- Critical CSS (inlined for performance) -->
+    <style>
+        :root {
+            /* Color Palette */
+            --primary-color: #4CAF50;
+            --primary-dark: #388E3C;
+            --primary-light: #81C784;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            
+            /* Neutral Colors */
+            --white: #ffffff;
+            --gray-50: #f8f9fa;
+            --gray-100: #e9ecef;
+            --gray-200: #dee2e6;
+            --gray-300: #ced4da;
+            --gray-400: #adb5bd;
+            --gray-500: #6c757d;
+            --gray-600: #495057;
+            --gray-700: #343a40;
+            --gray-800: #212529;
+            --gray-900: #0d1117;
+            
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            
+            /* Spacing Scale */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 0.75rem;
+            --spacing-lg: 1rem;
+            --spacing-xl: 1.5rem;
+            --spacing-2xl: 2rem;
+            --spacing-3xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            /* Z-Index Scale */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal: 1050;
+            --z-toast: 1080;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal);
+            gap: var(--spacing-lg);
+        }
+        
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid var(--gray-200);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .app-shell {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: var(--gray-50);
+        }
+        
+        .app-header {
+            position: sticky;
+            top: 0;
+            background-color: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            z-index: var(--z-sticky);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-lg) var(--spacing-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .app-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: var(--font-weight-bold);
+            color: var(--gray-900);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="./css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="./css/styles.css"></noscript>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading WanderLog...</p>
+    </div>
+
+    <!-- Install Banner -->
+    <div id="installBanner" class="install-banner hidden">
+        <div class="banner-content">
+            <div>
+                <strong>Install WanderLog</strong>
+                <p>Get the full app experience!</p>
+            </div>
+            <div>
+                <button id="installBtn" class="install-btn">Install</button>
+                <button id="dismissInstallBtn" class="dismiss-btn">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Notification -->
+    <div id="updateNotification" class="update-notification hidden">
+        <div class="update-content">
+            <p>A new version is available!</p>
+            <button id="updateBtn" class="update-btn">Update</button>
+            <button id="dismissUpdateBtn" class="dismiss-btn">&times;</button>
+        </div>
+    </div>
+
+    <!-- App Shell -->
+    <div id="app" class="app-shell hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">🌍 WanderLog</h1>
+                <div class="header-actions">
+                    <button id="menuBtn" class="icon-btn" aria-label="Menu">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main" id="mainContent">
+            <!-- Home View -->
+            <section id="homeView" class="view active">
+                <div class="app-content">
+                    <div class="welcome-section">
+                        <h2>Welcome to WanderLog</h2>
+                        <p>Your personal travel companion for discovering and logging amazing places.</p>
+                        
+                        <div class="action-cards">
+                            <div class="card card-clickable" id="exploreCard">
+                                <div class="card-body">
+                                    <h3>🗺️ Explore</h3>
+                                    <p>Discover new places and attractions</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card card-clickable" id="logCard">
+                                <div class="card-body">
+                                    <h3>📝 Log Journey</h3>
+                                    <p>Record your travel experiences</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card card-clickable" id="favoritesCard">
+                                <div class="card-body">
+                                    <h3>⭐ Favorites</h3>
+                                    <p>View your saved places</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Explore View -->
+            <section id="exploreView" class="view">
+                <div class="app-content">
+                    <h2>Explore Places</h2>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search for places...">
+                    </div>
+                    <div id="exploreResults" class="places-grid">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Log View -->
+            <section id="logView" class="view">
+                <div class="app-content">
+                    <h2>Log Your Journey</h2>
+                    <form id="logForm" class="log-form">
+                        <div class="form-group">
+                            <label for="placeInput">Place</label>
+                            <input type="text" id="placeInput" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="notesInput">Notes</label>
+                            <textarea id="notesInput" class="form-input" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="ratingInput">Rating</label>
+                            <select id="ratingInput" class="form-input">
+                                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                <option value="4">⭐⭐⭐⭐ Very Good</option>
+                                <option value="3">⭐⭐⭐ Good</option>
+                                <option value="2">⭐⭐ Fair</option>
+                                <option value="1">⭐ Poor</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-btn full-width">Save Entry</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Favorites View -->
+            <section id="favoritesView" class="view">
+                <div class="app-content">
+                    <h2>Your Favorites</h2>
+                    <div id="favoritesList" class="favorites-list">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="home">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span>Home</span>
+            </button>
+            
+            <button class="nav-item" data-view="explore">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <span>Explore</span>
+            </button>
+            
+            <button class="nav-item" data-view="log">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Log</span>
+            </button>
+            
+            <button class="nav-item" data-view="favorites">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span>Favorites</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Development helper - clear service workers and cache in dev mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const devScript = document.createElement('script');
+            devScript.src = './js/dev-helper.js';
+            document.head.appendChild(devScript);
+        }
+        
+        // Only load service worker registration in production
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const script = document.createElement('script');
+            script.src = './js/sw-register.js';
+            document.head.appendChild(script);
+        } else {
+            console.log('Development mode: Service worker registration skipped');
+        }
+    </script>
+    <script src="./js/app.js" type="module"></script>
+</body>
+</html>

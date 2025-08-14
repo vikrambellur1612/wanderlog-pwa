@@ -1,0 +1,32 @@
+{
+  "name": "wanderlog-pwa",
+  "version": "1.0.0",
+  "description": "A Progressive Web App for travel logging and exploration",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite",
+    "test": "vitest"
+  },
+  "keywords": [
+    "pwa",
+    "travel",
+    "wanderlog",
+    "progressive web app",
+    "offline",
+    "mobile-first"
+  ],
+  "author": "vikrambellur1612",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vite-plugin-pwa": "^0.20.0",
+    "@vite-pwa/assets-generator": "^0.2.4"
+  },
+  "dependencies": {
+    "workbox-window": "^7.1.0"
+  }
+}
