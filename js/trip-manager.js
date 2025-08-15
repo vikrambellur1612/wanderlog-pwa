@@ -39,6 +39,7 @@ class TripManager {
       endDate: tripData.endDate,
       places: [],
       itinerary: [], // Array of daily itinerary objects
+      accommodations: [], // Array of accommodation bookings
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -304,6 +305,157 @@ class TripManager {
     if (!trip || !trip.itinerary) return null;
 
     return trip.itinerary.find(item => item.date === date) || null;
+  }
+
+  // ===== ACCOMMODATION MANAGEMENT =====
+
+  // Add accommodation to the trip
+  addAccommodation(tripId, accommodationData) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return null;
+
+    const accommodation = {
+      id: Date.now(),
+      name: accommodationData.name,
+      type: accommodationData.type, // 'hotel', 'custom'
+      location: accommodationData.location, // { city, state }
+      checkIn: accommodationData.checkIn,
+      checkOut: accommodationData.checkOut,
+      hotelData: accommodationData.hotelData || null, // Full hotel info if from service
+      customDetails: accommodationData.customDetails || null, // Custom details if user-added
+      notes: accommodationData.notes || '',
+      createdAt: new Date().toISOString()
+    };
+
+    if (!trip.accommodations) {
+      trip.accommodations = [];
+    }
+
+    trip.accommodations.push(accommodation);
+    this.updateTrip(tripId, { accommodations: trip.accommodations });
+
+    // If dates are provided, also update daily itinerary
+    if (accommodationData.checkIn && accommodationData.checkOut) {
+      this.updateItineraryWithAccommodation(tripId, accommodation);
+    }
+
+    return accommodation;
+  }
+
+  // Update accommodation
+  updateAccommodation(tripId, accommodationId, updates) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.accommodations) return null;
+
+    const accommodationIndex = trip.accommodations.findIndex(acc => acc.id === accommodationId);
+    if (accommodationIndex !== -1) {
+      const oldAccommodation = trip.accommodations[accommodationIndex];
+      trip.accommodations[accommodationIndex] = {
+        ...oldAccommodation,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+
+      this.updateTrip(tripId, { accommodations: trip.accommodations });
+
+      // Update itinerary if dates changed
+      const newAccommodation = trip.accommodations[accommodationIndex];
+      if (newAccommodation.checkIn && newAccommodation.checkOut) {
+        this.updateItineraryWithAccommodation(tripId, newAccommodation, oldAccommodation);
+      }
+
+      return trip.accommodations[accommodationIndex];
+    }
+    return null;
+  }
+
+  // Remove accommodation
+  removeAccommodation(tripId, accommodationId) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.accommodations) return false;
+
+    const accommodationIndex = trip.accommodations.findIndex(acc => acc.id === accommodationId);
+    if (accommodationIndex !== -1) {
+      const accommodation = trip.accommodations[accommodationIndex];
+      trip.accommodations.splice(accommodationIndex, 1);
+      this.updateTrip(tripId, { accommodations: trip.accommodations });
+
+      // Remove from itinerary
+      this.removeAccommodationFromItinerary(tripId, accommodation);
+      return true;
+    }
+    return false;
+  }
+
+  // Get accommodations for trip
+  getAccommodations(tripId) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.accommodations) return [];
+    return trip.accommodations;
+  }
+
+  // Update itinerary with accommodation info
+  updateItineraryWithAccommodation(tripId, accommodation, oldAccommodation = null) {
+    const trip = this.getTrip(tripId);
+    if (!trip) return;
+
+    // Remove old accommodation from itinerary if dates changed
+    if (oldAccommodation && oldAccommodation.checkIn && oldAccommodation.checkOut) {
+      this.removeAccommodationFromItinerary(tripId, oldAccommodation);
+    }
+
+    // Add accommodation to all dates between check-in and check-out
+    const checkInDate = new Date(accommodation.checkIn);
+    const checkOutDate = new Date(accommodation.checkOut);
+    const currentDate = new Date(checkInDate);
+
+    while (currentDate < checkOutDate) {
+      const dateString = currentDate.toISOString().split('T')[0];
+      let dayItinerary = this.getDailyItinerary(tripId, dateString);
+
+      if (!dayItinerary) {
+        // Create new day itinerary
+        this.addDailyItinerary(tripId, {
+          date: dateString,
+          place: accommodation.location,
+          accommodation: accommodation,
+          attractions: [],
+          customAttractions: []
+        });
+      } else {
+        // Update existing day itinerary
+        this.updateDailyItinerary(tripId, dayItinerary.id, {
+          accommodation: accommodation
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+
+  // Remove accommodation from itinerary
+  removeAccommodationFromItinerary(tripId, accommodation) {
+    const trip = this.getTrip(tripId);
+    if (!trip || !trip.itinerary) return;
+
+    if (accommodation.checkIn && accommodation.checkOut) {
+      const checkInDate = new Date(accommodation.checkIn);
+      const checkOutDate = new Date(accommodation.checkOut);
+      const currentDate = new Date(checkInDate);
+
+      while (currentDate < checkOutDate) {
+        const dateString = currentDate.toISOString().split('T')[0];
+        const dayItinerary = this.getDailyItinerary(tripId, dateString);
+
+        if (dayItinerary && dayItinerary.accommodation && dayItinerary.accommodation.id === accommodation.id) {
+          this.updateDailyItinerary(tripId, dayItinerary.id, {
+            accommodation: null
+          });
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
   }
 
   // Get all attractions for a specific place (for dropdown in itinerary form)

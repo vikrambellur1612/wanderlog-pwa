@@ -459,16 +459,16 @@ class TripUI {
             </div>
           </div>
 
-          <!-- Accommodation Section (Coming Soon) -->
-          <div class="trip-section">
+          <!-- Accommodation Section -->
+          <div class="trip-section accommodation-section">
             <div class="section-header">
               <h2 class="section-title">🏨 Accommodation</h2>
-              <p class="section-subtitle">Coming Soon - Manage your stay details</p>
+              <button class="btn-add-accommodation" onclick="openAccommodationModal()">
+                <span>+</span> Add Accommodation
+              </button>
             </div>
-            <div class="coming-soon-placeholder">
-              <div class="coming-soon-icon">🚧</div>
-              <h3>Feature Under Development</h3>
-              <p>Soon you'll be able to add and manage accommodation details for each destination.</p>
+            <div id="accommodationContainer">
+              ${this.renderAccommodationList()}
             </div>
           </div>
         </div>
@@ -1578,7 +1578,24 @@ class TripUI {
             <div class="day-accommodation">
               <h4 class="accommodation-heading">🏨 Accommodation</h4>
               <div class="accommodation-info">
-                <span class="accommodation-location">${item.accommodation}</span>
+                ${typeof item.accommodation === 'object' ? `
+                  <div class="accommodation-details">
+                    <strong>${item.accommodation.name}</strong>
+                    <p>${item.accommodation.location.city}, ${item.accommodation.location.state}</p>
+                    ${item.accommodation.hotelData ? `
+                      <div class="hotel-rating">
+                        <span class="rating-stars">${'★'.repeat(Math.floor(item.accommodation.hotelData.rating))}</span>
+                        <span class="rating-text">${item.accommodation.hotelData.rating}/5</span>
+                      </div>
+                      <p><em>${item.accommodation.hotelData.category}</em></p>
+                    ` : ''}
+                    ${item.accommodation.customDetails ? `
+                      <p><em>${item.accommodation.customDetails.category}</em></p>
+                    ` : ''}
+                  </div>
+                ` : `
+                  <span class="accommodation-location">${item.accommodation}</span>
+                `}
               </div>
             </div>
           ` : ''}
@@ -1831,18 +1848,43 @@ class TripUI {
       <div class="attractions-grid">
         ${attractions.map((attraction, index) => {
           const isAlreadySelected = selectedAttractionsOtherDays.has(attraction.name);
-          const cardClass = isAlreadySelected ? 'attraction-card disabled' : 'attraction-card';
-          const onClickHandler = isAlreadySelected ? '' : 'onclick="tripUI.addSelectedAttraction(this)"';
+          
+          // Check if this attraction is selected in current modal session
+          const selectedContainer = document.getElementById('unifiedSelectedContainer');
+          let isSelectedInSession = false;
+          if (selectedContainer) {
+            const sessionItems = selectedContainer.querySelectorAll('.selected-item[data-attraction-type="existing"]');
+            isSelectedInSession = Array.from(sessionItems).some(item => 
+              item.dataset.attractionName === attraction.name
+            );
+          }
+          
+          let cardClass = 'attraction-card';
+          let onClickHandler = 'onclick="tripUI.addSelectedAttraction(this)"';
+          let iconClass = 'fas fa-plus';
+          let statusLabel = '';
+          
+          if (isAlreadySelected) {
+            cardClass += ' disabled';
+            onClickHandler = '';
+            iconClass = 'fas fa-check';
+            statusLabel = '<div class="already-selected-label">Already selected for another day</div>';
+          } else if (isSelectedInSession) {
+            cardClass += ' selected-in-session';
+            onClickHandler = '';
+            iconClass = 'fas fa-check';
+            statusLabel = '<div class="session-selected-label">Selected for this day</div>';
+          }
           
           return `
             <div class="${cardClass}" data-attraction='${JSON.stringify(attraction)}' ${onClickHandler}>
               <div class="attraction-card-content">
                 <div class="attraction-name">${attraction.name}</div>
                 <div class="attraction-desc">${attraction.description}</div>
-                ${isAlreadySelected ? '<div class="already-selected-label">Already selected for another day</div>' : ''}
+                ${statusLabel}
               </div>
               <div class="attraction-add-btn">
-                <i class="fas fa-${isAlreadySelected ? 'check' : 'plus'}"></i>
+                <i class="${iconClass}"></i>
               </div>
             </div>
           `;
@@ -1944,8 +1986,8 @@ class TripUI {
     
     selectedContainer.appendChild(selectedItem);
     
-    // Hide the card in available list
-    card.style.display = 'none';
+    // Refresh the attractions list to update visual states
+    this.updateAttractionsList();
   }
   
   // Remove selected attraction
@@ -1959,12 +2001,9 @@ class TripUI {
     // Remove from selected list
     selectedItem.remove();
     
-    // If it's an existing attraction, show it back in available list
+    // Refresh the attractions list to update visual states if it's an existing attraction
     if (attractionType === 'existing') {
-      const hiddenCard = availableList.querySelector(`[data-attraction*='"name":"${attractionName}"']`);
-      if (hiddenCard) {
-        hiddenCard.style.display = 'block';
-      }
+      this.updateAttractionsList();
     }
     
     // Show no selections message if empty
@@ -1975,7 +2014,7 @@ class TripUI {
 
   // Select/Deselect all attractions
   selectAllAttractions() {
-    const availableCards = document.querySelectorAll('#availableAttractionsList .attraction-card:not([style*="display: none"])');
+    const availableCards = document.querySelectorAll('#availableAttractionsList .attraction-card:not(.disabled):not(.selected-in-session)');
     availableCards.forEach(card => this.addSelectedAttraction(card));
   }
 
@@ -2073,6 +2112,105 @@ class TripUI {
     this.showItineraryModal(itinerary);
   }
 
+  // ===== ACCOMMODATION FUNCTIONS =====
+
+  // Render accommodation list
+  renderAccommodationList() {
+    const trip = this.getCurrentTrip();
+    if (!trip) return this.renderEmptyAccommodations();
+
+    const accommodations = this.tripManager.getAccommodations(this.currentTripId);
+    if (!accommodations || accommodations.length === 0) {
+      return this.renderEmptyAccommodations();
+    }
+
+    return `
+      <div class="accommodation-list">
+        ${accommodations.map(accommodation => this.renderAccommodationCard(accommodation)).join('')}
+      </div>
+    `;
+  }
+
+  // Render empty accommodations state
+  renderEmptyAccommodations() {
+    return `
+      <div class="empty-accommodations">
+        <div class="icon">🏨</div>
+        <h4>No accommodations added yet</h4>
+        <p>Add hotels, resorts, or other accommodations for your trip</p>
+        <button class="btn-add-accommodation" onclick="openAccommodationModal()">
+          <span>+</span> Add Your First Accommodation
+        </button>
+      </div>
+    `;
+  }
+
+  // Render accommodation card
+  renderAccommodationCard(accommodation) {
+    const checkInDate = new Date(accommodation.checkIn).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+    const checkOutDate = new Date(accommodation.checkOut).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short', 
+      day: 'numeric'
+    });
+
+    const isHotel = accommodation.type === 'hotel' && accommodation.hotelData;
+    const isCustom = accommodation.type === 'custom' && accommodation.customDetails;
+
+    return `
+      <div class="accommodation-card">
+        <div class="accommodation-header">
+          <h4>${accommodation.name}</h4>
+          <span class="accommodation-type">${isHotel ? 'Hotel' : 'Custom'}</span>
+        </div>
+        
+        <div class="accommodation-details">
+          ${isHotel ? `
+            <p><strong>Location:</strong> ${accommodation.hotelData.area}, ${accommodation.location.city}</p>
+            <div class="hotel-rating">
+              <span class="rating-stars">${'★'.repeat(Math.floor(accommodation.hotelData.rating))}</span>
+              <span class="rating-text">${accommodation.hotelData.rating}/5</span>
+            </div>
+            <p><strong>Category:</strong> ${accommodation.hotelData.category}</p>
+          ` : ''}
+          
+          ${isCustom ? `
+            <p><strong>Location:</strong> ${accommodation.location.city}, ${accommodation.location.state}</p>
+            <p><strong>Category:</strong> ${accommodation.customDetails.category}</p>
+            ${accommodation.customDetails.address ? `<p><strong>Address:</strong> ${accommodation.customDetails.address}</p>` : ''}
+          ` : ''}
+          
+          ${accommodation.notes ? `<p><strong>Notes:</strong> ${accommodation.notes}</p>` : ''}
+        </div>
+
+        <div class="accommodation-dates">
+          <strong>Stay Duration:</strong> ${checkInDate} → ${checkOutDate}
+        </div>
+
+        <div class="accommodation-actions">
+          <button class="btn-secondary" onclick="editAccommodation(${accommodation.id})">
+            ✏️ Edit
+          </button>
+          <button class="btn-secondary" onclick="removeAccommodation(${accommodation.id})">
+            🗑️ Remove
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Refresh accommodation list
+  refreshAccommodationList() {
+    const container = document.getElementById('accommodationContainer');
+    if (container) {
+      container.innerHTML = this.renderAccommodationList();
+    }
+  }
+
   // Delete itinerary item
   deleteItineraryItem(itineraryId) {
     const trip = this.getCurrentTrip();
@@ -2097,6 +2235,822 @@ class TripUI {
       return this.tripManager.getTrip(this.currentTripId);
     }
     return null;
+  }
+}
+
+// ===== GLOBAL ACCOMMODATION MODAL FUNCTIONS =====
+
+// Open accommodation modal
+function openAccommodationModal(accommodationId = null) {
+  const modal = document.getElementById('accommodationModal');
+  if (!modal) return;
+  
+  // Reset form
+  document.getElementById('accommodationForm').reset();
+  
+  // Reset global states
+  selectedHotelData = null;
+  confirmedHotelData = null;
+  
+  // Set modal title
+  const title = document.getElementById('accommodationModalTitle');
+  title.textContent = accommodationId ? 'Edit Accommodation' : 'Add Accommodation';
+  
+  // Populate location dropdown with trip places
+  populateAccommodationLocations();
+  
+  // Set date restrictions based on trip dates
+  setAccommodationDateRestrictions();
+  
+  // Reset hotel search interface
+  resetHotelSearch();
+  
+  // If editing, populate form with existing data
+  if (accommodationId && window.tripUI) {
+    populateAccommodationForm(accommodationId);
+  }
+  
+  modal.classList.remove('hidden');
+}
+
+// Close accommodation modal
+function closeAccommodationModal() {
+  const modal = document.getElementById('accommodationModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// Populate location dropdown
+function populateAccommodationLocations() {
+  if (!window.tripUI) return;
+  
+  const trip = window.tripUI.getCurrentTrip();
+  if (!trip) return;
+  
+  const locationSelect = document.getElementById('accommodationLocation');
+  locationSelect.innerHTML = '<option value="">Select location...</option>';
+  
+  // Add trip places to dropdown
+  trip.places.forEach(place => {
+    const option = document.createElement('option');
+    option.value = JSON.stringify({ city: place.city, state: place.state });
+    option.textContent = `${place.city}, ${place.state}`;
+    locationSelect.appendChild(option);
+  });
+}
+
+// Set date restrictions based on trip dates
+function setAccommodationDateRestrictions() {
+  if (!window.tripUI) return;
+  
+  const trip = window.tripUI.getCurrentTrip();
+  if (!trip) return;
+  
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  
+  checkInInput.min = trip.startDate;
+  checkInInput.max = trip.endDate;
+  checkOutInput.min = trip.startDate;
+  checkOutInput.max = trip.endDate;
+}
+
+// Handle accommodation modal events
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('hotelSearchInput');
+  const fetchBtn = document.getElementById('fetchHotelDetailsBtn');
+  
+  if (fetchBtn && searchInput) {
+    fetchBtn.addEventListener('click', function() {
+      performHotelFetch();
+    });
+    
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performHotelFetch();
+      }
+    });
+  }
+  
+  // Handle confirmation buttons
+  const confirmBtn = document.getElementById('confirmHotelBtn');
+  const changeBtn = document.getElementById('changeHotelBtn');
+  const editBtn = document.getElementById('editHotelBtn');
+  
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', function() {
+      confirmHotelSelection();
+    });
+  }
+  
+  if (changeBtn) {
+    changeBtn.addEventListener('click', function() {
+      backToSearch();
+    });
+  }
+  
+  if (editBtn) {
+    editBtn.addEventListener('click', function() {
+      editHotelSelection();
+    });
+  }
+  
+  // Handle check-in date change to set minimum check-out date
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  
+  if (checkInInput && checkOutInput) {
+    checkInInput.addEventListener('change', function() {
+      const checkInDate = new Date(this.value);
+      checkInDate.setDate(checkInDate.getDate() + 1); // Minimum 1 night stay
+      checkOutInput.min = checkInDate.toISOString().split('T')[0];
+      
+      // Clear check-out if it's before new minimum
+      if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(this.value)) {
+        checkOutInput.value = '';
+      }
+    });
+  }
+});
+
+// Global state for selected hotel
+let selectedHotelData = null;
+let confirmedHotelData = null;
+
+// Perform hotel fetch based on location and name
+async function performHotelFetch() {
+  const searchInput = document.getElementById('hotelSearchInput');
+  const locationSelect = document.getElementById('accommodationLocation');
+  const query = searchInput.value.trim();
+  const locationValue = locationSelect.value;
+  
+  if (!query || query.length < 2) {
+    showSearchError('Please enter at least 2 characters for hotel name');
+    return;
+  }
+  
+  if (!locationValue) {
+    showSearchError('Please select a location first');
+    return;
+  }
+  
+  // Show loading state
+  showFetchLoading();
+  
+  // Parse location
+  const location = JSON.parse(locationValue);
+  
+  try {
+    // Only use web search - no internal database fallback
+    let searchResult;
+    
+    if (window.webHotelSearchService) {
+      // Try web search only
+      searchResult = await window.webHotelSearchService.searchHotelDetails(query, location);
+    } else {
+      throw new Error('Web hotel search service not available');
+    }
+    
+    displayEnhancedFetchResults(searchResult, query, location);
+    
+  } catch (error) {
+    console.error('Hotel search error:', error);
+    showSearchError('Error searching for hotels online. Please try again or enter details manually.');
+    showManualEntryOption(query, location);
+  }
+}
+
+// Show fetch loading state
+function showFetchLoading() {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  const manualSection = document.getElementById('manualEntrySection');
+  
+  // Hide manual entry section
+  manualSection.classList.add('hidden');
+  
+  resultsList.innerHTML = `
+    <div class="search-loading">
+      <div style="text-align: center; padding: 20px; color: #666;">
+        🔍 Searching hotels online...
+        <div style="margin-top: 8px; font-size: 0.875rem;">
+          This may take a few seconds
+        </div>
+      </div>
+    </div>
+  `;
+  
+  resultsContainer.classList.remove('hidden');
+}
+
+// Display enhanced fetch results with web search capability
+function displayEnhancedFetchResults(searchResult, query, location) {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  
+  if (!searchResult.success) {
+    // No results found - show message and manual entry option
+    resultsList.innerHTML = `
+      <div class="search-info-message">
+        🔍 No hotels found online for "${query}" in ${location.city}, ${location.state}.
+        <div style="margin-top: 8px; font-size: 0.875rem;">
+          This could mean the hotel doesn't have an online presence or the name doesn't match exactly.
+        </div>
+      </div>
+    `;
+    
+    showManualEntryOption(query, location);
+    
+  } else if (searchResult.results.length === 1) {
+    // Auto-select if only one result
+    const hotel = searchResult.results[0];
+    selectHotelFromResults(encodeURIComponent(JSON.stringify(hotel)));
+    
+    // Show success message
+    resultsList.innerHTML = `
+      <div class="search-success-message">
+        ✅ Found "${hotel.name}" online! Hotel details have been loaded automatically.
+        <div style="margin-top: 4px; font-size: 0.8rem;">Source: Internet Search</div>
+      </div>
+    `;
+    
+    setTimeout(() => {
+      resultsContainer.classList.add('hidden');
+    }, 2000);
+    
+  } else {
+    // Multiple results - let user choose
+    resultsList.innerHTML = `
+      <div class="search-success-message">
+        Found ${searchResult.results.length} hotels online matching "${query}" in ${location.city}. Please select the correct hotel:
+      </div>
+      ${searchResult.results.map(hotel => `
+        <div class="hotel-result-item" onclick="selectHotelFromResults('${encodeURIComponent(JSON.stringify(hotel))}')">
+          <div class="hotel-result-name">${hotel.name}</div>
+          <div class="hotel-result-details">
+            ${hotel.address}
+            <span style="color: #059669; font-weight: 500;"> ✓ Found Online</span>
+          </div>
+          <div class="hotel-result-rating">
+            <span class="rating-stars">${'★'.repeat(Math.floor(hotel.rating))}</span>
+            <span>${hotel.rating}/5</span>
+            <span style="margin-left: 10px; font-weight: 500;">${hotel.category}</span>
+            ${hotel.priceRange ? `<span style="margin-left: 10px; color: #059669;">₹${hotel.priceRange.min}-${hotel.priceRange.max}/night</span>` : ''}
+          </div>
+        </div>
+      `).join('')}
+      <div class="manual-entry-option">
+        <p style="margin: 0; color: #666; font-size: 0.875rem;">
+          Don't see the right hotel? 
+        </p>
+        <button type="button" onclick="showManualEntryForm('${query}', '${encodeURIComponent(JSON.stringify(location))}')" class="btn-secondary">
+          📝 Add Hotel Details Manually
+        </button>
+      </div>
+    `;
+  }
+  
+  resultsContainer.classList.remove('hidden');
+}
+
+// Show manual entry option when no hotels found
+function showManualEntryOption(query, location) {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  
+  resultsList.innerHTML += `
+    <div class="manual-entry-option">
+      <p style="margin: 0 0 8px 0; color: #666; font-size: 0.875rem;">
+        🏨 Hotel not found online? No problem!
+      </p>
+      <p style="margin: 0 0 12px 0; color: #666; font-size: 0.8rem;">
+        You can add the hotel details manually and we'll save them for your trip.
+      </p>
+      <button type="button" onclick="showManualEntryForm('${query}', '${encodeURIComponent(JSON.stringify(location))}')" class="btn-primary">
+        📝 Add Hotel Details Manually
+      </button>
+    </div>
+  `;
+}
+
+// Show manual entry form
+function showManualEntryForm(hotelName, encodedLocation) {
+  const manualSection = document.getElementById('manualEntrySection');
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const location = JSON.parse(decodeURIComponent(encodedLocation));
+  
+  // Pre-fill hotel name
+  document.getElementById('manualHotelName').value = hotelName || '';
+  
+  // Pre-fill location in address if available
+  const addressField = document.getElementById('manualHotelAddress');
+  if (location.city && location.state) {
+    addressField.placeholder = `Enter address in ${location.city}, ${location.state}`;
+  }
+  
+  // Clear other fields
+  document.getElementById('manualHotelCategory').value = '';
+  document.getElementById('manualHotelAddress').value = '';
+  document.getElementById('manualHotelPhone').value = '';
+  document.getElementById('manualHotelEmail').value = '';
+  document.getElementById('manualHotelWebsite').value = '';
+  document.getElementById('manualHotelNotes').value = '';
+  
+  // Hide search results and show manual form
+  resultsContainer.classList.add('hidden');
+  manualSection.classList.remove('hidden');
+  
+  // Set up event handlers
+  setupManualEntryHandlers(location);
+}
+
+// Set up manual entry event handlers
+function setupManualEntryHandlers(location) {
+  const confirmBtn = document.getElementById('confirmManualHotelBtn');
+  const cancelBtn = document.getElementById('cancelManualEntryBtn');
+  
+  // Remove existing listeners
+  confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+  cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+  
+  // Add new listeners
+  document.getElementById('confirmManualHotelBtn').addEventListener('click', () => {
+    confirmManualHotelEntry(location);
+  });
+  
+  document.getElementById('cancelManualEntryBtn').addEventListener('click', () => {
+    hideManualEntryForm();
+  });
+}
+
+// Confirm manual hotel entry
+function confirmManualHotelEntry(location) {
+  const hotelName = document.getElementById('manualHotelName').value.trim();
+  const category = document.getElementById('manualHotelCategory').value;
+  const address = document.getElementById('manualHotelAddress').value.trim();
+  const phone = document.getElementById('manualHotelPhone').value.trim();
+  const email = document.getElementById('manualHotelEmail').value.trim();
+  const website = document.getElementById('manualHotelWebsite').value.trim();
+  const notes = document.getElementById('manualHotelNotes').value.trim();
+  
+  if (!hotelName) {
+    alert('Please enter the hotel name');
+    return;
+  }
+  
+  // Create hotel object from manual entry
+  const manualHotel = {
+    id: 'manual_' + Date.now(),
+    name: hotelName,
+    city: location.city,
+    state: location.state,
+    source: 'manual_entry',
+    category: category || 'Mid-Range',
+    rating: 'N/A',
+    address: address || `${location.city}, ${location.state}`,
+    phone: phone || 'Not provided',
+    email: email || 'Not provided',
+    website: website || 'Not provided',
+    notes: notes || '',
+    amenities: ['Manual Entry - Amenities not specified'],
+    description: `Manually added hotel in ${location.city}`,
+    lastUpdated: new Date().toISOString(),
+    dataConfidence: 'manual'
+  };
+  
+  // Process the manual hotel entry
+  selectHotelFromResults(encodeURIComponent(JSON.stringify(manualHotel)));
+  
+  // Hide manual entry form
+  hideManualEntryForm();
+  
+  // Show confirmation
+  showManualEntryConfirmation(hotelName);
+}
+
+// Hide manual entry form
+function hideManualEntryForm() {
+  const manualSection = document.getElementById('manualEntrySection');
+  manualSection.classList.add('hidden');
+}
+
+// Show confirmation for manual entry
+function showManualEntryConfirmation(hotelName) {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  
+  resultsList.innerHTML = `
+    <div class="search-success-message">
+      ✅ Hotel "${hotelName}" has been added manually! Details have been saved.
+      <div style="margin-top: 4px; font-size: 0.8rem;">You can edit these details anytime in your trip.</div>
+    </div>
+  `;
+  
+  resultsContainer.classList.remove('hidden');
+  
+  setTimeout(() => {
+    resultsContainer.classList.add('hidden');
+  }, 3000);
+}
+
+// Display fetch results
+function displayFetchResults(results, query, location) {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  
+  if (results.length === 0) {
+    resultsList.innerHTML = `
+      <div class="no-results-message">
+        No hotels found for "${query}" in ${location.city}. Try a different hotel name or check spelling.
+      </div>
+    `;
+  } else if (results.length === 1) {
+    // Auto-select if only one result
+    selectHotelFromResults(encodeURIComponent(JSON.stringify(results[0])));
+    resultsContainer.classList.add('hidden');
+  } else {
+    resultsList.innerHTML = `
+      <p style="margin-bottom: 15px; color: #666; font-size: 0.9rem;">
+        Found ${results.length} matches for "${query}". Please select the correct hotel:
+      </p>
+      ${results.map(hotel => `
+        <div class="hotel-result-item" onclick="selectHotelFromResults('${encodeURIComponent(JSON.stringify(hotel))}')">
+          <div class="hotel-result-name">${hotel.name}</div>
+          <div class="hotel-result-details">
+            ${hotel.address}
+            ${hotel.isFromOtherCity ? `<span style="color: #e53e3e; font-weight: 500;"> (Different City: ${hotel.city})</span>` : ''}
+          </div>
+          <div class="hotel-result-rating">
+            <span class="rating-stars">${'★'.repeat(Math.floor(hotel.rating))}</span>
+            <span>${hotel.rating}/5</span>
+            <span style="margin-left: 10px; font-weight: 500;">${hotel.category}</span>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+  
+  resultsContainer.classList.remove('hidden');
+}
+
+// Select hotel from search results
+function selectHotelFromResults(encodedHotelData) {
+  const hotel = JSON.parse(decodeURIComponent(encodedHotelData));
+  selectedHotelData = hotel;
+  
+  // Highlight selected item (only if called from search results)
+  const resultItems = document.querySelectorAll('.hotel-result-item');
+  if (resultItems.length > 0) {
+    resultItems.forEach(item => {
+      item.classList.remove('selected');
+    });
+    
+    // Simple highlighting based on hotel name
+    resultItems.forEach(item => {
+      const itemName = item.querySelector('.hotel-result-name')?.textContent;
+      if (itemName === hotel.name) {
+        item.classList.add('selected');
+      }
+    });
+  }
+  
+  // Show hotel details for confirmation
+  showHotelDetailsForConfirmation(hotel);
+}
+
+// Show hotel details for confirmation
+function showHotelDetailsForConfirmation(hotel) {
+  // Update hotel name (with safety check)
+  const nameElement = document.getElementById('selectedHotelName');
+  if (nameElement) nameElement.textContent = hotel.name;
+  
+  // Handle different data sources and formats
+  const locationText = hotel.address || (hotel.area ? `${hotel.area}, ${hotel.city}` : `${hotel.city}, ${hotel.state || ''}`);
+  const locationElement = document.getElementById('selectedHotelLocation');
+  if (locationElement) locationElement.textContent = locationText;
+  
+  // Handle rating display (could be number or 'N/A' for manual entries)
+  const ratingElement = document.getElementById('selectedHotelRating');
+  const ratingTextElement = document.getElementById('selectedHotelRatingText');
+  
+  if (hotel.rating && hotel.rating !== 'N/A') {
+    if (ratingElement) ratingElement.textContent = '★'.repeat(Math.floor(hotel.rating));
+    if (ratingTextElement) ratingTextElement.textContent = `${hotel.rating}/5`;
+  } else {
+    if (ratingElement) ratingElement.textContent = '';
+    if (ratingTextElement) ratingTextElement.textContent = hotel.rating === 'N/A' ? 'Rating: Not available' : 'Rating: Not specified';
+  }
+  
+  const categoryElement = document.getElementById('selectedHotelCategory');
+  if (categoryElement) categoryElement.textContent = hotel.category || 'Category not specified';
+  
+  // Show enhanced additional details
+  const additionalDetails = document.getElementById('selectedHotelDetails');
+  let detailsHtml = '';
+  
+  // Data source indicator
+  if (hotel.source) {
+    const sourceLabels = {
+      'web_search': '🌐 Found Online',
+      'internal': '💾 From Database',
+      'manual_entry': '✏️ Manually Added'
+    };
+    const sourceLabel = sourceLabels[hotel.source] || hotel.source;
+    detailsHtml += `<p style="color: #059669; font-weight: 500; margin-bottom: 12px;"><strong>Source:</strong> ${sourceLabel}</p>`;
+  }
+  
+  if (hotel.address) {
+    detailsHtml += `<p><strong>Address:</strong> ${hotel.address}</p>`;
+  }
+  
+  if (hotel.phone && hotel.phone !== 'Not provided') {
+    detailsHtml += `<p><strong>Phone:</strong> ${hotel.phone}</p>`;
+  }
+  
+  if (hotel.email && hotel.email !== 'Not provided') {
+    detailsHtml += `<p><strong>Email:</strong> ${hotel.email}</p>`;
+  }
+  
+  if (hotel.website && hotel.website !== 'Not provided') {
+    detailsHtml += `<p><strong>Website:</strong> <a href="${hotel.website.startsWith('http') ? hotel.website : 'https://' + hotel.website}" target="_blank">${hotel.website}</a></p>`;
+  }
+  
+  // Price range for web search results
+  if (hotel.priceRange) {
+    detailsHtml += `<p><strong>Price Range:</strong> ₹${hotel.priceRange.min} - ₹${hotel.priceRange.max} ${hotel.priceRange.period}</p>`;
+  }
+  
+  if (hotel.description) {
+    detailsHtml += `<p><strong>Description:</strong> ${hotel.description}</p>`;
+  }
+  
+  if (hotel.amenities && hotel.amenities.length > 0) {
+    const amenitiesText = hotel.amenities.slice(0, 8).join(', ') + (hotel.amenities.length > 8 ? '...' : '');
+    detailsHtml += `<p><strong>Amenities:</strong> ${amenitiesText}</p>`;
+  }
+  
+  if (hotel.notes) {
+    detailsHtml += `<p><strong>Notes:</strong> ${hotel.notes}</p>`;
+  }
+  
+  const additionalDetailsElement = document.getElementById('selectedHotelDetails');
+  if (additionalDetailsElement) additionalDetailsElement.innerHTML = detailsHtml;
+  
+  const detailsDiv = document.getElementById('hotelDetails');
+  if (detailsDiv) detailsDiv.classList.remove('hidden');
+  
+  // Hide confirmed hotel display if visible
+  const confirmedDisplay = document.getElementById('confirmedHotelDisplay');
+  if (confirmedDisplay) confirmedDisplay.classList.add('hidden');
+}
+
+// Confirm hotel selection
+function confirmHotelSelection() {
+  if (!selectedHotelData) return;
+  
+  confirmedHotelData = selectedHotelData;
+  
+  // Update confirmed hotel display
+  const confirmedNameElement = document.getElementById('confirmedHotelName');
+  if (confirmedNameElement) confirmedNameElement.textContent = confirmedHotelData.name;
+  
+  // Create enhanced confirmed details text
+  let confirmedDetailsText = '';
+  if (confirmedHotelData.address) {
+    confirmedDetailsText = confirmedHotelData.address;
+  } else if (confirmedHotelData.area) {
+    confirmedDetailsText = `${confirmedHotelData.area}, ${confirmedHotelData.city}`;
+  } else {
+    confirmedDetailsText = `${confirmedHotelData.city}, ${confirmedHotelData.state || ''}`;
+  }
+  
+  // Add rating and category
+  if (confirmedHotelData.rating && confirmedHotelData.rating !== 'N/A') {
+    confirmedDetailsText += ` • ${confirmedHotelData.rating}/5 ⭐`;
+  }
+  confirmedDetailsText += ` • ${confirmedHotelData.category}`;
+  
+  // Add source indicator
+  if (confirmedHotelData.source === 'manual_entry') {
+    confirmedDetailsText += ' • Manually Added';
+  } else if (confirmedHotelData.source === 'web_search') {
+    confirmedDetailsText += ' • Found Online';
+  }
+  
+  const confirmedDetailsElement = document.getElementById('confirmedHotelDetails');
+  if (confirmedDetailsElement) confirmedDetailsElement.textContent = confirmedDetailsText;
+  
+  // Show confirmed state and hide others
+  const confirmedDisplay = document.getElementById('confirmedHotelDisplay');
+  const hotelDetails = document.getElementById('hotelDetails');
+  const searchResults = document.getElementById('hotelSearchResults');
+  
+  if (confirmedDisplay) confirmedDisplay.classList.remove('hidden');
+  if (hotelDetails) hotelDetails.classList.add('hidden');
+  if (searchResults) searchResults.classList.add('hidden');
+  
+  // Disable search input and button (with safety checks)
+  const hotelSearchInput = document.getElementById('hotelSearchInput');
+  const fetchHotelBtn = document.getElementById('fetchHotelDetailsBtn');
+  
+  if (hotelSearchInput) hotelSearchInput.disabled = true;
+  if (fetchHotelBtn) fetchHotelBtn.disabled = true;
+}
+
+// Edit hotel selection (back to search)
+function editHotelSelection() {
+  backToSearch();
+}
+
+// Back to search state
+function backToSearch() {
+  // Reset states
+  selectedHotelData = null;
+  confirmedHotelData = null;
+  
+  // Show search interface (with safety checks)
+  const hotelSearchInput = document.getElementById('hotelSearchInput');
+  const fetchHotelBtn = document.getElementById('fetchHotelDetailsBtn');
+  
+  if (hotelSearchInput) {
+    hotelSearchInput.disabled = false;
+    hotelSearchInput.focus();
+  }
+  if (fetchHotelBtn) fetchHotelBtn.disabled = false;
+  
+  // Hide confirmation states (with safety checks)
+  const hotelDetails = document.getElementById('hotelDetails');
+  const confirmedDisplay = document.getElementById('confirmedHotelDisplay');
+  
+  if (hotelDetails) hotelDetails.classList.add('hidden');
+  if (confirmedDisplay) confirmedDisplay.classList.add('hidden');
+  
+  // Clear search results
+  hideSearchResults();
+}
+
+// Reset hotel search state
+function resetHotelSearch() {
+  selectedHotelData = null;
+  confirmedHotelData = null;
+  
+  // Reset form elements
+  document.getElementById('hotelSearchInput').value = '';
+  document.getElementById('hotelSearchInput').disabled = false;
+  document.getElementById('fetchHotelDetailsBtn').disabled = false;
+  
+  // Hide all hotel-related sections
+  hideSearchResults();
+  hideHotelDetails();
+  document.getElementById('confirmedHotelDisplay').classList.add('hidden');
+}
+
+// Hide search results
+function hideSearchResults() {
+  document.getElementById('hotelSearchResults').classList.add('hidden');
+}
+
+// Hide hotel details
+function hideHotelDetails() {
+  document.getElementById('hotelDetails').classList.add('hidden');
+}
+
+// Show search error
+function showSearchError(message) {
+  const resultsContainer = document.getElementById('hotelSearchResults');
+  const resultsList = document.getElementById('hotelResultsList');
+  
+  resultsList.innerHTML = `
+    <div class="search-error" style="color: #e53e3e; text-align: center; padding: 15px;">
+      ⚠️ ${message}
+    </div>
+  `;
+  
+  resultsContainer.classList.remove('hidden');
+}
+
+// Handle accommodation form submission
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('accommodationForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveAccommodation();
+    });
+  }
+});
+
+// Save accommodation
+function saveAccommodation() {
+  if (!window.tripUI) return;
+  
+  const locationValue = document.getElementById('accommodationLocation').value;
+  const checkIn = document.getElementById('accommodationCheckIn').value;
+  const checkOut = document.getElementById('accommodationCheckOut').value;
+  const notes = document.getElementById('accommodationNotes').value;
+  
+  if (!locationValue || !checkIn || !checkOut) {
+    alert('Please fill in all required fields');
+    return;
+  }
+  
+  if (!confirmedHotelData) {
+    alert('Please fetch and confirm hotel details');
+    return;
+  }
+  
+  const location = JSON.parse(locationValue);
+  
+  let accommodationData = {
+    type: 'hotel',
+    location: location,
+    checkIn: checkIn,
+    checkOut: checkOut,
+    notes: notes,
+    name: confirmedHotelData.name,
+    hotelData: confirmedHotelData
+  };
+  
+  const result = window.tripUI.tripManager.addAccommodation(window.tripUI.currentTripId, accommodationData);
+  
+  if (result) {
+    closeAccommodationModal();
+    window.tripUI.refreshAccommodationList();
+    window.tripUI.refreshItineraryList(); // Refresh itinerary to show accommodation updates
+    alert('Accommodation added successfully!');
+  } else {
+    alert('Failed to add accommodation. Please try again.');
+  }
+}
+
+// Edit accommodation
+function editAccommodation(accommodationId) {
+  openAccommodationModal(accommodationId);
+}
+
+// Remove accommodation
+function removeAccommodation(accommodationId) {
+  if (!window.tripUI) return;
+  
+  if (confirm('Are you sure you want to remove this accommodation?')) {
+    const result = window.tripUI.tripManager.removeAccommodation(window.tripUI.currentTripId, accommodationId);
+    
+    if (result) {
+      window.tripUI.refreshAccommodationList();
+      window.tripUI.refreshItineraryList(); // Refresh itinerary to remove accommodation updates
+      alert('Accommodation removed successfully!');
+    } else {
+      alert('Failed to remove accommodation. Please try again.');
+    }
+  }
+}
+
+// Populate form for editing
+function populateAccommodationForm(accommodationId) {
+  const trip = window.tripUI.getCurrentTrip();
+  if (!trip) return;
+  
+  const accommodations = window.tripUI.tripManager.getAccommodations(window.tripUI.currentTripId);
+  const accommodation = accommodations.find(acc => acc.id === accommodationId);
+  
+  if (!accommodation) return;
+  
+  // Set location
+  document.getElementById('accommodationLocation').value = JSON.stringify(accommodation.location);
+  
+  // Set dates
+  document.getElementById('accommodationCheckIn').value = accommodation.checkIn;
+  document.getElementById('accommodationCheckOut').value = accommodation.checkOut;
+  
+  // Set notes
+  document.getElementById('accommodationNotes').value = accommodation.notes || '';
+  
+  // Set hotel details if available
+  if (accommodation.hotelData) {
+    // Set the search input with hotel name
+    document.getElementById('hotelSearchInput').value = accommodation.hotelData.name;
+    
+    // Set the confirmed hotel data
+    confirmedHotelData = accommodation.hotelData;
+    selectedHotelData = accommodation.hotelData;
+    
+    // Show confirmed hotel state
+    setTimeout(() => {
+      document.getElementById('confirmedHotelName').textContent = accommodation.hotelData.name;
+      
+      let detailsText = `${accommodation.hotelData.area}, ${accommodation.hotelData.city} • ${accommodation.hotelData.rating}/5 ⭐ • ${accommodation.hotelData.category}`;
+      if (accommodation.hotelData.address) {
+        detailsText += `\n${accommodation.hotelData.address}`;
+      }
+      
+      document.getElementById('confirmedHotelDetails').textContent = detailsText;
+      
+      document.getElementById('confirmedHotelDisplay').classList.remove('hidden');
+      document.getElementById('hotelSearchInput').disabled = true;
+      document.getElementById('fetchHotelDetailsBtn').disabled = true;
+    }, 100);
   }
 }
 

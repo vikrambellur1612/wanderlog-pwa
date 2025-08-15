@@ -491,6 +491,155 @@
         </div>
     </div>
 
+    <!-- Accommodation Modal -->
+    <div id="accommodationModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="accommodationModalTitle">Add Accommodation</h2>
+                <button class="modal-close" onclick="closeAccommodationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="accommodationForm">
+                    <div class="form-group">
+                        <label for="accommodationLocation">Location</label>
+                        <select id="accommodationLocation" class="form-input" required>
+                            <option value="">Select location...</option>
+                        </select>
+                    </div>
+
+                    <!-- Hotel Search Section -->
+                    <div class="form-group">
+                        <label for="hotelSearchInput">Hotel Name</label>
+                        <div class="search-input-container">
+                            <input type="text" id="hotelSearchInput" class="form-input" placeholder="Enter hotel name..." required>
+                            <button type="button" id="fetchHotelDetailsBtn" class="btn-search">🔍 Fetch Hotel Details</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div id="hotelSearchResults" class="hotel-search-results hidden">
+                        <h5>Hotel Search Results:</h5>
+                        <div id="hotelResultsList" class="hotel-results-list">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Entry Section -->
+                    <div id="manualEntrySection" class="manual-entry-section hidden">
+                        <div class="manual-entry-header">
+                            <h5>🏨 Add Hotel Details Manually</h5>
+                            <p>Enter hotel information manually since we couldn't find it online. Only hotel name is required:</p>
+                        </div>
+                        <div class="manual-entry-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualHotelName">Hotel Name *</label>
+                                    <input type="text" id="manualHotelName" class="form-input" placeholder="Enter hotel name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualHotelCategory">Category (Optional)</label>
+                                    <select id="manualHotelCategory" class="form-input">
+                                        <option value="">Select category...</option>
+                                        <option value="Luxury">Luxury</option>
+                                        <option value="Business">Business</option>
+                                        <option value="Mid-Range">Mid-Range</option>
+                                        <option value="Budget">Budget</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualHotelAddress">Address (Optional)</label>
+                                    <input type="text" id="manualHotelAddress" class="form-input" placeholder="Hotel address">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualHotelPhone">Phone (Optional)</label>
+                                    <input type="tel" id="manualHotelPhone" class="form-input" placeholder="Contact number">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualHotelEmail">Email (Optional)</label>
+                                    <input type="email" id="manualHotelEmail" class="form-input" placeholder="Hotel email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualHotelWebsite">Website (Optional)</label>
+                                    <input type="url" id="manualHotelWebsite" class="form-input" placeholder="Hotel website">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="manualHotelNotes">Additional Notes (Optional)</label>
+                                <textarea id="manualHotelNotes" class="form-input" rows="2" placeholder="Any additional information about the hotel..."></textarea>
+                            </div>
+                            <div class="manual-entry-actions">
+                                <button type="button" id="confirmManualHotelBtn" class="btn-primary">✓ Confirm Hotel Details</button>
+                                <button type="button" id="cancelManualEntryBtn" class="btn-secondary">↩ Search Again</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Hotel Details -->
+                    <div id="hotelDetails" class="hotel-details hidden">
+                        <div class="hotel-confirmation">
+                            <h5>Confirm Hotel Details:</h5>
+                            <div class="hotel-info">
+                                <h4 id="selectedHotelName"></h4>
+                                <p id="selectedHotelLocation"></p>
+                                <div class="hotel-rating">
+                                    <span class="rating-stars" id="selectedHotelRating"></span>
+                                    <span class="rating-text" id="selectedHotelRatingText"></span>
+                                </div>
+                                <p id="selectedHotelCategory"></p>
+                                <div id="selectedHotelDetails" class="hotel-additional-details">
+                                    <!-- Additional details will be shown here -->
+                                </div>
+                            </div>
+                            <div class="confirmation-actions">
+                                <button type="button" id="confirmHotelBtn" class="btn-primary">✓ Confirm Hotel</button>
+                                <button type="button" id="changeHotelBtn" class="btn-secondary">↩ Search Again</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confirmed Hotel Display -->
+                    <div id="confirmedHotelDisplay" class="confirmed-hotel hidden">
+                        <div class="confirmed-hotel-info">
+                            <h5>Selected Hotel:</h5>
+                            <div class="hotel-summary">
+                                <div class="hotel-summary-details">
+                                    <strong id="confirmedHotelName"></strong>
+                                    <p id="confirmedHotelDetails"></p>
+                                </div>
+                                <button type="button" id="editHotelBtn" class="btn-secondary">✏️ Change Hotel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accommodationCheckIn">Check-in Date</label>
+                            <input type="date" id="accommodationCheckIn" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="accommodationCheckOut">Check-out Date</label>
+                            <input type="date" id="accommodationCheckOut" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accommodationNotes">Notes (Optional)</label>
+                        <textarea id="accommodationNotes" class="form-input" rows="3" placeholder="Special requests, booking details, etc..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeAccommodationModal()">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Accommodation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script>
         // Development helper - clear service workers and cache in dev mode
@@ -516,6 +665,8 @@
     </script>
     <script src="./js/api-config.js"></script>
     <script src="./js/trip-manager.js"></script>
+    <script src="./js/hotels-data.js"></script>
+    <script src="./js/web-hotel-search.js"></script>
     <script src="./js/map-manager.js"></script>
     <script src="./js/attraction-details.js"></script>
     <script src="./js/trip-ui.js"></script>
