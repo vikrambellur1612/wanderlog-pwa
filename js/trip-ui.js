@@ -107,7 +107,7 @@ class TripUI {
           <button class="trip-action-btn btn-primary" onclick="event.stopPropagation(); tripUI.viewTripDetail(${trip.id})">
             View Details
           </button>
-          <button class="trip-action-btn btn-secondary" onclick="event.stopPropagation(); tripUI.editTripFromHome(${trip.id})">
+          <button class="trip-action-btn btn-edit" onclick="event.stopPropagation(); tripUI.editTripFromHome(${trip.id})">
             Edit
           </button>
           <button class="trip-action-btn btn-danger" onclick="event.stopPropagation(); tripUI.deleteTripFromHome(${trip.id})">
@@ -167,9 +167,9 @@ class TripUI {
     // Get all trips
     const trips = this.tripManager.getAllTrips();
     
-    // If no trips exist, redirect to home page for trip creation
+    // If no trips exist, show empty state with options
     if (trips.length === 0) {
-      this.redirectToHomeForTripCreation();
+      this.showEmptyTripsState();
       return;
     }
 
@@ -201,6 +201,113 @@ class TripUI {
         container.innerHTML = this.createTripDetailView(completedTrips[0]);
         this.initializeTripMap(completedTrips[0]);
       }
+    }
+  }
+
+  // Show empty trips state with helpful options
+  showEmptyTripsState() {
+    const container = document.getElementById('trip-list');
+    if (!container) return;
+    
+    const allTrips = this.tripManager.getAllTrips();
+    
+    container.innerHTML = `
+      <div class="empty-trips-state">
+        <div class="empty-state-content">
+          <div class="empty-state-icon">✈️</div>
+          <h2 class="empty-state-title">No Trips Available</h2>
+          <p class="empty-state-description">
+            You haven't planned any trips yet. Start your adventure by creating a new trip!
+          </p>
+          <div class="empty-state-actions">
+            <button class="btn-primary" onclick="tripUI.createNewTripFromTripsPage()">
+              ✨ Create New Trip
+            </button>
+            <button class="btn-secondary" onclick="tripUI.backToHome()">
+              🏠 Go to Home
+            </button>
+          </div>
+        </div>
+        
+        ${allTrips.length > 0 ? `
+          <div class="trip-selector-section">
+            <h3>Or browse your trips:</h3>
+            <div class="trip-browser">
+              <div class="trip-filter-tabs">
+                <button class="filter-tab active" onclick="tripUI.filterTrips('all')">All Trips</button>
+                <button class="filter-tab" onclick="tripUI.filterTrips('upcoming')">Upcoming</button>
+                <button class="filter-tab" onclick="tripUI.filterTrips('completed')">Completed</button>
+              </div>
+              <div class="trips-selector-grid" id="tripsSelectorGrid">
+                ${this.renderTripsSelector(allTrips)}
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // Create new trip from trips page
+  createNewTripFromTripsPage() {
+    this.showAddTripModal();
+  }
+
+  // Render trips selector for empty state
+  renderTripsSelector(trips) {
+    if (trips.length === 0) {
+      return '<p class="no-trips-message">No trips match the selected filter.</p>';
+    }
+    
+    return trips.map(trip => {
+      const status = this.getTripStatus(trip);
+      const placesCount = trip.places ? trip.places.length : 0;
+      return `
+        <div class="trip-selector-card" onclick="tripUI.viewTripDetail(${trip.id})">
+          <div class="trip-selector-header">
+            <h4>${trip.name}</h4>
+            <span class="trip-status ${status.toLowerCase()}">${status}</span>
+          </div>
+          <p class="trip-selector-dates">${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}</p>
+          <p class="trip-selector-places">${placesCount} ${placesCount === 1 ? 'place' : 'places'}</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Get trip status
+  getTripStatus(trip) {
+    const currentDate = new Date();
+    const startDate = new Date(trip.startDate);
+    const endDate = new Date(trip.endDate);
+    
+    if (currentDate < startDate) return 'Upcoming';
+    if (currentDate > endDate) return 'Completed';
+    return 'Ongoing';
+  }
+
+  // Filter trips in empty state
+  filterTrips(filter) {
+    const allTrips = this.tripManager.getAllTrips();
+    const currentDate = new Date();
+    
+    let filteredTrips = allTrips;
+    
+    if (filter === 'upcoming') {
+      filteredTrips = allTrips.filter(trip => new Date(trip.startDate) > currentDate);
+    } else if (filter === 'completed') {
+      filteredTrips = allTrips.filter(trip => new Date(trip.endDate) < currentDate);
+    }
+    
+    // Update filter tabs
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Update trips grid
+    const grid = document.getElementById('tripsSelectorGrid');
+    if (grid) {
+      grid.innerHTML = this.renderTripsSelector(filteredTrips);
     }
   }
 
@@ -311,11 +418,8 @@ class TripUI {
       <div class="trip-detail">
         <div class="trip-detail-header">
           <div class="navigation-buttons">
-            <button class="btn-secondary" onclick="tripUI.backToHome()" style="margin-right: 0.5rem;">
+            <button class="btn-secondary" onclick="tripUI.backToHome()">
               🏠 Back to Home
-            </button>
-            <button class="btn-secondary" onclick="tripUI.backToList()">
-              ← Back to Trips List
             </button>
           </div>
           <h1 class="trip-detail-name">${trip.name}</h1>
@@ -483,7 +587,7 @@ class TripUI {
             <p class="place-location">${place.state}, India</p>
           </div>
           <div class="place-actions">
-            <button class="btn-secondary place-action-btn" onclick="tripUI.editPlace(${place.id})" title="Edit Place">
+            <button class="btn-edit place-action-btn" onclick="tripUI.editPlace(${place.id})" title="Manage Attractions">
               ✏️ Edit
             </button>
             <button class="btn-danger place-action-btn" onclick="tripUI.removePlace(${place.id})" title="Delete Place">
@@ -871,7 +975,7 @@ class TripUI {
     document.getElementById(`${tabName}-form`).classList.add('active');
   }
 
-  // Edit a specific place
+  // Edit a specific place - manage attractions only
   editPlace(placeId) {
     const trip = this.tripManager.getTrip(this.currentTripId);
     if (!trip) return;
@@ -879,22 +983,171 @@ class TripUI {
     const place = trip.places.find(p => p.id === placeId);
     if (!place) return;
 
-    const newName = prompt(`Edit place name:`, place.city);
-    if (newName && newName.trim() !== '' && newName !== place.city) {
-      try {
-        // Update the place
-        place.city = newName.trim();
-        this.tripManager.updateTrip(this.currentTripId, trip);
-        
-        // Refresh the display
-        this.refreshPlacesList();
-        
-        // Show success message
-        this.showNotification(`Place updated to "${newName}"`, 'success');
-      } catch (error) {
-        console.error('Error updating place:', error);
-        alert('Error updating place. Please try again.');
+    this.showEditPlaceModal(place);
+  }
+
+  // Show edit place modal for managing attractions
+  showEditPlaceModal(place) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'editPlaceModal';
+    
+    modal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Manage Attractions - ${place.city}, ${place.state}</h3>
+          <button class="close-btn" onclick="tripUI.closeEditPlaceModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">
+            Add or remove attractions you want to visit in ${place.city}. 
+            This won't change the place name or location.
+          </p>
+          
+          <div class="attractions-management">
+            <div class="current-attractions">
+              <h4>Current Attractions</h4>
+              <div id="currentAttractionsList" class="attractions-list-editable">
+                ${place.attractions && place.attractions.length > 0 ? 
+                  place.attractions.map((attraction, index) => `
+                    <div class="attraction-item-editable">
+                      <span>${attraction}</span>
+                      <button type="button" class="remove-attraction-btn" onclick="tripUI.removeAttractionFromPlace(${place.id}, ${index})">
+                        ×
+                      </button>
+                    </div>
+                  `).join('') : 
+                  '<p class="no-attractions">No attractions added yet</p>'
+                }
+              </div>
+            </div>
+            
+            <div class="add-attraction-section">
+              <h4>Add New Attraction</h4>
+              <div class="add-attraction-form">
+                <input type="text" id="newAttractionInput" placeholder="Enter attraction name..." class="form-input">
+                <button type="button" class="btn-primary" onclick="tripUI.addAttractionToPlace(${place.id})">
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="tripUI.closeEditPlaceModal()">Done</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add click handler to close modal when clicking background
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.closeEditPlaceModal();
       }
+    });
+    
+    // Focus on input field
+    setTimeout(() => {
+      const input = document.getElementById('newAttractionInput');
+      if (input) input.focus();
+    }, 100);
+  }
+
+  // Close edit place modal
+  closeEditPlaceModal() {
+    const modal = document.getElementById('editPlaceModal');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
+  // Add attraction to place
+  addAttractionToPlace(placeId) {
+    const input = document.getElementById('newAttractionInput');
+    const attractionName = input.value.trim();
+    
+    if (!attractionName) {
+      alert('Please enter an attraction name');
+      return;
+    }
+    
+    const trip = this.tripManager.getTrip(this.currentTripId);
+    if (!trip) return;
+    
+    const place = trip.places.find(p => p.id === placeId);
+    if (!place) return;
+    
+    // Initialize attractions array if it doesn't exist
+    if (!place.attractions) {
+      place.attractions = [];
+    }
+    
+    // Check for duplicates
+    if (place.attractions.includes(attractionName)) {
+      alert('This attraction is already in the list');
+      return;
+    }
+    
+    // Add attraction
+    place.attractions.push(attractionName);
+    
+    // Update the trip
+    this.tripManager.updateTrip(this.currentTripId, trip);
+    
+    // Clear input
+    input.value = '';
+    
+    // Refresh the attractions list in modal
+    this.refreshEditPlaceModal(place);
+    
+    // Refresh the main places list
+    this.refreshPlacesList();
+    
+    this.showNotification(`Added "${attractionName}" to ${place.city}`, 'success');
+  }
+
+  // Remove attraction from place
+  removeAttractionFromPlace(placeId, attractionIndex) {
+    const trip = this.tripManager.getTrip(this.currentTripId);
+    if (!trip) return;
+    
+    const place = trip.places.find(p => p.id === placeId);
+    if (!place || !place.attractions) return;
+    
+    const attractionName = place.attractions[attractionIndex];
+    
+    if (confirm(`Remove "${attractionName}" from ${place.city}?`)) {
+      place.attractions.splice(attractionIndex, 1);
+      
+      // Update the trip
+      this.tripManager.updateTrip(this.currentTripId, trip);
+      
+      // Refresh the attractions list in modal
+      this.refreshEditPlaceModal(place);
+      
+      // Refresh the main places list
+      this.refreshPlacesList();
+      
+      this.showNotification(`Removed "${attractionName}" from ${place.city}`, 'success');
+    }
+  }
+
+  // Refresh edit place modal content
+  refreshEditPlaceModal(place) {
+    const attractionsList = document.getElementById('currentAttractionsList');
+    if (attractionsList) {
+      attractionsList.innerHTML = place.attractions && place.attractions.length > 0 ? 
+        place.attractions.map((attraction, index) => `
+          <div class="attraction-item-editable">
+            <span>${attraction}</span>
+            <button type="button" class="remove-attraction-btn" onclick="tripUI.removeAttractionFromPlace(${place.id}, ${index})">
+              ×
+            </button>
+          </div>
+        `).join('') : 
+        '<p class="no-attractions">No attractions added yet</p>';
     }
   }
 
@@ -1079,11 +1332,18 @@ class TripUI {
     }, 100);
   }
 
-  // Show banner when adding place to trip
+  // Show banner when adding place to trip (fly-through banner for 3 seconds)
   showAddToTripBanner() {
     const banner = document.getElementById('add-to-trip-info');
     if (banner) {
       banner.classList.remove('hidden');
+      
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        if (banner && !banner.classList.contains('hidden')) {
+          banner.classList.add('hidden');
+        }
+      }, 3000);
     }
   }
 

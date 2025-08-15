@@ -14,6 +14,171 @@
   margin: 0 !important;
 }
 
+/* Edit Place Modal Styles */
+#editPlaceModal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 1rem !important;
+}
+
+#editPlaceModal .modal-content {
+  background: white !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  width: 90% !important;
+  max-width: 500px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+#editPlaceModal .modal-header {
+  padding: 1.5rem !important;
+  border-bottom: 1px solid #e1e5e9 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+#editPlaceModal .modal-body {
+  padding: 1.5rem !important;
+}
+
+#editPlaceModal .modal-footer {
+  padding: 1rem 1.5rem !important;
+  border-top: 1px solid #e1e5e9 !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+#editPlaceModal .modal-description {
+  margin-bottom: 1.5rem !important;
+  color: #666 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+}
+
+#editPlaceModal .attractions-management {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+}
+
+#editPlaceModal .current-attractions h4,
+#editPlaceModal .add-attraction-section h4 {
+  margin: 0 0 1rem 0 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+#editPlaceModal .attractions-list-editable {
+  border: 1px solid #e1e5e9 !important;
+  border-radius: 6px !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  background: #f8f9fa !important;
+}
+
+#editPlaceModal .attraction-item-editable {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #e1e5e9 !important;
+  background: white !important;
+  margin: 0 !important;
+}
+
+#editPlaceModal .attraction-item-editable:last-child {
+  border-bottom: none !important;
+}
+
+#editPlaceModal .attraction-item-editable span {
+  flex: 1 !important;
+  color: #333 !important;
+  font-size: 0.9rem !important;
+}
+
+#editPlaceModal .remove-attraction-btn {
+  background: #ff4757 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+#editPlaceModal .remove-attraction-btn:hover {
+  background: #ff3838 !important;
+}
+
+#editPlaceModal .no-attractions {
+  padding: 1rem !important;
+  text-align: center !important;
+  color: #8e9297 !important;
+  font-style: italic !important;
+  margin: 0 !important;
+}
+
+#editPlaceModal .add-attraction-form {
+  display: flex !important;
+  gap: 0.5rem !important;
+}
+
+#editPlaceModal .add-attraction-form input {
+  flex: 1 !important;
+  padding: 0.75rem !important;
+  border: 1px solid #e1e5e9 !important;
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+}
+
+#editPlaceModal .add-attraction-form input:focus {
+  outline: none !important;
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2) !important;
+}
+
+#editPlaceModal .btn-primary {
+  padding: 0.75rem 1rem !important;
+  background: #4CAF50 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+}
+
+#editPlaceModal .btn-primary:hover {
+  background: #45a049 !important;
+}
+
+#editPlaceModal .btn-secondary {
+  padding: 0.75rem 1.5rem !important;
+  background: #f8f9fa !important;
+  color: #333 !important;
+  border: 1px solid #e1e5e9 !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+}
+
 #itineraryModal .modal-content {
   background: white !important;
   border-radius: 8px !important;
