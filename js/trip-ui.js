@@ -1540,7 +1540,7 @@ class TripUI {
             <div class="day-location">📍 ${item.place}</div>
           </div>
           <div class="day-actions">
-            <button class="btn-secondary itinerary-action-btn" onclick="tripUI.editItineraryItem(${item.id})" title="Edit Day">
+            <button class="btn-edit itinerary-action-btn" onclick="tripUI.editItineraryItem(${item.id})" title="Edit Day">
               ✏️ Edit
             </button>
             <button class="btn-danger itinerary-action-btn" onclick="tripUI.deleteItineraryItem(${item.id})" title="Delete Day">

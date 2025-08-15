@@ -104,14 +104,6 @@ class MapManager {
             <div class="dropdown-icon">▼</div>
           </div>
         </div>
-
-        <!-- Trip Visualization -->
-        <div class="trip-visualization-section">
-          <h3 class="section-title">📍 Your Trip Locations</h3>
-          <div id="trip-map-visualization" class="trip-map-visualization">
-            <p class="empty-trip-message">Add places to your trip to see them visualized here</p>
-          </div>
-        </div>
       </div>
     `;
   }
@@ -367,6 +359,11 @@ class MapManager {
         
         // Update any existing places modals
         this.markPlaceAsSelected(city, state);
+        
+        // Navigate to trips page to show the added place
+        setTimeout(() => {
+          this.navigateToTripsPage(tripId);
+        }, 1500); // Wait for success message to be seen
       }
     } catch (error) {
       console.error('Error adding place to trip:', error);
@@ -399,10 +396,55 @@ class MapManager {
         
         // Show success message
         this.showPlaceAddedMessage(city, state);
+        
+        // Navigate back to trips page to show the added place
+        setTimeout(() => {
+          this.navigateToTripsPage(window.tripUI.currentTripId);
+        }, 1500); // Wait for success message to be seen
       }
     } catch (error) {
       console.error('Error adding place to trip:', error);
       this.showPlaceAddError(city, state);
+    }
+  }
+
+  // Navigate to trips page and show specific trip
+  navigateToTripsPage(tripId) {
+    if (window.tripUI) {
+      // Set the current trip
+      window.tripUI.currentTripId = tripId;
+      
+      // Switch to trips view
+      const views = document.querySelectorAll('.view');
+      views.forEach(view => view.classList.remove('active'));
+      
+      const tripsView = document.getElementById('tripsView');
+      if (tripsView) {
+        tripsView.classList.add('active');
+      }
+
+      // Update bottom navigation
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      
+      const tripsNavItem = document.querySelector('.nav-item[data-view="trips"]');
+      if (tripsNavItem) {
+        tripsNavItem.classList.add('active');
+      }
+
+      // Get the trip and render its detail view
+      const trip = window.tripUI.tripManager.getTrip(tripId);
+      if (trip) {
+        const container = document.getElementById('trip-list');
+        if (container) {
+          container.innerHTML = window.tripUI.createTripDetailView(trip);
+          
+          // Initialize map after view is rendered
+          setTimeout(() => {
+            window.tripUI.initializeTripMap(trip);
+          }, 100);
+        }
+      }
     }
   }
 

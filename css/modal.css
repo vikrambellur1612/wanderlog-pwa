@@ -9,9 +9,10 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 1000 !important;
-  padding: 0 !important;
+  z-index: 1050 !important;
+  padding: 1rem !important;
   margin: 0 !important;
+  overflow-y: auto !important;
 }
 
 /* Edit Place Modal Styles */
@@ -25,8 +26,9 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 1000 !important;
+  z-index: 1050 !important;
   padding: 1rem !important;
+  overflow-y: auto !important;
 }
 
 #editPlaceModal .modal-content {
@@ -185,11 +187,11 @@
   padding: 0 !important;
   width: 90% !important;
   max-width: 600px !important;
-  max-height: 90vh !important;
+  max-height: 85vh !important;
   overflow-y: auto !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
   display: block !important;
-  margin: 0 !important;
+  margin: auto !important;
   position: relative !important;
 }
 
