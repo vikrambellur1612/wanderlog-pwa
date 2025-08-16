@@ -702,7 +702,7 @@ select.form-input {
 
 .trips-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: var(--spacing-xl);
 }
 
@@ -3783,5 +3783,715 @@ select.form-input {
     
     .trip-duration-new {
         min-width: 70px;
+    }
+}
+
+/* ===== ENHANCED TRIP CARD FEATURES ===== */
+
+/* Color Theme Support for Trip Cards */
+.trip-card-new.blue-theme {
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.1) 0%,
+        rgba(29, 78, 216, 0.08) 50%,
+        rgba(59, 130, 246, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.trip-card-new.green-theme {
+    background: linear-gradient(135deg, 
+        rgba(16, 185, 129, 0.1) 0%,
+        rgba(5, 150, 105, 0.08) 50%,
+        rgba(16, 185, 129, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.trip-card-new.purple-theme {
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.1) 0%,
+        rgba(109, 40, 217, 0.08) 50%,
+        rgba(139, 92, 246, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(139, 92, 246, 0.2);
+}
+
+.trip-card-new.orange-theme {
+    background: linear-gradient(135deg, 
+        rgba(245, 158, 11, 0.1) 0%,
+        rgba(217, 119, 6, 0.08) 50%,
+        rgba(245, 158, 11, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(245, 158, 11, 0.2);
+}
+
+.trip-card-new.pink-theme {
+    background: linear-gradient(135deg, 
+        rgba(236, 72, 153, 0.1) 0%,
+        rgba(190, 24, 93, 0.08) 50%,
+        rgba(236, 72, 153, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(236, 72, 153, 0.2);
+}
+
+.trip-card-new.teal-theme {
+    background: linear-gradient(135deg, 
+        rgba(20, 184, 166, 0.1) 0%,
+        rgba(13, 148, 136, 0.08) 50%,
+        rgba(20, 184, 166, 0.05) 100%
+    ), white;
+    border: 2px solid rgba(20, 184, 166, 0.2);
+}
+
+/* Trip Background Color Selector */
+.trip-background-selector {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+}
+
+.color-selector-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.color-selector-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Places Section in Trip Cards */
+.trip-places-section {
+    margin-bottom: 1rem;
+}
+
+.places-heading {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.places-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.place-label {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.place-label:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.no-places-label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 0.5rem 0;
+}
+
+/* Modal Overlay for Color Selector and Place Details */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    backdrop-filter: blur(2px);
+}
+
+/* Color Selector Modal */
+.color-selector-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.color-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.color-selector-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #111827;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.color-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.color-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.color-option:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.color-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Place Details Modal */
+.place-details-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.place-details-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.place-details-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.place-details-header .close-modal {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.place-details-header .close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.place-details-content {
+    padding: 1.5rem;
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+}
+
+.place-section {
+    margin-bottom: 1.5rem;
+}
+
+.place-section:last-child {
+    margin-bottom: 0;
+}
+
+.place-section h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.attractions-list, .accommodations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.attraction-item, .accommodation-item {
+    background: #f8fafc;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.attraction-name, .accommodation-name {
+    font-weight: 500;
+    color: #374151;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.attraction-category, .accommodation-type {
+    font-size: 0.8rem;
+    color: #6b7280;
+    display: block;
+}
+
+.no-items {
+    color: #9ca3af;
+    font-style: italic;
+    padding: 1rem;
+    text-align: center;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.place-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.place-action-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.place-action-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments for trip grid */
+@media (max-width: 768px) {
+    .trips-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .trip-card-new {
+        margin: 0 0.5rem;
+    }
+    
+    .color-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .place-details-modal {
+        max-height: 90vh;
+        margin: 1rem 0.5rem;
+    }
+}
+
+@media (min-width: 769px) {
+    .trips-grid {
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        max-width: none;
+    }
+}
+
+@media (min-width: 1200px) {
+    .trips-grid {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 450px));
+        gap: 2rem;
+    }
+}
+
+/* ===== APP LOGO STYLING ===== */
+.app-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.app-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.logo-text {
+    flex: 1;
+}
+
+.logo-text h2 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+}
+
+.logo-text p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .app-logo-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .app-logo {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .logo-text h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===== COMING SOON STYLING ===== */
+.coming-soon-section {
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.coming-soon-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.coming-soon-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.coming-soon-description {
+    font-size: 1.1rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.planned-features {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: left;
+    margin-top: 2rem;
+}
+
+.planned-features h3 {
+    color: #374151;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.planned-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.planned-features li {
+    padding: 0.5rem 0;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ===== ABOUT PAGE STYLING ===== */
+.about-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.about-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.app-tagline {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-section {
+    background: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f3f4f6;
+}
+
+.about-section h3 {
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.version-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.version-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.developer-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 2px solid #e5e7eb;
+}
+
+.developer-details h4 {
+    color: #1f2937;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.developer-role {
+    color: #3b82f6;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.development-info {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tech-tag {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.highlights-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.highlight-item {
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #f59e0b;
+}
+
+.highlight-item h4 {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.highlight-item p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.about-footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-top: 2px solid #f3f4f6;
+}
+
+.copyright {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.disclaimer {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .about-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .features-list {
+        gap: 0.75rem;
+    }
+    
+    .version-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .tech-stack {
+        justify-content: center;
+    }
+    
+    .developer-card {
+        padding: 1.5rem;
+    }
+    
+    .coming-soon-section {
+        padding: 1.5rem;
+    }
+    
+    .coming-soon-icon {
+        font-size: 3rem;
     }
 }

@@ -841,6 +841,34 @@ class WanderLogApp {
       }
     }, 10000);
   }
+
+  // Refresh trips display
+  refreshTripsDisplay() {
+    if (window.tripUI && typeof window.tripUI.renderHomePageTrips === 'function') {
+      window.tripUI.renderHomePageTrips();
+    }
+  }
+
+  // View trip details
+  viewTripDetails(tripId) {
+    if (window.tripUI && typeof window.tripUI.viewTripDetail === 'function') {
+      window.tripUI.viewTripDetail(tripId);
+    }
+  }
+
+  // Edit trip
+  editTrip(tripId) {
+    if (window.tripUI && typeof window.tripUI.editTrip === 'function') {
+      window.tripUI.editTrip(tripId);
+    }
+  }
+
+  // Delete trip
+  deleteTrip(tripId) {
+    if (window.tripUI && typeof window.tripUI.deleteTrip === 'function') {
+      window.tripUI.deleteTrip(tripId);
+    }
+  }
 }
 
 // Initialize the app
@@ -866,5 +894,64 @@ window.addEventListener('offline', () => {
   app.isOnline = false;
   console.log('App is offline');
 });
+
+// PWA Installation Support
+let deferredPrompt;
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('PWA: beforeinstallprompt event fired');
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  
+  // Show install button or banner (optional)
+  showInstallPrompt();
+});
+
+// Function to show install prompt
+function showInstallPrompt() {
+  // You can add a custom install button here
+  console.log('PWA can be installed');
+  
+  // Optional: Show a custom install banner
+  if (app && typeof app.showToast === 'function') {
+    app.showToast('Install WanderLog as an app for the best experience! Look for the install option in your browser menu.', 'info', null, 8000);
+  }
+}
+
+// Handle the app installed event
+window.addEventListener('appinstalled', (evt) => {
+  console.log('PWA: App was installed successfully');
+  if (app && typeof app.showToast === 'function') {
+    app.showToast('WanderLog installed successfully! Welcome to your travel companion.', 'success');
+  }
+});
+
+// Function to trigger install prompt (can be called from UI)
+window.installPWA = async function() {
+  if (deferredPrompt) {
+    // Show the install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the PWA install prompt');
+    } else {
+      console.log('User dismissed the PWA install prompt');
+    }
+    
+    // Clear the deferred prompt
+    deferredPrompt = null;
+  } else {
+    console.log('PWA install prompt not available');
+    if (app && typeof app.showToast === 'function') {
+      app.showToast('To install WanderLog, look for "Add to Home Screen" or "Install" in your browser menu.', 'info');
+    }
+  }
+};
 
 export default WanderLogApp;

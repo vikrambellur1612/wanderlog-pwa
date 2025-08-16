@@ -8,16 +8,25 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="WanderLog">
+    <meta name="mobile-web-app-capable" content="yes">
     
     <title>WanderLog - Travel Companion</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
     
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="./icons/favicon.svg">
+    <!-- Icons for PWA Installation -->
+    <link rel="icon" type="image/jpeg" href="./Wanderlog.jpeg">
     <link rel="icon" type="image/png" href="./icons/favicon.png">
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    
+    <!-- Apple Touch Icons for iOS Home Screen -->
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512x512.png">
     
     <!-- Critical CSS (inlined for performance) -->
     <style>
@@ -230,8 +239,13 @@
             <section id="homeView" class="view active">
                 <div class="app-content">
                     <div class="home-header">
-                        <h2>Welcome to WanderLog</h2>
-                        <p>Your personal travel companion for discovering and logging amazing places.</p>
+                        <div class="app-logo-section">
+                            <img src="./Wanderlog.jpeg" alt="WanderLog" class="app-logo">
+                            <div class="logo-text">
+                                <h2>Welcome to WanderLog</h2>
+                                <p>Your personal travel companion for discovering and logging amazing places.</p>
+                            </div>
+                        </div>
                         <button class="btn-primary add-trip-btn" id="addTripBtn">
                             <span class="icon">✈️</span>
                             Add Trip
@@ -360,28 +374,26 @@
             <!-- Log View -->
             <section id="logView" class="view">
                 <div class="app-content">
-                    <h2>Log Your Journey</h2>
-                    <form id="logForm" class="log-form">
-                        <div class="form-group">
-                            <label for="placeInput">Place</label>
-                            <input type="text" id="placeInput" class="form-input" required>
+                    <div class="coming-soon-section">
+                        <div class="coming-soon-icon">🚧</div>
+                        <h2>Log Your Journey</h2>
+                        <div class="coming-soon-badge">Coming Soon</div>
+                        <p class="coming-soon-description">
+                            We're working on an amazing logging feature that will allow you to record your travel experiences, 
+                            add photos, rate places, and create a personal travel diary. Stay tuned!
+                        </p>
+                        <div class="planned-features">
+                            <h3>Planned Features:</h3>
+                            <ul>
+                                <li>📝 Rich text travel entries</li>
+                                <li>📸 Photo uploads and galleries</li>
+                                <li>⭐ Place ratings and reviews</li>
+                                <li>📍 Location-based memories</li>
+                                <li>📊 Travel statistics and insights</li>
+                                <li>🔗 Integration with your trips</li>
+                            </ul>
                         </div>
-                        <div class="form-group">
-                            <label for="notesInput">Notes</label>
-                            <textarea id="notesInput" class="form-input" rows="4"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="ratingInput">Rating</label>
-                            <select id="ratingInput" class="form-input">
-                                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                                <option value="4">⭐⭐⭐⭐ Very Good</option>
-                                <option value="3">⭐⭐⭐ Good</option>
-                                <option value="2">⭐⭐ Fair</option>
-                                <option value="1">⭐ Poor</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="primary-btn full-width">Save Entry</button>
-                    </form>
+                    </div>
                 </div>
             </section>
 
@@ -391,6 +403,92 @@
                     <h2>Your Favorites</h2>
                     <div id="favoritesList" class="favorites-list">
                         <!-- Dynamic content will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- About View -->
+            <section id="aboutView" class="view">
+                <div class="app-content">
+                    <div class="about-header">
+                        <img src="./Wanderlog.jpeg" alt="WanderLog" class="about-logo">
+                        <h2>About WanderLog</h2>
+                        <p class="app-tagline">Your Personal Travel Companion</p>
+                    </div>
+
+                    <div class="about-content">
+                        <div class="about-section">
+                            <h3>🌟 App Features</h3>
+                            <ul class="features-list">
+                                <li><span class="feature-icon">✈️</span> Create and manage trips with detailed itineraries</li>
+                                <li><span class="feature-icon">🏙️</span> Explore destinations across India with curated attractions</li>
+                                <li><span class="feature-icon">🏨</span> Find and book accommodations with smart search</li>
+                                <li><span class="feature-icon">📅</span> Plan day-by-day activities and schedules</li>
+                                <li><span class="feature-icon">🗺️</span> Interactive maps with place markers</li>
+                                <li><span class="feature-icon">📱</span> Progressive Web App (PWA) with offline support</li>
+                                <li><span class="feature-icon">🎨</span> Customizable trip cards with color themes</li>
+                                <li><span class="feature-icon">📍</span> Location-based trip planning and management</li>
+                            </ul>
+                        </div>
+
+                        <div class="about-section">
+                            <h3>📱 PWA Version</h3>
+                            <div class="version-info">
+                                <span class="version-badge">v1.8.0</span>
+                                <p>This is a Progressive Web App (PWA) that works seamlessly across all devices. Install it on your home screen for the best experience!</p>
+                            </div>
+                        </div>
+
+                        <div class="about-section">
+                            <h3>👨‍💻 Developer Information</h3>
+                            <div class="developer-info">
+                                <div class="developer-card">
+                                    <div class="developer-details">
+                                        <h4>Vikram Bellur</h4>
+                                        <p class="developer-role">AI Enthusiast</p>
+                                        <p class="development-info">
+                                            This app was developed using <strong>Claude Sonnet 4</strong> Agentic AI, 
+                                            showcasing the power of AI-assisted development in creating modern, 
+                                            feature-rich web applications.
+                                        </p>
+                                        <div class="tech-stack">
+                                            <span class="tech-tag">JavaScript</span>
+                                            <span class="tech-tag">Progressive Web App</span>
+                                            <span class="tech-tag">Local Storage</span>
+                                            <span class="tech-tag">Responsive Design</span>
+                                            <span class="tech-tag">AI-Assisted Development</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-section">
+                            <h3>🚀 Development Highlights</h3>
+                            <div class="highlights-list">
+                                <div class="highlight-item">
+                                    <h4>🤖 AI-Powered Development</h4>
+                                    <p>Built entirely using Claude Sonnet 4, demonstrating advanced AI capabilities in software development</p>
+                                </div>
+                                <div class="highlight-item">
+                                    <h4>📱 Modern PWA Architecture</h4>
+                                    <p>Implements latest web technologies for native app-like experience</p>
+                                </div>
+                                <div class="highlight-item">
+                                    <h4>🎨 Intuitive User Interface</h4>
+                                    <p>Clean, modern design with responsive layouts and smooth interactions</p>
+                                </div>
+                                <div class="highlight-item">
+                                    <h4>🔧 Feature-Rich Functionality</h4>
+                                    <p>Comprehensive trip planning tools with real-time data integration</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="about-footer">
+                            <p class="copyright">© 2025 WanderLog - Developed by Vikram Bellur with Claude Sonnet 4</p>
+                            <p class="disclaimer">This app is a demonstration of AI-assisted development capabilities.</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -419,6 +517,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
                 <span>Favorites</span>
+            </button>
+            
+            <button class="nav-item" data-view="about">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>About</span>
             </button>
         </nav>
     </div>

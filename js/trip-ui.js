@@ -108,10 +108,45 @@ class TripUI {
     };
 
     const progressInfo = getProgressInfo();
-    const destination = this.getTripDestination(trip);
+    
+    // Get trip background color theme
+    const getBackgroundTheme = () => {
+      // If trip has a selected color theme, use it
+      if (trip.colorTheme) {
+        return trip.colorTheme;
+      }
+      
+      // Auto-assign based on trip ID or first letter of trip name
+      const themes = ['blue', 'green', 'purple', 'orange', 'pink', 'teal'];
+      const themeIndex = (trip.id || trip.name.charCodeAt(0)) % themes.length;
+      return themes[themeIndex];
+    };
+
+    const backgroundTheme = getBackgroundTheme();
+
+    // Get places as clickable labels
+    const getPlaceLabels = () => {
+      if (!trip.places || trip.places.length === 0) {
+        return '<div class="no-places-label">No destinations added</div>';
+      }
+      
+      return trip.places.map(place => `
+        <button class="place-label" onclick="event.stopPropagation(); tripUI.showPlaceDetails('${trip.id}', '${place.id}')" title="View ${place.city} attractions">
+          📍 ${place.city}
+        </button>
+      `).join('');
+    };
+
+    const placeLabels = getPlaceLabels();
 
     return `
-      <div class="trip-card-new" onclick="app.viewTripDetails(${trip.id})">
+      <div class="trip-card-new ${backgroundTheme}-theme" onclick="app.viewTripDetails(${trip.id})">
+        <div class="trip-background-selector" onclick="event.stopPropagation();">
+          <button class="color-selector-btn" onclick="tripUI.showColorSelector('${trip.id}')" title="Change card color">
+            🎨
+          </button>
+        </div>
+        
         <div class="trip-card-header-new">
           <div class="trip-main-info">
             <div class="trip-title-section">
@@ -121,7 +156,6 @@ class TripUI {
                 <span class="status-text">${progressInfo.text}</span>
               </div>
             </div>
-            <p class="trip-destination-new">📍 ${destination}</p>
           </div>
           
           <div class="trip-actions-new">
@@ -143,6 +177,13 @@ class TripUI {
                 <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
               </svg>
             </button>
+          </div>
+        </div>
+        
+        <div class="trip-places-section">
+          <h4 class="places-heading">🏙️ Destinations</h4>
+          <div class="places-labels">
+            ${placeLabels}
           </div>
         </div>
         
@@ -3500,6 +3541,139 @@ function populateAccommodationForm(accommodationId) {
     document.getElementById('hotelAddress').value = accommodation.hotelData.address || '';
   }
 }
+
+// Add new methods to TripUI class
+Object.assign(TripUI.prototype, {
+  showColorSelector(tripId) {
+    const colorThemes = [
+      { name: 'Blue Ocean', value: 'blue', preview: '#3b82f6' },
+      { name: 'Forest Green', value: 'green', preview: '#10b981' },
+      { name: 'Royal Purple', value: 'purple', preview: '#8b5cf6' },
+      { name: 'Sunset Orange', value: 'orange', preview: '#f59e0b' },
+      { name: 'Rose Pink', value: 'pink', preview: '#ec4899' },
+      { name: 'Teal Waters', value: 'teal', preview: '#14b8a6' }
+    ];
+
+    const modalContent = `
+      <div class="color-selector-modal">
+        <div class="color-selector-header">
+          <h3>Choose Trip Card Color</h3>
+          <button class="close-modal" onclick="tripUI.closeColorSelector()">&times;</button>
+        </div>
+        <div class="color-options">
+          ${colorThemes.map(theme => `
+            <button class="color-option" data-theme="${theme.value}" onclick="tripUI.selectColor('${tripId}', '${theme.value}')">
+              <div class="color-preview" style="background: ${theme.preview}"></div>
+              <span class="color-name">${theme.name}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.innerHTML = modalContent;
+    modalOverlay.onclick = (e) => {
+      if (e.target === modalOverlay) this.closeColorSelector();
+    };
+    
+    document.body.appendChild(modalOverlay);
+  },
+
+  selectColor(tripId, colorTheme) {
+    // Update trip color theme
+    const trips = JSON.parse(localStorage.getItem('trips')) || [];
+    const trip = trips.find(t => t.id.toString() === tripId.toString());
+    
+    if (trip) {
+      trip.colorTheme = colorTheme;
+      localStorage.setItem('trips', JSON.stringify(trips));
+      this.closeColorSelector();
+      
+      // Refresh the trip display
+      if (window.app && window.app.refreshTripsDisplay) {
+        window.app.refreshTripsDisplay();
+      }
+    }
+  },
+
+  closeColorSelector() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+      modal.remove();
+    }
+  },
+
+  showPlaceDetails(tripId, placeId) {
+    const trips = JSON.parse(localStorage.getItem('trips')) || [];
+    const trip = trips.find(t => t.id.toString() === tripId.toString());
+    
+    if (!trip || !trip.places) return;
+    
+    const place = trip.places.find(p => p.id.toString() === placeId.toString());
+    if (!place) return;
+
+    const attractions = place.attractions || [];
+    const accommodations = trip.accommodations?.filter(acc => acc.location === place.city) || [];
+
+    const modalContent = `
+      <div class="place-details-modal">
+        <div class="place-details-header">
+          <h3>📍 ${place.city}</h3>
+          <button class="close-modal" onclick="tripUI.closePlaceDetails()">&times;</button>
+        </div>
+        <div class="place-details-content">
+          <div class="place-section">
+            <h4>🎯 Attractions (${attractions.length})</h4>
+            <div class="attractions-list">
+              ${attractions.length > 0 ? attractions.map(attraction => `
+                <div class="attraction-item">
+                  <span class="attraction-name">${attraction.name || attraction}</span>
+                  ${attraction.category ? `<span class="attraction-category">${attraction.category}</span>` : ''}
+                </div>
+              `).join('') : '<div class="no-items">No attractions added yet</div>'}
+            </div>
+          </div>
+          
+          <div class="place-section">
+            <h4>🏨 Accommodations (${accommodations.length})</h4>
+            <div class="accommodations-list">
+              ${accommodations.length > 0 ? accommodations.map(acc => `
+                <div class="accommodation-item">
+                  <span class="accommodation-name">${acc.name}</span>
+                  <span class="accommodation-type">${acc.type || 'Accommodation'}</span>
+                </div>
+              `).join('') : '<div class="no-items">No accommodations in this city</div>'}
+            </div>
+          </div>
+          
+          <div class="place-actions">
+            <button class="place-action-btn" onclick="tripUI.closePlaceDetails(); app.viewTripDetails(${tripId})">
+              View Full Trip Details
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.innerHTML = modalContent;
+    modalOverlay.onclick = (e) => {
+      if (e.target === modalOverlay) this.closePlaceDetails();
+    };
+    
+    document.body.appendChild(modalOverlay);
+  },
+
+  closePlaceDetails() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+      modal.remove();
+    }
+  }
+});
 
 // Initialize trip UI when DOM is loaded or when needed
 document.addEventListener('DOMContentLoaded', () => {

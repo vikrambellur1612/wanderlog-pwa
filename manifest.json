@@ -2,7 +2,7 @@
   "name": "WanderLog",
   "short_name": "WanderLog",
   "description": "Your personal travel companion for discovering and logging amazing places",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -12,6 +12,30 @@
   "lang": "en",
   "dir": "ltr",
   "icons": [
+    {
+      "src": "./icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./Wanderlog.jpeg",
+      "sizes": "144x144",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
     {
       "src": "./icons/icon-72x72.png",
       "sizes": "72x72",
@@ -43,22 +67,10 @@
       "purpose": "any"
     },
     {
-      "src": "./icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
       "src": "./icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "./icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
