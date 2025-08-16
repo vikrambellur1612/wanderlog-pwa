@@ -426,9 +426,19 @@ class TripUI {
             </button>
           </div>
           <h1 class="trip-detail-name">${trip.name}</h1>
-          <p class="trip-detail-dates">
-            ${window.formatDate(trip.startDate)} - ${window.formatDate(trip.endDate)}
-          </p>
+          <div class="trip-detail-dates">
+            <div class="trip-date-badges">
+              <div class="trip-date-badge trip-start-date">
+                <span class="date-label">Departure</span>
+                <span class="date-value">${window.formatDate(trip.startDate)}</span>
+              </div>
+              <div class="trip-date-separator">→</div>
+              <div class="trip-date-badge trip-end-date">
+                <span class="date-label">Return</span>
+                <span class="date-value">${window.formatDate(trip.endDate)}</span>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="trip-sections">
@@ -2366,8 +2376,8 @@ class TripUI {
           <button class="btn-action edit-btn" onclick="editAccommodation(${accommodation.id})" title="Edit accommodation">
             ✏️ Edit
           </button>
-          <button class="btn-action remove-btn" onclick="removeAccommodation(${accommodation.id})" title="Remove accommodation">
-            🗑️ Remove
+          <button class="btn-action remove-btn" onclick="removeAccommodation(${accommodation.id})" title="Delete accommodation">
+            🗑️ Delete
           </button>
         </div>
       </div>

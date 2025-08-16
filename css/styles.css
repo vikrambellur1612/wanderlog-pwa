@@ -142,7 +142,11 @@
 
 /* Card Component System */
 .card {
-    background-color: var(--white);
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(248, 250, 252, 0.9) 50%,
+        rgba(241, 245, 249, 0.95) 100%
+    );
     border-radius: var(--radius-lg);
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(4px);
@@ -153,6 +157,11 @@
 }
 
 .card:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 250, 252, 0.95) 50%,
+        rgba(236, 242, 255, 0.9) 100%
+    );
     box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
     transform: translateY(-5px);
     border-color: rgba(255, 255, 255, 0.25);
@@ -699,8 +708,16 @@ select.form-input {
 
 .trip-card {
     background: linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.9) 0%,
-        rgba(255, 255, 255, 0.7) 100%
+        rgba(139, 69, 19, 0.05) 0%,
+        rgba(245, 158, 11, 0.08) 20%,
+        rgba(34, 197, 94, 0.06) 40%,
+        rgba(59, 130, 246, 0.08) 60%,
+        rgba(168, 85, 247, 0.06) 80%,
+        rgba(236, 72, 153, 0.05) 100%
+    ),
+    linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.8) 100%
     );
     border-radius: var(--radius-xl);
     box-shadow: 
@@ -736,6 +753,18 @@ select.form-input {
 }
 
 .trip-card:hover {
+    background: linear-gradient(135deg, 
+        rgba(139, 69, 19, 0.12) 0%,
+        rgba(245, 158, 11, 0.15) 20%,
+        rgba(34, 197, 94, 0.12) 40%,
+        rgba(59, 130, 246, 0.15) 60%,
+        rgba(168, 85, 247, 0.12) 80%,
+        rgba(236, 72, 153, 0.1) 100%
+    ),
+    linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(255, 255, 255, 0.9) 100%
+    );
     transform: translateY(-8px) scale(1.02) rotateX(5deg);
     box-shadow: 
         0 30px 60px rgba(0, 0, 0, 0.15),
@@ -2115,7 +2144,10 @@ select.form-input {
 
 .accommodation-list {
     display: grid;
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .accommodation-card {
@@ -2133,14 +2165,21 @@ select.form-input {
 
 /* Modern Card Styling */
 .accommodation-card.modern-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, 
+        rgba(255, 247, 237, 0.95) 0%,
+        rgba(254, 242, 242, 0.9) 25%,
+        rgba(240, 253, 244, 0.9) 50%,
+        rgba(239, 246, 255, 0.9) 75%,
+        rgba(250, 245, 255, 0.95) 100%
+    );
+    border: 1px solid rgba(226, 232, 240, 0.6);
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    max-width: 100%;
 }
 
 .accommodation-card.modern-card::before {
@@ -2155,9 +2194,16 @@ select.form-input {
 }
 
 .accommodation-card.modern-card:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 251, 235, 0.98) 0%,
+        rgba(254, 226, 226, 0.95) 25%,
+        rgba(220, 252, 231, 0.95) 50%,
+        rgba(219, 234, 254, 0.95) 75%,
+        rgba(245, 208, 254, 0.98) 100%
+    );
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border-color: #c7d2fe;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+    border-color: rgba(167, 139, 250, 0.4);
 }
 
 .accommodation-card.modern-card:active {
@@ -2307,7 +2353,8 @@ select.form-input {
 .date-badge {
     flex: 1;
     min-width: 120px;
-    padding: 1rem;
+    max-width: 180px;
+    padding: 0.8rem 1rem;
     border-radius: 12px;
     text-align: center;
     position: relative;
@@ -2315,15 +2362,15 @@ select.form-input {
 }
 
 .check-in {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+    color: #064e3b;
+    box-shadow: 0 4px 6px rgba(52, 211, 153, 0.2);
 }
 
 .check-out {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-    box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #92400e;
+    box-shadow: 0 4px 6px rgba(251, 191, 36, 0.2);
 }
 
 .date-badge::before {
@@ -2366,6 +2413,7 @@ select.form-input {
 .btn-action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
     border: none;
@@ -2377,6 +2425,8 @@ select.form-input {
     text-decoration: none;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
+    min-width: 90px;
 }
 
 .edit-btn {
@@ -2486,6 +2536,38 @@ select.form-input {
     font-size: 3rem;
     margin-bottom: var(--spacing-lg);
     opacity: 0.5;
+}
+
+/* Desktop specific styles for accommodation cards */
+@media (min-width: 769px) {
+    .date-badges {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .date-badge {
+        max-width: 200px;
+        padding: 0.9rem 1.2rem;
+    }
+    
+    .accommodation-actions {
+        flex-direction: row;
+        gap: 0.8rem;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+    }
+    
+    .btn-action {
+        white-space: nowrap;
+        min-width: 100px;
+        font-size: 0.875rem;
+        padding: 0.8rem 1.3rem;
+    }
+    
+    .accommodation-card.modern-card {
+        max-width: 100%;
+        margin: 0;
+    }
 }
 
 .empty-accommodations h4 {
@@ -2979,6 +3061,106 @@ select.form-input {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Trip Detail Header Date Badges */
+.trip-detail-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.trip-detail-name {
+    color: var(--gray-900);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.trip-date-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.trip-date-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    min-width: 140px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.trip-start-date {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.trip-end-date {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.trip-date-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.trip-start-date:hover {
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.trip-end-date:hover {
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.date-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    opacity: 0.9;
+}
+
+.date-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.trip-date-separator {
+    font-size: 1.5rem;
+    color: var(--gray-400);
+    font-weight: 300;
+}
+
+/* Mobile responsive for trip header dates */
+@media (max-width: 768px) {
+    .trip-date-badges {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .trip-date-separator {
+        transform: rotate(90deg);
+        font-size: 1.2rem;
+    }
+    
+    .trip-date-badge {
+        min-width: 120px;
+        padding: 0.8rem 1.2rem;
+    }
+    
+    .trip-detail-name {
+        font-size: 1.5rem;
+    }
 }
 
 .explore-section {
