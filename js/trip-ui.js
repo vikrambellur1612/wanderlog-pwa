@@ -3,7 +3,12 @@
 
 class TripUI {
   constructor() {
-    this.tripManager = new TripManager();
+    // Use shared TripManager instance if available, otherwise create new one
+    this.tripManager = window.tripManager || new TripManager();
+    // Make sure it's globally available
+    if (!window.tripManager) {
+      window.tripManager = this.tripManager;
+    }
     this.currentView = 'list'; // 'list' or 'detail'
     this.currentTripId = null;
     this.init();
@@ -1400,7 +1405,7 @@ class TripUI {
 
   // Refresh trips list
   refreshTripsList() {
-    const content = document.getElementById('trips-content');
+    const content = document.getElementById('trip-list');
     if (content) {
       content.innerHTML = this.renderTripsList();
     }

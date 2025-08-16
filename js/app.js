@@ -327,7 +327,10 @@ class WanderLogApp {
     const endDateInput = document.getElementById('tripEndDate');
     const descriptionInput = document.getElementById('tripDescription');
 
+    console.log('Create trip called', { nameInput, startDateInput, endDateInput }); // Debug log
+
     if (!nameInput || !startDateInput || !endDateInput) {
+      console.error('Missing form elements:', { nameInput, startDateInput, endDateInput });
       this.showToast('Please fill in all required fields', 'error');
       return;
     }
@@ -338,6 +341,8 @@ class WanderLogApp {
       endDate: endDateInput.value,
       description: descriptionInput ? descriptionInput.value.trim() : ''
     };
+
+    console.log('Trip data:', tripData); // Debug log
 
     // Validation
     if (!tripData.name) {
@@ -356,13 +361,21 @@ class WanderLogApp {
     }
 
     // Initialize TripManager if not already done
-    if (!window.tripManager && typeof TripManager === 'function') {
-      window.tripManager = new TripManager();
+    if (!window.tripManager) {
+      if (typeof TripManager === 'function') {
+        window.tripManager = new TripManager();
+        console.log('TripManager initialized');
+      } else {
+        console.error('TripManager class not available');
+        this.showToast('Error: Trip manager not available', 'error');
+        return;
+      }
     }
 
     // Create trip
     try {
       const newTrip = window.tripManager.createTrip(tripData);
+      console.log('Trip created:', newTrip);
       this.showToast(`Trip "${tripData.name}" created successfully!`, 'success');
       
       // Close modal
@@ -374,6 +387,13 @@ class WanderLogApp {
       // Auto-navigate to trips view to show the new trip
       setTimeout(() => {
         this.navigateToView('trips');
+        
+        // Force refresh of TripUI to show the new trip
+        setTimeout(() => {
+          if (window.tripUI && window.tripUI.createTripListView) {
+            window.tripUI.createTripListView();
+          }
+        }, 200);
       }, 1500);
       
     } catch (error) {
