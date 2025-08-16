@@ -1612,13 +1612,43 @@ class TripUI {
       ...(item.customAttractions || []).map(name => ({ name, isFromPlace: false }))
     ];
 
+    // Get all unique places covered on this day
+    const getPlacesCovered = () => {
+      const trip = this.getCurrentTrip();
+      const places = new Set();
+      
+      // Add base place from itinerary item
+      if (item.place && typeof item.place === 'string') {
+        places.add(item.place);
+      }
+      
+      // Add places from attractions
+      if (item.attractions && item.attractions.length > 0) {
+        trip.places.forEach(tripPlace => {
+          const hasAttractions = item.attractions.some(attraction => 
+            tripPlace.attractions && tripPlace.attractions.includes(attraction)
+          );
+          if (hasAttractions) {
+            places.add(tripPlace.city);
+          }
+        });
+      }
+      
+      return Array.from(places).filter(place => place && place !== 'Unknown Location');
+    };
+
+    const placesCovered = getPlacesCovered();
+    const displayLocation = placesCovered.length > 0 
+      ? placesCovered.slice(0, 2).join(', ') + (placesCovered.length > 2 ? ` +${placesCovered.length - 2} more` : '')
+      : (item.place || 'No location specified');
+
     return `
       <div class="itinerary-day-card" data-itinerary-id="${item.id}">
         <div class="itinerary-day-header">
           <div class="day-info">
             <div class="day-number">Day ${dayNumber}</div>
             <div class="day-date">${formattedDate}</div>
-            <div class="day-location">📍 ${item.place}</div>
+            <div class="day-location">📍 ${displayLocation}</div>
           </div>
           <div class="day-actions">
             <button class="btn-edit itinerary-action-btn" onclick="tripUI.editItineraryItem(${item.id})" title="Edit Day">
@@ -1635,18 +1665,35 @@ class TripUI {
             <div class="day-attractions">
               <h4 class="attractions-heading">🎯 Places to Visit</h4>
               <div class="attractions-grid">
-                ${allAttractions.map(attraction => `
-                  <div class="attraction-item ${attraction.isFromPlace ? 'from-place' : 'custom'}">
-                    <div class="attraction-name">${attraction.name}</div>
-                    ${attraction.isFromPlace ? `
-                      <div class="attraction-description">
-                        ${this.tripManager.getAttractionDescription(attraction.name, { city: item.place })}
+                ${allAttractions.map(attraction => {
+                  if (attraction.isFromPlace) {
+                    // Find which place this attraction belongs to
+                    const trip = this.getCurrentTrip();
+                    const attractionPlace = trip.places.find(place => 
+                      place.attractions && place.attractions.includes(attraction.name)
+                    );
+                    const placeInfo = attractionPlace ? { city: attractionPlace.city } : { city: item.place };
+                    
+                    return `
+                      <div class="attraction-item from-place">
+                        <div class="attraction-name">${attraction.name}</div>
+                        <div class="attraction-description">
+                          ${this.tripManager.getAttractionDescription(attraction.name, placeInfo)}
+                        </div>
+                        ${attractionPlace && attractionPlace.city !== item.place ? 
+                          `<div class="attraction-place">📍 ${attractionPlace.city}</div>` : ''
+                        }
                       </div>
-                    ` : `
-                      <div class="attraction-type">Custom Attraction</div>
-                    `}
-                  </div>
-                `).join('')}
+                    `;
+                  } else {
+                    return `
+                      <div class="attraction-item custom">
+                        <div class="attraction-name">${attraction.name}</div>
+                        <div class="attraction-type">Custom Attraction</div>
+                      </div>
+                    `;
+                  }
+                }).join('')}
               </div>
             </div>
           ` : `

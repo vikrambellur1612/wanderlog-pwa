@@ -409,6 +409,20 @@ class TripManager {
     const checkOutDate = new Date(accommodation.checkOut);
     const currentDate = new Date(checkInDate);
 
+    // Extract location string from accommodation
+    const getLocationString = (location) => {
+      if (typeof location === 'string') return location;
+      if (typeof location === 'object' && location) {
+        const parts = [];
+        if (location.city) parts.push(location.city);
+        if (location.state) parts.push(location.state);
+        return parts.length > 0 ? parts.join(', ') : 'Unknown Location';
+      }
+      return 'Unknown Location';
+    };
+
+    const locationString = getLocationString(accommodation.location);
+
     while (currentDate < checkOutDate) {
       const dateString = currentDate.toISOString().split('T')[0];
       let dayItinerary = this.getDailyItinerary(tripId, dateString);
@@ -417,7 +431,7 @@ class TripManager {
         // Create new day itinerary
         this.addDailyItinerary(tripId, {
           date: dateString,
-          place: accommodation.location,
+          place: locationString,
           accommodation: accommodation,
           attractions: [],
           customAttractions: []

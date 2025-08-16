@@ -3449,3 +3449,15 @@ select.form-input {
         min-width: 120px;
     }
 }
+
+/* Attraction place indicator styling */
+.attraction-place {
+    font-size: 0.75rem;
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    display: inline-block;
+}
