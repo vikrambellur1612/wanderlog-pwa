@@ -2242,43 +2242,131 @@ class TripUI {
     const hasWebsite = (isHotel && accommodation.hotelData.website && accommodation.hotelData.website !== 'Not provided') ||
                       (isCustom && accommodation.customDetails.website && accommodation.customDetails.website !== 'Not provided');
 
+    // Get location info with safe fallbacks
+    const getLocationInfo = () => {
+      if (isHotel && accommodation.location) {
+        const parts = [];
+        if (accommodation.hotelData?.area && accommodation.hotelData.area !== 'undefined') {
+          parts.push(accommodation.hotelData.area);
+        }
+        if (accommodation.location.city && accommodation.location.city !== 'undefined') {
+          parts.push(accommodation.location.city);
+        }
+        if (accommodation.location.state && accommodation.location.state !== 'undefined') {
+          parts.push(accommodation.location.state);
+        }
+        return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+      }
+      
+      if (isCustom && accommodation.location) {
+        const parts = [];
+        if (accommodation.location.city && accommodation.location.city !== 'undefined') {
+          parts.push(accommodation.location.city);
+        }
+        if (accommodation.location.state && accommodation.location.state !== 'undefined') {
+          parts.push(accommodation.location.state);
+        }
+        return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+      }
+      
+      return 'Location not specified';
+    };
+
+    // Get rating info with safe fallbacks
+    const getRatingInfo = () => {
+      if (isHotel && accommodation.hotelData?.rating && accommodation.hotelData.rating !== 'N/A') {
+        const rating = parseFloat(accommodation.hotelData.rating);
+        if (!isNaN(rating) && rating > 0) {
+          return {
+            stars: '★'.repeat(Math.floor(rating)),
+            text: `${rating}/5`
+          };
+        }
+      }
+      return null;
+    };
+
+    const locationInfo = getLocationInfo();
+    const ratingInfo = getRatingInfo();
+
     return `
-      <div class="accommodation-card">
+      <div class="accommodation-card modern-card">
         <div class="accommodation-header">
-          <h4>${accommodation.name}</h4>
-          <span class="accommodation-type">${isHotel ? 'Hotel' : 'Custom'}</span>
+          <div class="accommodation-title-section">
+            <h4 class="accommodation-name">${accommodation.name}</h4>
+            <span class="accommodation-location">📍 ${locationInfo}</span>
+          </div>
+          <span class="accommodation-type-badge ${isHotel ? 'hotel-badge' : 'custom-badge'}">
+            ${isHotel ? '🏨 Hotel' : '🏡 Custom'}
+          </span>
         </div>
         
+        ${ratingInfo ? `
+          <div class="accommodation-rating">
+            <span class="rating-stars">${ratingInfo.stars}</span>
+            <span class="rating-text">${ratingInfo.text}</span>
+          </div>
+        ` : ''}
+        
         <div class="accommodation-details">
-          ${isHotel ? `
-            <p><strong>Location:</strong> ${accommodation.hotelData.area}, ${accommodation.location.city}</p>
-            <div class="hotel-rating">
-              <span class="rating-stars">${'★'.repeat(Math.floor(accommodation.hotelData.rating))}</span>
-              <span class="rating-text">${accommodation.hotelData.rating}/5</span>
+          ${isHotel && accommodation.hotelData?.category ? `
+            <div class="accommodation-category">
+              <span class="category-label">Category:</span>
+              <span class="category-value">${accommodation.hotelData.category}</span>
             </div>
-            <p><strong>Category:</strong> ${accommodation.hotelData.category}</p>
-            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.hotelData.website.match(/^https?:\/\//) ? accommodation.hotelData.website : 'https://' + accommodation.hotelData.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
           ` : ''}
           
-          ${isCustom ? `
-            <p><strong>Location:</strong> ${accommodation.location.city}, ${accommodation.location.state}</p>
-            <p><strong>Category:</strong> ${accommodation.customDetails.category}</p>
-            ${accommodation.customDetails.address ? `<p><strong>Address:</strong> ${accommodation.customDetails.address}</p>` : ''}
-            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.customDetails.website.match(/^https?:\/\//) ? accommodation.customDetails.website : 'https://' + accommodation.customDetails.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
+          ${isCustom && accommodation.customDetails?.category ? `
+            <div class="accommodation-category">
+              <span class="category-label">Type:</span>
+              <span class="category-value">${accommodation.customDetails.category}</span>
+            </div>
           ` : ''}
           
-          ${accommodation.notes ? `<p><strong>Notes:</strong> ${accommodation.notes}</p>` : ''}
+          ${accommodation.customDetails?.address ? `
+            <div class="accommodation-address">
+              <span class="address-label">Address:</span>
+              <span class="address-value">${accommodation.customDetails.address}</span>
+            </div>
+          ` : ''}
+          
+          ${hasWebsite ? `
+            <div class="accommodation-website">
+              <a href="${(isHotel ? accommodation.hotelData.website : accommodation.customDetails.website).match(/^https?:\/\//) ? 
+                         (isHotel ? accommodation.hotelData.website : accommodation.customDetails.website) : 
+                         'https://' + (isHotel ? accommodation.hotelData.website : accommodation.customDetails.website)}" 
+                 target="_blank" rel="noopener" class="website-link">
+                🔗 View Details
+              </a>
+            </div>
+          ` : ''}
+          
+          ${accommodation.notes ? `
+            <div class="accommodation-notes">
+              <span class="notes-label">Notes:</span>
+              <span class="notes-value">${accommodation.notes}</span>
+            </div>
+          ` : ''}
         </div>
 
-        <div class="accommodation-dates">
-          <strong>Stay Duration:</strong> ${checkInDate} → ${checkOutDate}
+        <div class="accommodation-dates-section">
+          <div class="date-badges">
+            <div class="date-badge check-in">
+              <span class="date-label">Check In</span>
+              <span class="date-value">${checkInDate}</span>
+            </div>
+            <div class="date-badge check-out">
+              <span class="date-label">Check Out</span>
+              <span class="date-value">${checkOutDate}</span>
+            </div>
+          </div>
         </div>
 
         <div class="accommodation-actions">
-          <button class="btn-secondary" onclick="editAccommodation(${accommodation.id})">
+          <button class="btn-action edit-btn" onclick="editAccommodation(${accommodation.id})" title="Edit accommodation">
             ✏️ Edit
           </button>
-          <button class="btn-secondary" onclick="removeAccommodation(${accommodation.id})">
+          <button class="btn-action remove-btn" onclick="removeAccommodation(${accommodation.id})" title="Remove accommodation">
             🗑️ Remove
           </button>
         </div>
