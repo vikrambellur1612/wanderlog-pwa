@@ -78,6 +78,22 @@
     white-space: nowrap;
 }
 
+/* Trip action buttons consistent styling */
+.trip-action-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem; /* Consistent font size */
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -128,15 +144,18 @@
 .card {
     background-color: var(--white);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     overflow: hidden;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .card-header {
@@ -588,10 +607,14 @@ select.form-input {
     text-align: center;
     margin-bottom: var(--spacing-3xl);
     padding: var(--spacing-2xl) var(--spacing-lg);
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(56, 142, 60, 0.9));
     color: var(--white);
     border-radius: var(--radius-lg);
     margin: 0 var(--spacing-lg) var(--spacing-3xl);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .home-header h2 {
@@ -649,19 +672,22 @@ select.form-input {
 }
 
 .trip-card {
-    background-color: var(--white);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     padding: var(--spacing-xl);
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
     cursor: pointer;
 }
 
 .trip-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-    border-color: var(--primary-color);
+    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    transform: translateY(-5px);
+    border-color: rgba(76, 175, 80, 0.4);
+    background: rgba(255, 255, 255, 0.35);
 }
 
 .trip-card-header {
@@ -757,13 +783,14 @@ select.form-input {
 }
 
 .trip-action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-danger {
     background-color: #dc3545;
     color: var(--white);
+    font-size: 0.875rem; /* Consistent font size */
 }
 
 .btn-danger:hover {
@@ -2396,4 +2423,46 @@ select.form-input {
 
 .manual-entry-option button {
     margin-top: var(--spacing-md);
+}
+
+/* Hotel link styling */
+.hotel-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.hotel-link:hover {
+    color: var(--primary-color-dark);
+    text-decoration: underline;
+}
+
+/* Enhance glassmorphism effects for sections */
+.trip-section {
+    margin-bottom: var(--spacing-3xl);
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.explore-section {
+    margin-bottom: var(--spacing-3xl);
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin-left: var(--spacing-lg);
+    margin-right: var(--spacing-lg);
 }

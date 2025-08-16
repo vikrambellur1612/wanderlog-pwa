@@ -1588,9 +1588,15 @@ class TripUI {
                         <span class="rating-text">${item.accommodation.hotelData.rating}/5</span>
                       </div>
                       <p><em>${item.accommodation.hotelData.category}</em></p>
+                      ${item.accommodation.hotelData.website && item.accommodation.hotelData.website !== 'Not provided' ? `
+                        <p><a href="${item.accommodation.hotelData.website.startsWith('http') ? item.accommodation.hotelData.website : 'https://' + item.accommodation.hotelData.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
+                      ` : ''}
                     ` : ''}
                     ${item.accommodation.customDetails ? `
                       <p><em>${item.accommodation.customDetails.category}</em></p>
+                      ${item.accommodation.customDetails.website && item.accommodation.customDetails.website !== 'Not provided' ? `
+                        <p><a href="${item.accommodation.customDetails.website.startsWith('http') ? item.accommodation.customDetails.website : 'https://' + item.accommodation.customDetails.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
+                      ` : ''}
                     ` : ''}
                   </div>
                 ` : `
@@ -2160,6 +2166,8 @@ class TripUI {
 
     const isHotel = accommodation.type === 'hotel' && accommodation.hotelData;
     const isCustom = accommodation.type === 'custom' && accommodation.customDetails;
+    const hasWebsite = (isHotel && accommodation.hotelData.website && accommodation.hotelData.website !== 'Not provided') ||
+                      (isCustom && accommodation.customDetails.website && accommodation.customDetails.website !== 'Not provided');
 
     return `
       <div class="accommodation-card">
@@ -2176,12 +2184,14 @@ class TripUI {
               <span class="rating-text">${accommodation.hotelData.rating}/5</span>
             </div>
             <p><strong>Category:</strong> ${accommodation.hotelData.category}</p>
+            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.hotelData.website.startsWith('http') ? accommodation.hotelData.website : 'https://' + accommodation.hotelData.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
           ` : ''}
           
           ${isCustom ? `
             <p><strong>Location:</strong> ${accommodation.location.city}, ${accommodation.location.state}</p>
             <p><strong>Category:</strong> ${accommodation.customDetails.category}</p>
             ${accommodation.customDetails.address ? `<p><strong>Address:</strong> ${accommodation.customDetails.address}</p>` : ''}
+            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.customDetails.website.startsWith('http') ? accommodation.customDetails.website : 'https://' + accommodation.customDetails.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
           ` : ''}
           
           ${accommodation.notes ? `<p><strong>Notes:</strong> ${accommodation.notes}</p>` : ''}

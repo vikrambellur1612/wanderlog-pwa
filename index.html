@@ -96,7 +96,8 @@
             font-family: var(--font-family);
             line-height: 1.6;
             color: var(--gray-800);
-            background-color: var(--gray-50);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
         
         .loading-screen {
@@ -132,7 +133,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: var(--gray-50);
+            background: transparent;
         }
         
         .app-header {
@@ -537,6 +538,12 @@
                                     <input type="text" id="manualHotelName" class="form-input" placeholder="Enter hotel name" required>
                                 </div>
                                 <div class="form-group">
+                                    <label for="manualHotelWebsite">Hotel Website/Link</label>
+                                    <input type="url" id="manualHotelWebsite" class="form-input" placeholder="Hotel website or booking link">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
                                     <label for="manualHotelCategory">Category (Optional)</label>
                                     <select id="manualHotelCategory" class="form-input">
                                         <option value="">Select category...</option>
@@ -546,12 +553,6 @@
                                         <option value="Budget">Budget</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="manualHotelAddress">Address (Optional)</label>
-                                    <input type="text" id="manualHotelAddress" class="form-input" placeholder="Hotel address">
-                                </div>
                                 <div class="form-group">
                                     <label for="manualHotelPhone">Phone (Optional)</label>
                                     <input type="tel" id="manualHotelPhone" class="form-input" placeholder="Contact number">
@@ -559,12 +560,12 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="manualHotelEmail">Email (Optional)</label>
-                                    <input type="email" id="manualHotelEmail" class="form-input" placeholder="Hotel email">
+                                    <label for="manualHotelAddress">Address (Optional)</label>
+                                    <input type="text" id="manualHotelAddress" class="form-input" placeholder="Hotel address">
                                 </div>
                                 <div class="form-group">
-                                    <label for="manualHotelWebsite">Website (Optional)</label>
-                                    <input type="url" id="manualHotelWebsite" class="form-input" placeholder="Hotel website">
+                                    <label for="manualHotelEmail">Email (Optional)</label>
+                                    <input type="email" id="manualHotelEmail" class="form-input" placeholder="Hotel email">
                                 </div>
                             </div>
                             <div class="form-group">

@@ -1,5 +1,5 @@
 // WanderLog PWA - Main Application Logic
-// Version: 1.4.0
+// Version: 1.7.0
 
 class WanderLogApp {
   constructor() {
@@ -12,7 +12,7 @@ class WanderLogApp {
   }
 
   async init() {
-    console.log('Initializing WanderLog PWA v1.4.0');
+    console.log('Initializing WanderLog PWA v1.7.0');
     
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
@@ -169,6 +169,15 @@ class WanderLogApp {
     // Home view is mostly static, but we can add dynamic content here
     console.log('Rendering home view');
     
+    // Load and display trips on home page
+    this.loadHomePageTrips();
+    
+    // Set up Add Trip button
+    const addTripBtn = document.getElementById('addTripBtn');
+    if (addTripBtn) {
+      addTripBtn.addEventListener('click', this.openAddTripModal.bind(this));
+    }
+    
     // Ensure TripUI is initialized for home page functionality
     setTimeout(() => {
       if (typeof window.initializeTripUI === 'function') {
@@ -181,6 +190,250 @@ class WanderLogApp {
         }
       }
     }, 100);
+  }
+
+  // Load trips for home page display
+  loadHomePageTrips() {
+    const upcomingTripsList = document.getElementById('upcomingTripsList');
+    const completedTripsList = document.getElementById('completedTripsList');
+    
+    if (!upcomingTripsList || !completedTripsList) return;
+
+    // Initialize TripManager if not already done
+    if (!window.tripManager && typeof TripManager === 'function') {
+      window.tripManager = new TripManager();
+    }
+
+    const trips = window.tripManager ? window.tripManager.getAllTrips() : [];
+    const upcomingTrips = trips.filter(trip => this.getTripStatus(trip) === 'Upcoming');
+    const completedTrips = trips.filter(trip => this.getTripStatus(trip) === 'Completed');
+
+    // Render upcoming trips
+    if (upcomingTrips.length === 0) {
+      upcomingTripsList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✈️</div>
+          <h3>No upcoming trips</h3>
+          <p>Start planning your next adventure!</p>
+        </div>
+      `;
+    } else {
+      upcomingTripsList.innerHTML = upcomingTrips.map(trip => this.renderTripCard(trip)).join('');
+    }
+
+    // Render completed trips
+    if (completedTrips.length === 0) {
+      completedTripsList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📅</div>
+          <h3>No completed trips</h3>
+          <p>Your travel memories will appear here</p>
+        </div>
+      `;
+    } else {
+      completedTripsList.innerHTML = completedTrips.map(trip => this.renderTripCard(trip)).join('');
+    }
+  }
+
+  // Render a single trip card
+  renderTripCard(trip) {
+    const status = this.getTripStatus(trip);
+    const startDate = new Date(trip.startDate).toLocaleDateString();
+    const endDate = new Date(trip.endDate).toLocaleDateString();
+    const placesCount = trip.places ? trip.places.length : 0;
+
+    return `
+      <div class="trip-card" onclick="app.viewTripDetails(${trip.id})">
+        <div class="trip-card-header">
+          <div>
+            <div class="trip-title">${trip.name}</div>
+            <div class="trip-destination">${placesCount} destinations</div>
+          </div>
+          <span class="trip-status ${status.toLowerCase()}">${status}</span>
+        </div>
+        
+        <div class="trip-dates">
+          <span class="date-label start-date">Start: ${startDate}</span>
+          <span class="date-label end-date">End: ${endDate}</span>
+        </div>
+        
+        ${trip.description ? `<div class="trip-description">${trip.description}</div>` : ''}
+        
+        <div class="trip-actions">
+          <button class="trip-action-btn btn-primary" onclick="event.stopPropagation(); app.viewTripDetails(${trip.id})">
+            View
+          </button>
+          <button class="trip-action-btn btn-edit" onclick="event.stopPropagation(); app.editTrip(${trip.id})">
+            Edit
+          </button>
+          <button class="trip-action-btn btn-danger" onclick="event.stopPropagation(); app.deleteTrip(${trip.id})">
+            Delete
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Open Add Trip Modal
+  openAddTripModal() {
+    const modal = document.getElementById('addTripModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      
+      // Set up form submission
+      const form = document.getElementById('addTripForm');
+      const closeBtn = document.getElementById('closeAddTripModal');
+      const cancelBtn = document.getElementById('cancelTripBtn');
+      
+      if (form) {
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          this.createTrip();
+        };
+      }
+      
+      if (closeBtn) {
+        closeBtn.onclick = () => this.closeAddTripModal();
+      }
+      
+      if (cancelBtn) {
+        cancelBtn.onclick = () => this.closeAddTripModal();
+      }
+
+      // Close modal when clicking outside
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          this.closeAddTripModal();
+        }
+      };
+    }
+  }
+
+  // Close Add Trip Modal
+  closeAddTripModal() {
+    const modal = document.getElementById('addTripModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      // Clear form
+      const form = document.getElementById('addTripForm');
+      if (form) form.reset();
+    }
+  }
+
+  // Create new trip
+  createTrip() {
+    const nameInput = document.getElementById('tripName');
+    const startDateInput = document.getElementById('tripStartDate');
+    const endDateInput = document.getElementById('tripEndDate');
+    const descriptionInput = document.getElementById('tripDescription');
+
+    if (!nameInput || !startDateInput || !endDateInput) {
+      this.showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    const tripData = {
+      name: nameInput.value.trim(),
+      startDate: startDateInput.value,
+      endDate: endDateInput.value,
+      description: descriptionInput ? descriptionInput.value.trim() : ''
+    };
+
+    // Validation
+    if (!tripData.name) {
+      this.showToast('Please enter a trip name', 'error');
+      return;
+    }
+
+    if (!tripData.startDate || !tripData.endDate) {
+      this.showToast('Please select both start and end dates', 'error');
+      return;
+    }
+
+    if (new Date(tripData.startDate) >= new Date(tripData.endDate)) {
+      this.showToast('End date must be after start date', 'error');
+      return;
+    }
+
+    // Initialize TripManager if not already done
+    if (!window.tripManager && typeof TripManager === 'function') {
+      window.tripManager = new TripManager();
+    }
+
+    // Create trip
+    try {
+      const newTrip = window.tripManager.createTrip(tripData);
+      this.showToast(`Trip "${tripData.name}" created successfully!`, 'success');
+      
+      // Close modal
+      this.closeAddTripModal();
+      
+      // Refresh home page trips display
+      this.loadHomePageTrips();
+      
+      // Auto-navigate to trips view to show the new trip
+      setTimeout(() => {
+        this.navigateToView('trips');
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error creating trip:', error);
+      this.showToast('Error creating trip. Please try again.', 'error');
+    }
+  }
+
+  // View trip details
+  viewTripDetails(tripId) {
+    // Navigate to trips view and show trip detail
+    this.navigateToView('trips');
+    
+    // Wait for TripUI to initialize, then view trip detail
+    setTimeout(() => {
+      if (window.tripUI && window.tripUI.viewTripDetail) {
+        window.tripUI.viewTripDetail(tripId);
+      }
+    }, 200);
+  }
+
+  // Edit trip
+  editTrip(tripId) {
+    // Navigate to trips view and edit trip
+    this.navigateToView('trips');
+    
+    // Wait for TripUI to initialize, then edit trip
+    setTimeout(() => {
+      if (window.tripUI && window.tripUI.editTrip) {
+        window.tripUI.editTrip(tripId);
+      }
+    }, 200);
+  }
+
+  // Delete trip
+  deleteTrip(tripId) {
+    if (!window.tripManager) {
+      this.showToast('Trip manager not available', 'error');
+      return;
+    }
+
+    const trip = window.tripManager.getTrip(tripId);
+    if (!trip) {
+      this.showToast('Trip not found', 'error');
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete "${trip.name}"? This action cannot be undone.`)) {
+      try {
+        window.tripManager.deleteTrip(tripId);
+        this.showToast(`Trip "${trip.name}" deleted successfully`, 'success');
+        
+        // Refresh home page trips display
+        this.loadHomePageTrips();
+        
+      } catch (error) {
+        console.error('Error deleting trip:', error);
+        this.showToast('Error deleting trip. Please try again.', 'error');
+      }
+    }
   }
 
   renderTripsView() {
