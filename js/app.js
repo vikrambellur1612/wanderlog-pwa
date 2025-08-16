@@ -330,8 +330,8 @@ class WanderLogApp {
     console.log('Create trip called', { nameInput, startDateInput, endDateInput }); // Debug log
 
     if (!nameInput || !startDateInput || !endDateInput) {
-      console.error('Missing form elements:', { nameInput, startDateInput, endDateInput });
-      this.showToast('Please fill in all required fields', 'error');
+      console.error('Missing required form elements:', { nameInput, startDateInput, endDateInput });
+      this.showToast('Form elements not found. Please try again.', 'error');
       return;
     }
 
@@ -344,7 +344,7 @@ class WanderLogApp {
 
     console.log('Trip data:', tripData); // Debug log
 
-    // Validation
+    // Validation - only check required fields
     if (!tripData.name) {
       this.showToast('Please enter a trip name', 'error');
       return;

@@ -22,7 +22,7 @@ class WebHotelSearchService {
     };
   }
 
-  // Main search function that tries internet search first, then falls back to internal data
+  // Main search function that tries internet search first, then allows manual entry
   async searchHotelDetails(hotelName, location) {
     try {
       console.log(`🔍 Searching for "${hotelName}" in ${location.city}, ${location.state}`);
@@ -40,22 +40,10 @@ class WebHotelSearchService {
         };
       }
       
-      // Step 2: Try internal database as fallback but prioritize location match
-      if (this.internalHotels) {
-        const internalResults = this.internalHotels.searchHotelsInLocation(location, hotelName);
-        if (internalResults && internalResults.length > 0) {
-          console.log('✅ Found results from internal database');
-          return {
-            success: true,
-            source: 'internal',
-            results: internalResults,
-            message: `Found ${internalResults.length} hotel(s) from our database in ${location.city}`
-          };
-        }
-      }
-      
-      // Step 3: No results found
-      console.log('❌ No hotels found in web search or internal database');
+      // Step 2: No results found, allow manual entry
+      console.log('⚠️ No hotels found online, allowing manual entry');
+      // Step 2: No results found, allow manual entry
+      console.log('❌ No hotels found online, allowing manual entry');
       return {
         success: false,
         source: 'none',
