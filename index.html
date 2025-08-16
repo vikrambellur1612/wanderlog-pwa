@@ -268,13 +268,17 @@
             <!-- Explore View -->
             <section id="exploreView" class="view">
                 <div class="app-content">
+                    <!-- Add to Trip Banner - Outside header -->
+                    <div id="add-to-trip-info" class="add-to-trip-notification-banner hidden">
+                        <div class="banner-content">
+                            <span class="banner-text">Select a destination to add to your trip</span>
+                            <button class="btn-banner-cancel" onclick="tripUI.cancelAddPlace()">Cancel</button>
+                        </div>
+                    </div>
+                    
                     <div class="explore-header">
                         <h2>🗺️ Explore India</h2>
                         <p>Discover amazing destinations across India and add them to your trips</p>
-                        <div id="add-to-trip-info" class="add-to-trip-banner hidden">
-                            <span>Select a destination to add to your trip</span>
-                            <button class="btn-secondary" onclick="tripUI.cancelAddPlace()">Cancel</button>
-                        </div>
                     </div>
                     
                     <!-- Browse Destinations Section -->
@@ -343,13 +347,6 @@
                                 <label for="customPlaceAttractions">Attractions (one per line)</label>
                                 <textarea id="customPlaceAttractions" class="form-input" rows="5" placeholder="Enter attractions, one per line:&#10;Beautiful Temple&#10;Local Market&#10;Scenic Viewpoint&#10;Traditional Restaurant&#10;Heritage Museum"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label for="selectTripForPlace">Add to Trip</label>
-                                <select id="selectTripForPlace" class="form-input">
-                                    <option value="">Select a trip to add this place to</option>
-                                    <!-- Trip options will be populated dynamically -->
-                                </select>
-                            </div>
                             <div class="form-actions">
                                 <button type="button" class="btn-primary" onclick="app.addCustomPlace()">Add Custom Place</button>
                                 <button type="button" class="btn-secondary" onclick="app.clearCustomPlaceForm()">Clear Form</button>
@@ -357,21 +354,6 @@
                         </div>
                     </div>
 
-                    <!-- Trip Selection Modal -->
-                    <div id="tripSelectionModal" class="modal hidden">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3>Select Trip</h3>
-                                <button class="close-btn" onclick="app.closeTripSelectionModal()">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Choose which trip you'd like to add this destination to:</p>
-                                <div id="tripSelectionList" class="trip-selection-list">
-                                    <!-- Trip options will be populated here -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 

@@ -257,119 +257,14 @@ class MapManager {
         console.error('No current trip found');
       }
     } else {
-      // Coming from explore page directly - show trip selection modal
-      this.showTripSelectionForPlace(city, state);
+      // If no trip context, don't allow adding places - redirect to create trip
+      alert('Please select a trip first from your trips page to add destinations.');
+      window.app?.navigateToView('trips');
     }
   }
 
   // Show trip selection modal for adding place
-  showTripSelectionForPlace(city, state) {
-    const trips = window.tripUI?.tripManager.getAllTrips() || [];
-    
-    if (trips.length === 0) {
-      alert('No trips available. Please create a trip first.');
-      return;
-    }
-    
-    const modal = document.createElement('div');
-    modal.className = 'places-modal-overlay';
-    modal.innerHTML = `
-      <div class="places-modal">
-        <div class="places-modal-header">
-          <h3>Select Trip for ${city}</h3>
-          <button class="close-btn" onclick="this.closest('.places-modal-overlay').remove()">×</button>
-        </div>
-        <div class="places-modal-body">
-          <p>Choose which trip you'd like to add <strong>${city}, ${state}</strong> to:</p>
-          <div class="trip-selection-grid">
-            ${trips.map(trip => {
-              const status = this.getTripStatus(trip);
-              const placesCount = trip.places ? trip.places.length : 0;
-              return `
-                <div class="trip-selection-card" onclick="window.mapManager.addPlaceToSelectedTrip('${city}', '${state}', ${trip.id})">
-                  <div class="trip-selection-header">
-                    <h4>${trip.name}</h4>
-                    <span class="trip-status ${status.toLowerCase()}">${status}</span>
-                  </div>
-                  <p class="trip-dates">${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}</p>
-                  <p class="trip-places">${placesCount} ${placesCount === 1 ? 'place' : 'places'}</p>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-        <div class="places-modal-footer">
-          <button class="close-modal secondary" onclick="this.closest('.places-modal-overlay').remove()">
-            Cancel
-          </button>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Add click outside to close
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.remove();
-      }
-    });
-  }
-
-  // Get trip status helper function
-  getTripStatus(trip) {
-    const currentDate = new Date();
-    const startDate = new Date(trip.startDate);
-    const endDate = new Date(trip.endDate);
-    
-    if (currentDate < startDate) return 'Upcoming';
-    if (currentDate > endDate) return 'Completed';
-    return 'Ongoing';
-  }
-
-  // Add place to selected trip
-  async addPlaceToSelectedTrip(city, state, tripId) {
-    try {
-      // Close modal
-      const modal = document.querySelector('.places-modal-overlay');
-      if (modal) modal.remove();
-      
-      // Check if place already exists in trip
-      const trip = window.tripUI?.tripManager.getTrip(tripId);
-      if (trip) {
-        const existingPlace = trip.places.find(p => 
-          p.city === city && p.state === state
-        );
-        
-        if (existingPlace) {
-          this.showPlaceAlreadyExistsMessage(city, state);
-          return;
-        }
-      }
-      
-      // Show loading state
-      this.showPlaceAddingState(city);
-      
-      // Add place using trip manager
-      if (window.tripUI && window.tripUI.tripManager) {
-        await window.tripUI.tripManager.addPlaceToTrip(tripId, { city, state });
-        
-        // Show success message
-        this.showPlaceAddedMessage(city, state);
-        
-        // Update any existing places modals
-        this.markPlaceAsSelected(city, state);
-        
-        // Navigate to trips page to show the added place
-        setTimeout(() => {
-          this.navigateToTripsPage(tripId);
-        }, 1500); // Wait for success message to be seen
-      }
-    } catch (error) {
-      console.error('Error adding place to trip:', error);
-      alert('Error adding place to trip. Please try again.');
-    }
-  }
+  // Add place to current trip
 
   // Add place to current trip
   async addPlaceToCurrentTrip(city, state) {

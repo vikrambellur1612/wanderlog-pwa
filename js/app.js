@@ -428,11 +428,6 @@ class WanderLogApp {
       window.tripUI.initializeExploreMap();
     }
 
-    // Populate trip dropdown for custom place form
-    setTimeout(() => {
-      this.populateTripDropdown();
-    }, 100);
-
     console.log('Rendered explore view with destinations browser and custom place form');
   }
 
@@ -442,7 +437,6 @@ class WanderLogApp {
     const state = document.getElementById('customPlaceState').value;
     const description = document.getElementById('customPlaceDescription').value.trim();
     const attractionsText = document.getElementById('customPlaceAttractions').value.trim();
-    const selectedTripId = document.getElementById('selectTripForPlace').value;
 
     // Validation
     if (!name) {
@@ -479,11 +473,13 @@ class WanderLogApp {
       isCustom: true
     };
 
-    // Check if user selected a trip to add to
-    if (selectedTripId && window.tripUI) {
-      // Add to selected trip
+    // Check if we're coming from a trip context
+    const addToTripId = localStorage.getItem('addPlaceToTripId');
+    
+    if (addToTripId && window.tripUI) {
+      // Add directly to the current trip
       try {
-        window.tripUI.tripManager.addPlaceToTrip(parseInt(selectedTripId), customPlace);
+        window.tripUI.tripManager.addPlaceToTrip(parseInt(addToTripId), customPlace);
         this.showToast(`"${name}" added to your trip!`, 'success');
         
         // Clear the form
@@ -495,37 +491,22 @@ class WanderLogApp {
         }
         
         // Navigate back to trip detail
-        window.tripUI.viewTripDetail(parseInt(selectedTripId));
+        window.tripUI.viewTripDetail(parseInt(addToTripId));
         
       } catch (error) {
         console.error('Error adding custom place to trip:', error);
         this.showToast('Error adding place to trip', 'error');
       }
     } else {
-      // No trip selected - check if there are any trips available
-      const trips = window.tripUI ? window.tripUI.tripManager.getAllTrips() : [];
-      
-      if (trips.length === 0) {
-        // No trips available - show error and redirect to create trip
-        this.showErrorToastWithAction(
-          'No Trips Available',
-          'You need to create a trip first before adding destinations.',
-          'Create Trip',
-          () => {
-            this.navigateToView('home');
-            setTimeout(() => {
-              const createTripBtn = document.getElementById('createTripBtn');
-              if (createTripBtn) {
-                createTripBtn.click();
-              }
-            }, 100);
-          }
-        );
-        return;
-      }
-      
-      // Show trip selection modal
-      this.showTripSelectionModal(customPlace);
+      // If no trip context, redirect to trips page
+      this.showErrorToastWithAction(
+        'No Trip Selected',
+        'Please select a trip first from your trips page to add destinations.',
+        'Go to Trips',
+        () => {
+          this.navigateToView('trips');
+        }
+      );
     }
   }
 
@@ -535,7 +516,6 @@ class WanderLogApp {
     document.getElementById('customPlaceState').value = '';
     document.getElementById('customPlaceDescription').value = '';
     document.getElementById('customPlaceAttractions').value = '';
-    document.getElementById('selectTripForPlace').value = '';
   }
 
   // Load custom places from storage
@@ -809,98 +789,6 @@ class WanderLogApp {
   }
 
   // Show trip selection modal
-  showTripSelectionModal(customPlace) {
-    const modal = document.getElementById('tripSelectionModal');
-    const tripList = document.getElementById('tripSelectionList');
-    
-    if (!modal || !tripList) {
-      console.error('Trip selection modal elements not found');
-      return;
-    }
-
-    // Get all trips
-    const trips = window.tripUI ? window.tripUI.tripManager.getAllTrips() : [];
-    
-    // Clear previous content
-    tripList.innerHTML = '';
-    
-    if (trips.length === 0) {
-      tripList.innerHTML = `
-        <div class="no-trips-message">
-          <h4>No Trips Available</h4>
-          <p>Create your first trip to start adding destinations!</p>
-          <button class="btn-primary" onclick="app.navigateToView('home'); app.closeTripSelectionModal();">
-            Create Trip
-          </button>
-        </div>
-      `;
-    } else {
-      // Render trip options
-      trips.forEach(trip => {
-        const status = this.getTripStatus(trip);
-        const tripElement = document.createElement('div');
-        tripElement.className = 'trip-selection-item';
-        tripElement.innerHTML = `
-          <h4>${trip.name}</h4>
-          <p>${trip.places ? trip.places.length : 0} destinations</p>
-          <span class="trip-status ${status.toLowerCase()}">${status}</span>
-        `;
-        
-        tripElement.addEventListener('click', () => {
-          this.selectTripForPlace(trip.id, customPlace);
-        });
-        
-        tripList.appendChild(tripElement);
-      });
-    }
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Store the custom place for later use
-    this.pendingCustomPlace = customPlace;
-  }
-
-  // Close trip selection modal
-  closeTripSelectionModal() {
-    const modal = document.getElementById('tripSelectionModal');
-    if (modal) {
-      modal.classList.add('hidden');
-    }
-    this.pendingCustomPlace = null;
-  }
-
-  // Select trip for custom place
-  selectTripForPlace(tripId, customPlace) {
-    if (!window.tripUI) {
-      this.showToast('Trip manager not available', 'error');
-      return;
-    }
-
-    try {
-      window.tripUI.tripManager.addPlaceToTrip(tripId, customPlace);
-      this.showToast(`"${customPlace.city}" added to your trip!`, 'success');
-      
-      // Clear the form
-      this.clearCustomPlaceForm();
-      
-      // Close modal
-      this.closeTripSelectionModal();
-      
-      // Refresh home page trip cards to show updated counts
-      if (window.tripUI && window.tripUI.renderHomePageTrips) {
-        window.tripUI.renderHomePageTrips();
-      }
-      
-      // Navigate to trip detail
-      window.tripUI.viewTripDetail(tripId);
-      
-    } catch (error) {
-      console.error('Error adding custom place to trip:', error);
-      this.showToast('Error adding place to trip', 'error');
-    }
-  }
-
   // Get trip status
   getTripStatus(trip) {
     if (!trip.endDate) return 'Upcoming';
@@ -952,28 +840,6 @@ class WanderLogApp {
         }, 300);
       }
     }, 10000);
-  }
-
-  // Populate trip dropdown on explore page
-  populateTripDropdown() {
-    const dropdown = document.getElementById('selectTripForPlace');
-    if (!dropdown || !window.tripUI) return;
-
-    // Get all trips
-    const trips = window.tripUI.tripManager.getAllTrips();
-    
-    // Clear existing options (except the first placeholder)
-    while (dropdown.children.length > 1) {
-      dropdown.removeChild(dropdown.lastChild);
-    }
-    
-    // Add trip options
-    trips.forEach(trip => {
-      const option = document.createElement('option');
-      option.value = trip.id;
-      option.textContent = `${trip.name} (${trip.places ? trip.places.length : 0} destinations)`;
-      dropdown.appendChild(option);
-    });
   }
 }
 

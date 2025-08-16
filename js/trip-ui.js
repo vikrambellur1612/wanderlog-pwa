@@ -1345,7 +1345,7 @@ class TripUI {
     
     return `
       <div class="back-nav-container">
-        <button class="btn-secondary back-btn" onclick="tripUI.backToTripDetail()">
+        <button class="btn-outline back-btn" onclick="tripUI.backToTripDetail()">
           ← Back to ${tripName}
         </button>
         <button class="btn-outline back-btn" onclick="tripUI.backToHome()">
