@@ -79,36 +79,113 @@ class TripUI {
   renderHomeTripCard(trip, status) {
     const startDate = new Date(trip.startDate);
     const endDate = new Date(trip.endDate);
+    const now = new Date();
+    const daysUntilTrip = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+    const tripDuration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
     
     // Use global formatDate function for consistency
     const formattedStartDate = window.formatDate(trip.startDate);
     const formattedEndDate = window.formatDate(trip.endDate);
     const placesCount = trip.places ? trip.places.length : 0;
+    const accommodationsCount = trip.accommodations ? trip.accommodations.length : 0;
+    const itineraryCount = trip.itinerary ? trip.itinerary.length : 0;
     
+    // Get progress info
+    const getProgressInfo = () => {
+      if (status === 'completed') {
+        return { text: 'Trip Completed', icon: '✅', class: 'completed' };
+      } else if (daysUntilTrip < 0) {
+        return { text: 'In Progress', icon: '🚀', class: 'in-progress' };
+      } else if (daysUntilTrip === 0) {
+        return { text: 'Today!', icon: '🎉', class: 'today' };
+      } else if (daysUntilTrip === 1) {
+        return { text: 'Tomorrow', icon: '⭐', class: 'tomorrow' };
+      } else if (daysUntilTrip <= 7) {
+        return { text: `${daysUntilTrip} days to go`, icon: '📅', class: 'soon' };
+      } else {
+        return { text: `${daysUntilTrip} days away`, icon: '🗓️', class: 'upcoming' };
+      }
+    };
+
+    const progressInfo = getProgressInfo();
+    const destination = this.getTripDestination(trip);
+
     return `
-      <div class="trip-card" onclick="app.viewTripDetails(${trip.id})">
-        <div class="trip-card-header">
-          <div>
-            <h3 class="trip-title">${trip.name}</h3>
-            <p class="trip-destination">${this.getTripDestination(trip)}</p>
+      <div class="trip-card-new" onclick="app.viewTripDetails(${trip.id})">
+        <div class="trip-card-header-new">
+          <div class="trip-main-info">
+            <div class="trip-title-section">
+              <h3 class="trip-name-new">${trip.name}</h3>
+              <div class="trip-status-badge ${progressInfo.class}">
+                <span class="status-icon">${progressInfo.icon}</span>
+                <span class="status-text">${progressInfo.text}</span>
+              </div>
+            </div>
+            <p class="trip-destination-new">📍 ${destination}</p>
           </div>
-          <span class="trip-status ${status}">${status === 'upcoming' ? 'Upcoming' : 'Completed'}</span>
+          
+          <div class="trip-actions-new">
+            <button class="action-btn view-btn-new" onclick="event.stopPropagation(); app.viewTripDetails(${trip.id})" title="View Trip">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <button class="action-btn edit-btn-new" onclick="event.stopPropagation(); app.editTrip(${trip.id})" title="Edit Trip">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="m18.5 2.5 a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button class="action-btn delete-btn-new" onclick="event.stopPropagation(); app.deleteTrip(${trip.id})" title="Delete Trip">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"></polyline>
+                <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="trip-dates">
-          <span class="date-label start-date">Start: ${formattedStartDate}</span>
-          <span class="date-label end-date">End: ${formattedEndDate}</span>
+        
+        <div class="trip-dates-new">
+          <div class="date-range-new">
+            <div class="date-item-new departure-new">
+              <span class="date-label-new">Departure</span>
+              <span class="date-value-new">${formattedStartDate}</span>
+            </div>
+            <div class="trip-duration-new">
+              <span class="duration-text">${tripDuration} day${tripDuration !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="date-item-new return-new">
+              <span class="date-label-new">Return</span>
+              <span class="date-value-new">${formattedEndDate}</span>
+            </div>
+          </div>
         </div>
-        <div class="trip-description">${placesCount} ${placesCount === 1 ? 'place' : 'places'} to explore</div>
-        <div class="trip-actions">
-          <button class="trip-action-btn btn-primary" onclick="event.stopPropagation(); app.viewTripDetails(${trip.id})">
-            View
-          </button>
-          <button class="trip-action-btn btn-edit" onclick="event.stopPropagation(); app.editTrip(${trip.id})">
-            Edit
-          </button>
-          <button class="trip-action-btn btn-danger" onclick="event.stopPropagation(); app.deleteTrip(${trip.id})">
-            Delete
-          </button>
+        
+        <div class="trip-stats-new">
+          <div class="stat-item">
+            <div class="stat-icon">🏙️</div>
+            <div class="stat-info">
+              <span class="stat-number">${placesCount}</span>
+              <span class="stat-label">Place${placesCount !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">🏨</div>
+            <div class="stat-info">
+              <span class="stat-number">${accommodationsCount}</span>
+              <span class="stat-label">Stay${accommodationsCount !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <span class="stat-number">${itineraryCount}</span>
+              <span class="stat-label">Day${itineraryCount !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
         </div>
       </div>
     `;

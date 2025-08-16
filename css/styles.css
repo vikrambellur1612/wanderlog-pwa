@@ -3461,3 +3461,327 @@ select.form-input {
     border: 1px solid rgba(99, 102, 241, 0.2);
     display: inline-block;
 }
+
+/* New Trip Card Design for Home Page */
+.trip-card-new {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 250, 252, 0.95) 50%,
+        rgba(236, 242, 255, 0.98) 100%
+    );
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.trip-card-new::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #8b5cf6 0%, #3b82f6 50%, #10b981 100%);
+    border-radius: 20px 20px 0 0;
+}
+
+.trip-card-new:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 1) 0%,
+        rgba(248, 250, 252, 0.98) 50%,
+        rgba(224, 238, 255, 0.95) 100%
+    );
+}
+
+.trip-card-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+}
+
+.trip-main-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.trip-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.trip-name-new {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.trip-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.trip-status-badge.completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.trip-status-badge.in-progress {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.trip-status-badge.today {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border-color: rgba(245, 158, 11, 0.2);
+    animation: pulse 2s infinite;
+}
+
+.trip-status-badge.tomorrow {
+    background: rgba(168, 85, 247, 0.1);
+    color: #7c3aed;
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.trip-status-badge.soon {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.trip-status-badge.upcoming {
+    background: rgba(107, 114, 128, 0.1);
+    color: #4b5563;
+    border-color: rgba(107, 114, 128, 0.2);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.trip-destination-new {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.trip-actions-new {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.trip-actions-new .action-btn {
+    width: 42px;
+    height: 42px;
+}
+
+.view-btn-new {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.view-btn-new:hover {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.trip-dates-new {
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.date-range-new {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.date-item-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+.date-label-new {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+
+.departure-new .date-label-new {
+    color: #10b981;
+}
+
+.return-new .date-label-new {
+    color: #3b82f6;
+}
+
+.date-value-new {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.trip-duration-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    min-width: 80px;
+}
+
+.duration-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #7c3aed;
+}
+
+.trip-stats-new {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    padding: 0.75rem 0;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-icon {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.125rem;
+}
+
+/* Mobile responsive for new trip cards */
+@media (max-width: 768px) {
+    .trip-card-new {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .trip-card-header-new {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .trip-actions-new {
+        align-self: flex-end;
+        gap: 0.75rem;
+    }
+    
+    .trip-actions-new .action-btn {
+        width: 46px;
+        height: 46px;
+    }
+    
+    .trip-name-new {
+        font-size: 1.25rem;
+    }
+    
+    .date-range-new {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+    
+    .date-item-new {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 10px;
+        width: 100%;
+    }
+    
+    .trip-duration-new {
+        width: 100%;
+    }
+    
+    .trip-stats-new {
+        gap: 0.75rem;
+        padding: 1rem 0 0.5rem 0;
+    }
+    
+    .stat-icon {
+        font-size: 1.1rem;
+    }
+}
+
+/* Tablet responsive for new trip cards */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .date-range-new {
+        gap: 0.75rem;
+    }
+    
+    .trip-duration-new {
+        min-width: 70px;
+    }
+}
