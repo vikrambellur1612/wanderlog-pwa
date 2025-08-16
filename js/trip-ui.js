@@ -80,18 +80,9 @@ class TripUI {
     const startDate = new Date(trip.startDate);
     const endDate = new Date(trip.endDate);
     
-    // Format dates as dd-mmm-yy
-    const formatDate = (date) => {
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = months[date.getMonth()];
-      const year = date.getFullYear().toString().slice(-2);
-      return `${day}-${month}-${year}`;
-    };
-    
-    const formattedStartDate = formatDate(startDate);
-    const formattedEndDate = formatDate(endDate);
+    // Use global formatDate function for consistency
+    const formattedStartDate = window.formatDate(trip.startDate);
+    const formattedEndDate = window.formatDate(trip.endDate);
     const placesCount = trip.places ? trip.places.length : 0;
     
     return `
@@ -273,7 +264,7 @@ class TripUI {
             <h4>${trip.name}</h4>
             <span class="trip-status ${status.toLowerCase()}">${status}</span>
           </div>
-          <p class="trip-selector-dates">${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}</p>
+          <p class="trip-selector-dates">${window.formatDate(trip.startDate)} - ${window.formatDate(trip.endDate)}</p>
           <p class="trip-selector-places">${placesCount} ${placesCount === 1 ? 'place' : 'places'}</p>
         </div>
       `;
@@ -373,8 +364,8 @@ class TripUI {
 
   // Render individual trip card
   renderTripCard(trip) {
-    const startDate = new Date(trip.startDate).toLocaleDateString();
-    const endDate = new Date(trip.endDate).toLocaleDateString();
+    const startDate = window.formatDate(trip.startDate);
+    const endDate = window.formatDate(trip.endDate);
     const placesCount = trip.places.length;
     const placesPreview = trip.places.slice(0, 3);
 
@@ -429,7 +420,7 @@ class TripUI {
           </div>
           <h1 class="trip-detail-name">${trip.name}</h1>
           <p class="trip-detail-dates">
-            ${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}
+            ${window.formatDate(trip.startDate)} - ${window.formatDate(trip.endDate)}
           </p>
         </div>
         
@@ -1525,11 +1516,7 @@ class TripUI {
     const date = new Date(item.date);
     const dayNumber = Math.floor((date - new Date(this.getCurrentTrip().startDate)) / (1000 * 60 * 60 * 24)) + 1;
     
-    const formattedDate = date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
-    });
+    const formattedDate = window.formatDate(date);
 
     const allAttractions = [
       ...(item.attractions || []).map(name => ({ name, isFromPlace: true })),
@@ -2158,16 +2145,8 @@ class TripUI {
 
   // Render accommodation card
   renderAccommodationCard(accommodation) {
-    const checkInDate = new Date(accommodation.checkIn).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
-    });
-    const checkOutDate = new Date(accommodation.checkOut).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short', 
-      day: 'numeric'
-    });
+    const checkInDate = window.formatDate(accommodation.checkIn);
+    const checkOutDate = window.formatDate(accommodation.checkOut);
 
     const isHotel = accommodation.type === 'hotel' && accommodation.hotelData;
     const isCustom = accommodation.type === 'custom' && accommodation.customDetails;
@@ -2234,7 +2213,7 @@ class TripUI {
     const itinerary = trip.itinerary.find(item => item.id === itineraryId);
     if (!itinerary) return;
     
-    const date = new Date(itinerary.date).toLocaleDateString();
+    const date = window.formatDate(itinerary.date);
     
     if (confirm(`Are you sure you want to delete the itinerary for ${date} in ${itinerary.place}?`)) {
       if (this.tripManager.deleteDailyItinerary(this.currentTripId, itineraryId)) {

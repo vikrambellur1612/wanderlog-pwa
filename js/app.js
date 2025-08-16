@@ -1,3 +1,16 @@
+// Global utility function for consistent date formatting (dd-mmm-yy)
+window.formatDate = function(dateString) {
+  const date = new Date(dateString);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = months[date.getMonth()];
+  const year = date.getFullYear().toString().slice(-2);
+  
+  return `${day}-${month}-${year}`;
+};
+
 // WanderLog PWA - Main Application Logic
 // Version: 1.7.0
 
@@ -199,9 +212,15 @@ class WanderLogApp {
     
     if (!upcomingTripsList || !completedTripsList) return;
 
-    // Initialize TripManager if not already done
-    if (!window.tripManager && typeof TripManager === 'function') {
-      window.tripManager = new TripManager();
+    // Initialize TripManager if not already done or if it's corrupted
+    if (!window.tripManager || typeof window.tripManager.getAllTrips !== 'function') {
+      if (typeof TripManager === 'function') {
+        window.tripManager = new TripManager();
+        console.log('TripManager re-initialized in loadHomePageTrips');
+      } else {
+        console.error('TripManager class not available');
+        return;
+      }
     }
 
     const trips = window.tripManager ? window.tripManager.getAllTrips() : [];
@@ -238,8 +257,8 @@ class WanderLogApp {
   // Render a single trip card
   renderTripCard(trip) {
     const status = this.getTripStatus(trip);
-    const startDate = new Date(trip.startDate).toLocaleDateString();
-    const endDate = new Date(trip.endDate).toLocaleDateString();
+    const startDate = window.formatDate(trip.startDate);
+    const endDate = window.formatDate(trip.endDate);
     const placesCount = trip.places ? trip.places.length : 0;
 
     return `
@@ -397,11 +416,18 @@ class WanderLogApp {
         setTimeout(() => {
           this.navigateToView('trips');
           
-          // Force refresh of TripUI to show the new trip
+          // Force refresh of TripUI and show the newly created trip detail
           setTimeout(() => {
             if (window.tripUI && window.tripUI.createTripListView) {
               window.tripUI.createTripListView();
             }
+            
+            // Navigate directly to the trip detail view
+            setTimeout(() => {
+              if (window.tripUI && window.tripUI.viewTripDetail) {
+                window.tripUI.viewTripDetail(newTrip.id);
+              }
+            }, 300);
           }, 200);
         }, 1500);
         
@@ -458,6 +484,16 @@ class WanderLogApp {
         
         // Refresh home page trips display
         this.loadHomePageTrips();
+        
+        // Also refresh TripUI if it exists
+        if (window.tripUI) {
+          if (window.tripUI.createTripListView) {
+            window.tripUI.createTripListView();
+          }
+          if (window.tripUI.renderHomePageTrips) {
+            window.tripUI.renderHomePageTrips();
+          }
+        }
         
       } catch (error) {
         console.error('Error deleting trip:', error);
