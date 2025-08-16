@@ -207,6 +207,13 @@ class WanderLogApp {
 
   // Load trips for home page display
   loadHomePageTrips() {
+    // Use TripUI's rendering if available for consistency
+    if (window.tripUI && window.tripUI.renderHomePageTrips) {
+      window.tripUI.renderHomePageTrips();
+      return;
+    }
+    
+    // Fallback to local rendering if TripUI not available
     const upcomingTripsList = document.getElementById('upcomingTripsList');
     const completedTripsList = document.getElementById('completedTripsList');
     
@@ -404,32 +411,18 @@ class WanderLogApp {
       try {
         const newTrip = window.tripManager.createTrip(tripData);
         console.log('Trip created:', newTrip);
-        this.showToast(`Trip "${tripData.name}" created successfully!`, 'success');
+        this.showToast(`Trip "${tripData.name}" created successfully! Click "View" to add details.`, 'success');
         
         // Close modal
         this.closeAddTripModal();
         
-        // Refresh home page trips display
+        // Refresh home page trips display (this will use TripUI if available)
         this.loadHomePageTrips();
         
-        // Auto-navigate to trips view to show the new trip
-        setTimeout(() => {
-          this.navigateToView('trips');
-          
-          // Force refresh of TripUI and show the newly created trip detail
-          setTimeout(() => {
-            if (window.tripUI && window.tripUI.createTripListView) {
-              window.tripUI.createTripListView();
-            }
-            
-            // Navigate directly to the trip detail view
-            setTimeout(() => {
-              if (window.tripUI && window.tripUI.viewTripDetail) {
-                window.tripUI.viewTripDetail(newTrip.id);
-              }
-            }, 300);
-          }, 200);
-        }, 1500);
+        // Also refresh TripUI trips list if it exists
+        if (window.tripUI && window.tripUI.createTripListView) {
+          window.tripUI.createTripListView();
+        }
         
       } catch (error) {
         console.error('Error creating trip:', error);
@@ -482,17 +475,12 @@ class WanderLogApp {
         window.tripManager.deleteTrip(tripId);
         this.showToast(`Trip "${trip.name}" deleted successfully`, 'success');
         
-        // Refresh home page trips display
+        // Refresh home page trips display (this will use TripUI if available)
         this.loadHomePageTrips();
         
-        // Also refresh TripUI if it exists
-        if (window.tripUI) {
-          if (window.tripUI.createTripListView) {
-            window.tripUI.createTripListView();
-          }
-          if (window.tripUI.renderHomePageTrips) {
-            window.tripUI.renderHomePageTrips();
-          }
+        // Also refresh TripUI trips list if it exists
+        if (window.tripUI && window.tripUI.createTripListView) {
+          window.tripUI.createTripListView();
         }
         
       } catch (error) {

@@ -86,7 +86,7 @@ class TripUI {
     const placesCount = trip.places ? trip.places.length : 0;
     
     return `
-      <div class="trip-card" onclick="tripUI.viewTripDetail(${trip.id})">
+      <div class="trip-card" onclick="app.viewTripDetails(${trip.id})">
         <div class="trip-card-header">
           <div>
             <h3 class="trip-title">${trip.name}</h3>
@@ -100,13 +100,13 @@ class TripUI {
         </div>
         <div class="trip-description">${placesCount} ${placesCount === 1 ? 'place' : 'places'} to explore</div>
         <div class="trip-actions">
-          <button class="trip-action-btn btn-primary" onclick="event.stopPropagation(); tripUI.viewTripDetail(${trip.id})">
-            View Details
+          <button class="trip-action-btn btn-primary" onclick="event.stopPropagation(); app.viewTripDetails(${trip.id})">
+            View
           </button>
-          <button class="trip-action-btn btn-edit" onclick="event.stopPropagation(); tripUI.editTripFromHome(${trip.id})">
+          <button class="trip-action-btn btn-edit" onclick="event.stopPropagation(); app.editTrip(${trip.id})">
             Edit
           </button>
-          <button class="trip-action-btn btn-danger" onclick="event.stopPropagation(); tripUI.deleteTripFromHome(${trip.id})">
+          <button class="trip-action-btn btn-danger" onclick="event.stopPropagation(); app.deleteTrip(${trip.id})">
             Delete
           </button>
         </div>
@@ -169,35 +169,42 @@ class TripUI {
       return;
     }
 
-    // Get the most recent upcoming trip
+    // Reset current trip selection to show proper list view
+    this.currentTripId = null;
+    this.currentView = 'list';
+
+    // Create a proper trip list view
     const currentDate = new Date();
     const upcomingTrips = trips.filter(trip => new Date(trip.endDate) >= currentDate);
-    
-    // Sort upcoming trips by start date (closest first)
-    upcomingTrips.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-    
-    const mostRecentUpcoming = upcomingTrips.length > 0 ? upcomingTrips[0] : null;
+    const completedTrips = trips.filter(trip => new Date(trip.endDate) < currentDate);
 
-    if (mostRecentUpcoming) {
-      // Show the most recent upcoming trip detail by default
-      this.currentTripId = mostRecentUpcoming.id;
-      this.currentView = 'detail';
-      container.innerHTML = this.createTripDetailView(mostRecentUpcoming);
-      
-      // Initialize map after view is rendered
-      this.initializeTripMap(mostRecentUpcoming);
-    } else {
-      // Show the most recent completed trip if no upcoming trips
-      const completedTrips = trips.filter(trip => new Date(trip.endDate) < currentDate);
-      completedTrips.sort((a, b) => new Date(b.endDate) - new Date(a.endDate)); // Most recent first
-      
-      if (completedTrips.length > 0) {
-        this.currentTripId = completedTrips[0].id;
-        this.currentView = 'detail';
-        container.innerHTML = this.createTripDetailView(completedTrips[0]);
-        this.initializeTripMap(completedTrips[0]);
-      }
-    }
+    // Sort trips
+    upcomingTrips.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    completedTrips.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+
+    container.innerHTML = `
+      <div class="trips-overview">
+        <h2>Your Trips</h2>
+        
+        ${upcomingTrips.length > 0 ? `
+          <div class="trips-section">
+            <h3>Upcoming Trips</h3>
+            <div class="trips-grid">
+              ${upcomingTrips.map(trip => this.renderTripCard(trip)).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
+        ${completedTrips.length > 0 ? `
+          <div class="trips-section">
+            <h3>Completed Trips</h3>
+            <div class="trips-grid">
+              ${completedTrips.map(trip => this.renderTripCard(trip)).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   // Show empty trips state with helpful options
