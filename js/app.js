@@ -322,84 +322,94 @@ class WanderLogApp {
 
   // Create new trip
   createTrip() {
-    const nameInput = document.getElementById('tripName');
-    const startDateInput = document.getElementById('tripStartDate');
-    const endDateInput = document.getElementById('tripEndDate');
-    const descriptionInput = document.getElementById('tripDescription');
+    // Ensure we wait for modal to be fully rendered
+    setTimeout(() => {
+      const nameInput = document.getElementById('tripName');
+      const startDateInput = document.getElementById('tripStartDate');
+      const endDateInput = document.getElementById('tripEndDate');
+      const descriptionInput = document.getElementById('tripDescription');
 
-    console.log('Create trip called', { nameInput, startDateInput, endDateInput }); // Debug log
+      console.log('Create trip called', { nameInput, startDateInput, endDateInput }); // Debug log
 
-    if (!nameInput || !startDateInput || !endDateInput) {
-      console.error('Missing required form elements:', { nameInput, startDateInput, endDateInput });
-      this.showToast('Form elements not found. Please try again.', 'error');
-      return;
-    }
-
-    const tripData = {
-      name: nameInput.value.trim(),
-      startDate: startDateInput.value,
-      endDate: endDateInput.value,
-      description: descriptionInput ? descriptionInput.value.trim() : ''
-    };
-
-    console.log('Trip data:', tripData); // Debug log
-
-    // Validation - only check required fields
-    if (!tripData.name) {
-      this.showToast('Please enter a trip name', 'error');
-      return;
-    }
-
-    if (!tripData.startDate || !tripData.endDate) {
-      this.showToast('Please select both start and end dates', 'error');
-      return;
-    }
-
-    if (new Date(tripData.startDate) >= new Date(tripData.endDate)) {
-      this.showToast('End date must be after start date', 'error');
-      return;
-    }
-
-    // Initialize TripManager if not already done
-    if (!window.tripManager) {
-      if (typeof TripManager === 'function') {
-        window.tripManager = new TripManager();
-        console.log('TripManager initialized');
-      } else {
-        console.error('TripManager class not available');
-        this.showToast('Error: Trip manager not available', 'error');
+      // Check if modal is visible (indicates DOM is ready)
+      const modal = document.getElementById('addTripModal');
+      if (!modal || modal.classList.contains('hidden')) {
+        console.error('Modal not ready');
         return;
       }
-    }
 
-    // Create trip
-    try {
-      const newTrip = window.tripManager.createTrip(tripData);
-      console.log('Trip created:', newTrip);
-      this.showToast(`Trip "${tripData.name}" created successfully!`, 'success');
-      
-      // Close modal
-      this.closeAddTripModal();
-      
-      // Refresh home page trips display
-      this.loadHomePageTrips();
-      
-      // Auto-navigate to trips view to show the new trip
-      setTimeout(() => {
-        this.navigateToView('trips');
+      if (!nameInput || !startDateInput || !endDateInput) {
+        console.error('Missing required form elements:', { nameInput, startDateInput, endDateInput });
+        this.showToast('Form not ready. Please try again.', 'error');
+        return;
+      }
+
+      const tripData = {
+        name: nameInput.value.trim(),
+        startDate: startDateInput.value,
+        endDate: endDateInput.value,
+        description: descriptionInput ? descriptionInput.value.trim() : ''
+      };
+
+      console.log('Trip data:', tripData); // Debug log
+
+      // Validation - only check required fields
+      if (!tripData.name) {
+        this.showToast('Please enter a trip name', 'error');
+        return;
+      }
+
+      if (!tripData.startDate || !tripData.endDate) {
+        this.showToast('Please select both start and end dates', 'error');
+        return;
+      }
+
+      if (new Date(tripData.startDate) >= new Date(tripData.endDate)) {
+        this.showToast('End date must be after start date', 'error');
+        return;
+      }
+
+      // Initialize TripManager if not already done
+      if (!window.tripManager) {
+        if (typeof TripManager === 'function') {
+          window.tripManager = new TripManager();
+          console.log('TripManager initialized');
+        } else {
+          console.error('TripManager class not available');
+          this.showToast('Error: Trip manager not available', 'error');
+          return;
+        }
+      }
+
+      // Create trip
+      try {
+        const newTrip = window.tripManager.createTrip(tripData);
+        console.log('Trip created:', newTrip);
+        this.showToast(`Trip "${tripData.name}" created successfully!`, 'success');
         
-        // Force refresh of TripUI to show the new trip
+        // Close modal
+        this.closeAddTripModal();
+        
+        // Refresh home page trips display
+        this.loadHomePageTrips();
+        
+        // Auto-navigate to trips view to show the new trip
         setTimeout(() => {
-          if (window.tripUI && window.tripUI.createTripListView) {
-            window.tripUI.createTripListView();
-          }
-        }, 200);
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Error creating trip:', error);
-      this.showToast('Error creating trip. Please try again.', 'error');
-    }
+          this.navigateToView('trips');
+          
+          // Force refresh of TripUI to show the new trip
+          setTimeout(() => {
+            if (window.tripUI && window.tripUI.createTripListView) {
+              window.tripUI.createTripListView();
+            }
+          }, 200);
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Error creating trip:', error);
+        this.showToast('Error creating trip. Please try again.', 'error');
+      }
+    }, 100); // Small delay to ensure DOM is ready
   }
 
   // View trip details
