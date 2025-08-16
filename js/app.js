@@ -306,17 +306,9 @@ class WanderLogApp {
     if (modal) {
       modal.classList.remove('hidden');
       
-      // Set up form submission
-      const form = document.getElementById('addTripForm');
+      // Set up close button handlers only (form submission is handled by TripUI)
       const closeBtn = document.getElementById('closeAddTripModal');
       const cancelBtn = document.getElementById('cancelTripBtn');
-      
-      if (form) {
-        form.onsubmit = (e) => {
-          e.preventDefault();
-          this.createTrip();
-        };
-      }
       
       if (closeBtn) {
         closeBtn.onclick = () => this.closeAddTripModal();
@@ -346,89 +338,11 @@ class WanderLogApp {
     }
   }
 
-  // Create new trip
+  // Create new trip - DEPRECATED: Now handled by TripUI
+  // This method is no longer used - form submission is handled by TripUI
   createTrip() {
-    // Ensure we wait for modal to be fully rendered
-    setTimeout(() => {
-      const nameInput = document.getElementById('tripName');
-      const startDateInput = document.getElementById('tripStartDate');
-      const endDateInput = document.getElementById('tripEndDate');
-      const descriptionInput = document.getElementById('tripDescription');
-
-      console.log('Create trip called', { nameInput, startDateInput, endDateInput }); // Debug log
-
-      // Check if modal is visible (indicates DOM is ready)
-      const modal = document.getElementById('addTripModal');
-      if (!modal || modal.classList.contains('hidden')) {
-        console.error('Modal not ready');
-        return;
-      }
-
-      if (!nameInput || !startDateInput || !endDateInput) {
-        console.error('Missing required form elements:', { nameInput, startDateInput, endDateInput });
-        this.showToast('Form not ready. Please try again.', 'error');
-        return;
-      }
-
-      const tripData = {
-        name: nameInput.value.trim(),
-        startDate: startDateInput.value,
-        endDate: endDateInput.value,
-        description: descriptionInput ? descriptionInput.value.trim() : ''
-      };
-
-      console.log('Trip data:', tripData); // Debug log
-
-      // Validation - only check required fields
-      if (!tripData.name) {
-        this.showToast('Please enter a trip name', 'error');
-        return;
-      }
-
-      if (!tripData.startDate || !tripData.endDate) {
-        this.showToast('Please select both start and end dates', 'error');
-        return;
-      }
-
-      if (new Date(tripData.startDate) >= new Date(tripData.endDate)) {
-        this.showToast('End date must be after start date', 'error');
-        return;
-      }
-
-      // Initialize TripManager if not already done
-      if (!window.tripManager) {
-        if (typeof TripManager === 'function') {
-          window.tripManager = new TripManager();
-          console.log('TripManager initialized');
-        } else {
-          console.error('TripManager class not available');
-          this.showToast('Error: Trip manager not available', 'error');
-          return;
-        }
-      }
-
-      // Create trip
-      try {
-        const newTrip = window.tripManager.createTrip(tripData);
-        console.log('Trip created:', newTrip);
-        this.showToast(`Trip "${tripData.name}" created successfully! Click "View" to add details.`, 'success');
-        
-        // Close modal
-        this.closeAddTripModal();
-        
-        // Refresh home page trips display (this will use TripUI if available)
-        this.loadHomePageTrips();
-        
-        // Also refresh TripUI trips list if it exists
-        if (window.tripUI && window.tripUI.createTripListView) {
-          window.tripUI.createTripListView();
-        }
-        
-      } catch (error) {
-        console.error('Error creating trip:', error);
-        this.showToast('Error creating trip. Please try again.', 'error');
-      }
-    }, 100); // Small delay to ensure DOM is ready
+    console.warn('app.createTrip() called but is deprecated - using TripUI instead');
+    return;
   }
 
   // View trip details
@@ -519,7 +433,7 @@ class WanderLogApp {
       this.populateTripDropdown();
     }, 100);
 
-    console.log('Rendered explore view with interactive map and custom place form');
+    console.log('Rendered explore view with destinations browser and custom place form');
   }
 
   // Add custom place functionality

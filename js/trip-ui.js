@@ -438,7 +438,7 @@ class TripUI {
               <h2 class="section-title">📍 Places Covered</h2>
               <div class="section-actions">
                 <button class="btn-primary" onclick="tripUI.goToExplorePage()">
-                  ➕ Add Place (Go to Explore)
+                  🗺️ Add Places to Trip
                 </button>
               </div>
             </div>
@@ -742,7 +742,7 @@ class TripUI {
       } else {
         // Create new trip
         this.tripManager.createTrip(tripData);
-        this.showNotification('Trip created successfully! Now add destinations to your trip.', 'success');
+        this.showNotification('Trip created successfully!', 'success');
       }
       
       // Hide modal and refresh display
@@ -1298,24 +1298,88 @@ class TripUI {
       exploreView.classList.add('active');
     }
 
-    // Update bottom navigation
+    // Update bottom navigation - don't activate explore since it's not in nav anymore
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => item.classList.remove('active'));
     
-    const exploreNavItem = document.querySelector('.nav-item[data-view="explore"]');
-    if (exploreNavItem) {
-      exploreNavItem.classList.add('active');
-    }
+    // Add back navigation in explore view
+    this.addBackNavigationToExplore();
+    
+    // Initialize the explore map and functionality
+    setTimeout(() => {
+      this.initializeExploreMap();
+      
+      // Show the add-to-trip banner
+      this.showAddToTripBanner();
+    }, 100);
+    
+    console.log('Navigated to explore page from trip:', this.currentTripId);
+  }
 
-    // Initialize the map in explore view
-    this.initializeExploreMap();
+  // Add back navigation to explore view
+  addBackNavigationToExplore() {
+    const exploreView = document.getElementById('exploreView');
+    if (!exploreView) return;
+    
+    const appContent = exploreView.querySelector('.app-content');
+    if (!appContent) return;
+    
+    // Check if back navigation already exists
+    let backNavigation = appContent.querySelector('.explore-back-navigation');
+    if (backNavigation) {
+      // Update existing navigation
+      backNavigation.innerHTML = this.getExploreBackNavigationHTML();
+    } else {
+      // Add new back navigation at the top of app-content
+      backNavigation = document.createElement('div');
+      backNavigation.className = 'explore-back-navigation';
+      backNavigation.innerHTML = this.getExploreBackNavigationHTML();
+      appContent.insertBefore(backNavigation, appContent.firstChild);
+    }
+  }
+
+  // Get HTML for explore back navigation
+  getExploreBackNavigationHTML() {
+    const currentTrip = this.currentTripId ? this.tripManager.getTrip(this.currentTripId) : null;
+    const tripName = currentTrip ? currentTrip.name : 'Trip';
+    
+    return `
+      <div class="back-nav-container">
+        <button class="btn-secondary back-btn" onclick="tripUI.backToTripDetail()">
+          ← Back to ${tripName}
+        </button>
+        <button class="btn-outline back-btn" onclick="tripUI.backToHome()">
+          🏠 Back to Home
+        </button>
+      </div>
+    `;
+  }
+
+  // Back to trip detail from explore
+  backToTripDetail() {
+    if (this.currentTripId) {
+      this.viewTripDetail(this.currentTripId);
+    } else {
+      this.backToHome();
+    }
   }
 
   // Initialize map for explore page
   initializeExploreMap() {
+    console.log('Initializing explore destinations browser...');
+    
     setTimeout(() => {
       const mapContainer = document.getElementById('explore-map');
+      
+      // Ensure mapManager is initialized
+      if (!this.mapManager && window.MapManager) {
+        console.log('Reinitializing mapManager for explore page');
+        this.initializeMapManager();
+      }
+      
       if (mapContainer && this.mapManager) {
+        console.log('Setting up destinations browser in explore map container');
+        
         // Clear existing content
         mapContainer.innerHTML = '';
         
@@ -1331,6 +1395,14 @@ class TripUI {
         if (addToTripId) {
           this.showAddToTripBanner();
         }
+        
+        console.log('Destinations browser initialized successfully');
+      } else {
+        console.error('Failed to initialize destinations browser:', {
+          mapContainer: !!mapContainer,
+          mapManager: !!this.mapManager,
+          windowMapManager: !!window.MapManager
+        });
       }
     }, 100);
   }
@@ -1588,13 +1660,13 @@ class TripUI {
                       </div>
                       <p><em>${item.accommodation.hotelData.category}</em></p>
                       ${item.accommodation.hotelData.website && item.accommodation.hotelData.website !== 'Not provided' ? `
-                        <p><a href="${item.accommodation.hotelData.website.startsWith('http') ? item.accommodation.hotelData.website : 'https://' + item.accommodation.hotelData.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
+                        <p><a href="${item.accommodation.hotelData.website.match(/^https?:\/\//) ? item.accommodation.hotelData.website : 'https://' + item.accommodation.hotelData.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
                       ` : ''}
                     ` : ''}
                     ${item.accommodation.customDetails ? `
                       <p><em>${item.accommodation.customDetails.category}</em></p>
                       ${item.accommodation.customDetails.website && item.accommodation.customDetails.website !== 'Not provided' ? `
-                        <p><a href="${item.accommodation.customDetails.website.startsWith('http') ? item.accommodation.customDetails.website : 'https://' + item.accommodation.customDetails.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
+                        <p><a href="${item.accommodation.customDetails.website.match(/^https?:\/\//) ? item.accommodation.customDetails.website : 'https://' + item.accommodation.customDetails.website}" target="_blank" rel="noopener" class="hotel-link">🔗 View Hotel Details</a></p>
                       ` : ''}
                     ` : ''}
                   </div>
@@ -1622,17 +1694,31 @@ class TripUI {
     const trip = this.getCurrentTrip();
     if (!trip) return;
     
-    const availableDates = this.tripManager.getAvailableDatesForItinerary(this.currentTripId);
+    let availableDates = this.tripManager.getAvailableDatesForItinerary(this.currentTripId);
     
-    // If editing, add the current date to available dates
+    // If editing, we need to handle dates differently
     if (existingItinerary) {
-      availableDates.push(existingItinerary.date);
-      availableDates.sort();
-    }
-    
-    if (availableDates.length === 0 && !existingItinerary) {
-      alert('All days in this trip already have itineraries planned!');
-      return;
+      // For editing, include the current itinerary date in available dates
+      const currentDate = existingItinerary.date;
+      
+      // Check if the current date is already in available dates
+      if (!availableDates.find(dateObj => dateObj.date === currentDate)) {
+        // Add the current date to available dates for editing
+        const currentDateObj = {
+          date: currentDate,
+          displayDate: window.formatDate(currentDate) || currentDate
+        };
+        availableDates.push(currentDateObj);
+      }
+      
+      // Sort dates chronologically
+      availableDates.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else {
+      // For new itinerary, check if we have available dates
+      if (availableDates.length === 0) {
+        alert('All days in this trip already have itineraries planned!');
+        return;
+      }
     }
 
     const modal = this.createItineraryModal(availableDates, trip.places, existingItinerary);
@@ -1664,9 +1750,14 @@ class TripUI {
               <label for="itineraryDate">Date</label>
               <select id="itineraryDate" required>
                 <option value="">Select date</option>
-                ${availableDates.map(date => `
-                  <option value="${date.date}" ${existingItinerary && existingItinerary.date === date.date ? 'selected' : ''}>${date.displayDate}</option>
-                `).join('')}
+                ${availableDates.map(dateObj => {
+                  // Handle both object and string formats for backward compatibility
+                  const dateValue = typeof dateObj === 'object' ? dateObj.date : dateObj;
+                  const displayDate = typeof dateObj === 'object' ? dateObj.displayDate : window.formatDate(dateObj);
+                  const isSelected = existingItinerary && existingItinerary.date === dateValue;
+                  
+                  return `<option value="${dateValue}" ${isSelected ? 'selected' : ''}>${displayDate}</option>`;
+                }).join('')}
               </select>
             </div>
             
@@ -1713,16 +1804,6 @@ class TripUI {
             </div>
             
             <div class="field-group">
-              <label for="itineraryAccommodation">Accommodation (Optional)</label>
-              <select id="itineraryAccommodation">
-                <option value="">Select accommodation location</option>
-                ${places.map(place => 
-                    `<option value="${place.city}" ${existingItinerary && existingItinerary.accommodation === place.city ? 'selected' : ''}>${place.city}, ${place.state}</option>`
-                ).join('')}
-              </select>
-            </div>
-            
-            <div class="field-group">
               <label for="itineraryNotes">Notes (Optional)</label>
               <textarea id="itineraryNotes" placeholder="Any special notes for this day..." rows="3">${existingItinerary ? existingItinerary.notes || '' : ''}</textarea>
             </div>
@@ -1731,7 +1812,10 @@ class TripUI {
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="tripUI.closeItineraryModal()">Cancel</button>
-          <button type="button" class="btn-primary" onclick="tripUI.saveItineraryForm()">${isEditing ? 'Update' : 'Add'} Day Plan</button>
+          <button type="button" class="btn-primary" 
+                  data-editing="${isEditing ? 'true' : 'false'}" 
+                  data-itinerary-id="${existingItinerary ? existingItinerary.id : ''}"
+                  onclick="tripUI.saveItineraryForm()">${isEditing ? 'Update' : 'Add'} Day Plan</button>
         </div>
       </div>
     `;
@@ -2028,11 +2112,10 @@ class TripUI {
     const form = document.getElementById('itineraryForm');
     const saveButton = form.closest('.modal').querySelector('.btn-primary');
     const isEditing = saveButton.dataset.editing === 'true';
-    const itineraryId = saveButton.dataset.itineraryId;
+    const itineraryId = parseInt(saveButton.dataset.itineraryId);
     
     const date = document.getElementById('itineraryDate').value;
     const place = document.getElementById('itineraryPlace').value;
-    const accommodation = document.getElementById('itineraryAccommodation').value;
     const notes = document.getElementById('itineraryNotes').value;
     
     if (!date || !place) {
@@ -2055,7 +2138,6 @@ class TripUI {
       place,
       attractions: selectedAttractions,
       customAttractions,
-      accommodation: accommodation || null,
       notes: notes.trim() || ''
     };
 
@@ -2175,14 +2257,14 @@ class TripUI {
               <span class="rating-text">${accommodation.hotelData.rating}/5</span>
             </div>
             <p><strong>Category:</strong> ${accommodation.hotelData.category}</p>
-            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.hotelData.website.startsWith('http') ? accommodation.hotelData.website : 'https://' + accommodation.hotelData.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
+            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.hotelData.website.match(/^https?:\/\//) ? accommodation.hotelData.website : 'https://' + accommodation.hotelData.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
           ` : ''}
           
           ${isCustom ? `
             <p><strong>Location:</strong> ${accommodation.location.city}, ${accommodation.location.state}</p>
             <p><strong>Category:</strong> ${accommodation.customDetails.category}</p>
             ${accommodation.customDetails.address ? `<p><strong>Address:</strong> ${accommodation.customDetails.address}</p>` : ''}
-            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.customDetails.website.startsWith('http') ? accommodation.customDetails.website : 'https://' + accommodation.customDetails.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
+            ${hasWebsite ? `<p><strong>Website:</strong> <a href="${accommodation.customDetails.website.match(/^https?:\/\//) ? accommodation.customDetails.website : 'https://' + accommodation.customDetails.website}" target="_blank" rel="noopener">View Hotel Details</a></p>` : ''}
           ` : ''}
           
           ${accommodation.notes ? `<p><strong>Notes:</strong> ${accommodation.notes}</p>` : ''}
@@ -2246,10 +2328,8 @@ function openAccommodationModal(accommodationId = null) {
   const modal = document.getElementById('accommodationModal');
   if (!modal) return;
   
-  // Reset form
+  // Reset form and clear global state
   document.getElementById('accommodationForm').reset();
-  
-  // Reset global states
   selectedHotelData = null;
   confirmedHotelData = null;
   
@@ -2260,11 +2340,8 @@ function openAccommodationModal(accommodationId = null) {
   // Populate location dropdown with trip places
   populateAccommodationLocations();
   
-  // Set date restrictions based on trip dates
+  // Set date restrictions based on trip dates and existing accommodations
   setAccommodationDateRestrictions();
-  
-  // Reset hotel search interface
-  resetHotelSearch();
   
   // If editing, populate form with existing data
   if (accommodationId && window.tripUI) {
@@ -2279,6 +2356,10 @@ function closeAccommodationModal() {
   const modal = document.getElementById('accommodationModal');
   if (modal) {
     modal.classList.add('hidden');
+    // Clear global state and editing ID
+    selectedHotelData = null;
+    confirmedHotelData = null;
+    document.getElementById('accommodationForm').dataset.editingId = '';
   }
 }
 
@@ -2301,7 +2382,7 @@ function populateAccommodationLocations() {
   });
 }
 
-// Set date restrictions based on trip dates
+// Set date restrictions based on trip dates and existing accommodations
 function setAccommodationDateRestrictions() {
   if (!window.tripUI) return;
   
@@ -2311,10 +2392,161 @@ function setAccommodationDateRestrictions() {
   const checkInInput = document.getElementById('accommodationCheckIn');
   const checkOutInput = document.getElementById('accommodationCheckOut');
   
+  if (!checkInInput || !checkOutInput) return;
+  
+  // Set trip date boundaries
   checkInInput.min = trip.startDate;
   checkInInput.max = trip.endDate;
   checkOutInput.min = trip.startDate;
   checkOutInput.max = trip.endDate;
+  
+  // Get existing accommodations to prevent overlaps
+  const existingAccommodations = window.tripUI.tripManager.getAccommodations(window.tripUI.currentTripId) || [];
+  const currentEditingId = document.getElementById('accommodationForm').dataset.editingId;
+  
+  // Create a list of blocked dates
+  const blockedDates = new Set();
+  
+  existingAccommodations.forEach(accommodation => {
+    // Skip if we're editing the same accommodation
+    if (currentEditingId && accommodation.id === parseInt(currentEditingId)) {
+      return;
+    }
+    
+    const checkIn = new Date(accommodation.checkIn || accommodation.checkInDate);
+    const checkOut = new Date(accommodation.checkOut || accommodation.checkOutDate);
+    
+    // Add all dates in the range to blocked dates (excluding checkout date)
+    const currentDate = new Date(checkIn);
+    while (currentDate < checkOut) {
+      blockedDates.add(currentDate.toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  });
+  
+  // Add event listeners for date validation
+  checkInInput.addEventListener('change', function() {
+    validateAccommodationDates();
+    updateCheckOutMinDate();
+    
+    // Check if selected check-in date is blocked
+    if (this.value && blockedDates.has(this.value)) {
+      alert('This date is already booked by another accommodation. Please select a different date.');
+      this.value = '';
+      return;
+    }
+    
+    // Update checkout options based on blocked dates
+    updateCheckOutOptions(blockedDates);
+  });
+  
+  checkOutInput.addEventListener('change', function() {
+    validateAccommodationDates();
+  });
+}
+
+// Update checkout date options based on blocked dates
+function updateCheckOutOptions(blockedDates) {
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  
+  if (!checkInInput.value) return;
+  
+  const checkInDate = new Date(checkInInput.value);
+  
+  // Find the next blocked date after check-in to set as maximum checkout
+  let nextBlockedDate = null;
+  const sortedBlockedDates = Array.from(blockedDates).sort();
+  
+  for (const blockedDate of sortedBlockedDates) {
+    const blockedDateTime = new Date(blockedDate);
+    if (blockedDateTime > checkInDate) {
+      nextBlockedDate = blockedDate;
+      break;
+    }
+  }
+  
+  // Set maximum checkout date
+  if (nextBlockedDate) {
+    checkOutInput.max = nextBlockedDate;
+  } else {
+    // No blocked dates after check-in, use trip end date
+    const trip = window.tripUI.getCurrentTrip();
+    if (trip) {
+      checkOutInput.max = trip.endDate;
+    }
+  }
+}
+
+// Validate accommodation dates don't overlap with existing ones
+function validateAccommodationDates() {
+  if (!window.tripUI) return true;
+  
+  const trip = window.tripUI.getCurrentTrip();
+  if (!trip) return true;
+  
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  
+  if (!checkInInput.value || !checkOutInput.value) return true;
+  
+  const newCheckIn = new Date(checkInInput.value);
+  const newCheckOut = new Date(checkOutInput.value);
+  
+  // Validate check-out is after check-in
+  if (newCheckOut <= newCheckIn) {
+    showToast('Check-out date must be after check-in date', 'error');
+    checkOutInput.value = '';
+    return false;
+  }
+  
+  // Check for overlaps with existing accommodations
+  const existingAccommodations = trip.accommodations || [];
+  const currentEditingId = document.getElementById('accommodationForm').dataset.editingId;
+  
+  for (let accommodation of existingAccommodations) {
+    // Skip if we're editing the same accommodation
+    if (currentEditingId && accommodation.id === parseInt(currentEditingId)) {
+      continue;
+    }
+    
+    const existingCheckIn = new Date(accommodation.checkInDate);
+    const existingCheckOut = new Date(accommodation.checkOutDate);
+    
+    // Check for date overlap
+    if ((newCheckIn < existingCheckOut) && (newCheckOut > existingCheckIn)) {
+      const existingDates = `${window.formatDate(accommodation.checkInDate)} - ${window.formatDate(accommodation.checkOutDate)}`;
+      showToast(`Dates overlap with existing accommodation: ${existingDates}`, 'error');
+      checkInInput.value = '';
+      checkOutInput.value = '';
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+// Update minimum check-out date based on check-in selection
+function updateCheckOutMinDate() {
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  
+  if (!checkInInput || !checkOutInput) return;
+  
+  if (checkInInput.value) {
+    const checkInDate = new Date(checkInInput.value);
+    checkInDate.setDate(checkInDate.getDate() + 1); // Minimum 1 night stay
+    checkOutInput.min = checkInDate.toISOString().split('T')[0];
+  }
+}
+
+// Show toast message (helper function)
+function showToast(message, type = 'info') {
+  if (window.app && window.app.showToast) {
+    window.app.showToast(message, type);
+  } else {
+    alert(message); // Fallback for notifications
+  }
 }
 
 // Handle accommodation modal events
@@ -2775,7 +3007,7 @@ function showHotelDetailsForConfirmation(hotel) {
   }
   
   if (hotel.website && hotel.website !== 'Not provided') {
-    detailsHtml += `<p><strong>Website:</strong> <a href="${hotel.website.startsWith('http') ? hotel.website : 'https://' + hotel.website}" target="_blank">${hotel.website}</a></p>`;
+    detailsHtml += `<p><strong>Website:</strong> <a href="${hotel.website.match(/^https?:\/\//) ? hotel.website : 'https://' + hotel.website}" target="_blank">${hotel.website}</a></p>`;
   }
   
   // Price range for web search results
@@ -2952,17 +3184,51 @@ function saveAccommodation() {
   const checkOut = document.getElementById('accommodationCheckOut').value;
   const notes = document.getElementById('accommodationNotes').value;
   
-  if (!locationValue || !checkIn || !checkOut) {
-    alert('Please fill in all required fields');
+  // Get manual hotel details from the simplified form
+  const hotelName = document.getElementById('hotelName').value.trim();
+  const hotelWebsite = document.getElementById('hotelWebsite').value.trim();
+  const hotelCategory = document.getElementById('hotelCategory').value.trim();
+  const hotelPhone = document.getElementById('hotelPhone').value.trim();
+  const hotelAddress = document.getElementById('hotelAddress').value.trim();
+  
+  // Check if we're editing
+  const editingId = document.getElementById('accommodationForm').dataset.editingId;
+  const isEditing = !!editingId;
+  
+  if (!locationValue || !checkIn || !checkOut || !hotelName) {
+    alert('Please fill in all required fields (location, dates, and hotel name)');
     return;
   }
   
-  if (!confirmedHotelData) {
-    alert('Please fetch and confirm hotel details');
-    return;
+  // Validate website URL format if provided
+  let validatedWebsite = hotelWebsite;
+  if (hotelWebsite) {
+    // Accept URLs like marriott.com, www.marriott.com, http://marriott.com, https://marriott.com
+    if (!hotelWebsite.match(/^https?:\/\//)) {
+      // Add https:// if not present
+      validatedWebsite = 'https://' + hotelWebsite;
+    }
   }
   
   const location = JSON.parse(locationValue);
+  
+  // Create hotel data from manual entry
+  const manualHotelData = {
+    id: isEditing ? `manual_edit_${editingId}` : 'manual_' + Date.now(),
+    name: hotelName,
+    city: location.city,
+    state: location.state,
+    source: 'manual_entry',
+    category: hotelCategory || 'Mid-Range',
+    rating: 'N/A',
+    address: hotelAddress || `${location.city}, ${location.state}`,
+    phone: hotelPhone || 'Not provided',
+    website: validatedWebsite || 'Not provided',
+    amenities: ['Manual Entry - Details as provided by user'],
+    description: `Manually added hotel in ${location.city}`,
+    lastUpdated: new Date().toISOString(),
+    dataConfidence: 'manual'
+  };
   
   let accommodationData = {
     type: 'hotel',
@@ -2970,19 +3236,34 @@ function saveAccommodation() {
     checkIn: checkIn,
     checkOut: checkOut,
     notes: notes,
-    name: confirmedHotelData.name,
-    hotelData: confirmedHotelData
+    name: manualHotelData.name,
+    hotelData: manualHotelData
   };
   
-  const result = window.tripUI.tripManager.addAccommodation(window.tripUI.currentTripId, accommodationData);
+  let result;
   
-  if (result) {
-    closeAccommodationModal();
-    window.tripUI.refreshAccommodationList();
-    window.tripUI.refreshItineraryList(); // Refresh itinerary to show accommodation updates
-    alert('Accommodation added successfully!');
+  if (isEditing) {
+    // Update existing accommodation
+    result = window.tripUI.tripManager.updateAccommodation(window.tripUI.currentTripId, parseInt(editingId), accommodationData);
+    if (result) {
+      closeAccommodationModal();
+      window.tripUI.refreshAccommodationList();
+      window.tripUI.refreshItineraryList();
+      alert('Accommodation updated successfully!');
+    } else {
+      alert('Failed to update accommodation. Please try again.');
+    }
   } else {
-    alert('Failed to add accommodation. Please try again.');
+    // Add new accommodation
+    result = window.tripUI.tripManager.addAccommodation(window.tripUI.currentTripId, accommodationData);
+    if (result) {
+      closeAccommodationModal();
+      window.tripUI.refreshAccommodationList();
+      window.tripUI.refreshItineraryList();
+      alert('Accommodation added successfully!');
+    } else {
+      alert('Failed to add accommodation. Please try again.');
+    }
   }
 }
 
@@ -3018,40 +3299,26 @@ function populateAccommodationForm(accommodationId) {
   
   if (!accommodation) return;
   
+  // Store editing ID for date validation
+  document.getElementById('accommodationForm').dataset.editingId = accommodationId;
+  
   // Set location
   document.getElementById('accommodationLocation').value = JSON.stringify(accommodation.location);
   
-  // Set dates
-  document.getElementById('accommodationCheckIn').value = accommodation.checkIn;
-  document.getElementById('accommodationCheckOut').value = accommodation.checkOut;
+  // Set dates - use the correct property names
+  document.getElementById('accommodationCheckIn').value = accommodation.checkIn || accommodation.checkInDate;
+  document.getElementById('accommodationCheckOut').value = accommodation.checkOut || accommodation.checkOutDate;
   
   // Set notes
   document.getElementById('accommodationNotes').value = accommodation.notes || '';
   
   // Set hotel details if available
   if (accommodation.hotelData) {
-    // Set the search input with hotel name
-    document.getElementById('hotelSearchInput').value = accommodation.hotelData.name;
-    
-    // Set the confirmed hotel data
-    confirmedHotelData = accommodation.hotelData;
-    selectedHotelData = accommodation.hotelData;
-    
-    // Show confirmed hotel state
-    setTimeout(() => {
-      document.getElementById('confirmedHotelName').textContent = accommodation.hotelData.name;
-      
-      let detailsText = `${accommodation.hotelData.area}, ${accommodation.hotelData.city} • ${accommodation.hotelData.rating}/5 ⭐ • ${accommodation.hotelData.category}`;
-      if (accommodation.hotelData.address) {
-        detailsText += `\n${accommodation.hotelData.address}`;
-      }
-      
-      document.getElementById('confirmedHotelDetails').textContent = detailsText;
-      
-      document.getElementById('confirmedHotelDisplay').classList.remove('hidden');
-      document.getElementById('hotelSearchInput').disabled = true;
-      document.getElementById('fetchHotelDetailsBtn').disabled = true;
-    }, 100);
+    document.getElementById('hotelName').value = accommodation.hotelData.name || '';
+    document.getElementById('hotelWebsite').value = accommodation.hotelData.website !== 'Not provided' ? accommodation.hotelData.website : '';
+    document.getElementById('hotelCategory').value = accommodation.hotelData.category || '';
+    document.getElementById('hotelPhone').value = accommodation.hotelData.phone !== 'Not provided' ? accommodation.hotelData.phone : '';
+    document.getElementById('hotelAddress').value = accommodation.hotelData.address || '';
   }
 }
 

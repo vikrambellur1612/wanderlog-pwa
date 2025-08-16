@@ -277,14 +277,14 @@
                         </div>
                     </div>
                     
-                    <!-- Interactive India Map Section -->
+                    <!-- Browse Destinations Section -->
                     <div class="explore-section">
                         <div class="section-header">
-                            <h3 class="section-title">Interactive Map</h3>
+                            <h3 class="section-title">Browse Destinations</h3>
                             <p class="section-subtitle">Click on states to explore destinations</p>
                         </div>
                         <div id="explore-map">
-                            <!-- India map will be loaded here -->
+                            <!-- India destinations browser will be loaded here -->
                         </div>
                     </div>
 
@@ -423,19 +423,7 @@
                 <span>Home</span>
             </button>
             
-            <button class="nav-item" data-view="trips">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                </svg>
-                <span>Trips</span>
-            </button>
-            
-            <button class="nav-item" data-view="explore">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <span>Explore</span>
-            </button>
+            <!-- Trips and Explore removed from main navigation - now accessible through Home flow -->
             
             <button class="nav-item" data-view="log">
                 <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -508,112 +496,37 @@
                         </select>
                     </div>
 
-                    <!-- Hotel Search Section -->
+                    <!-- Simplified Hotel Entry Section -->
                     <div class="form-group">
-                        <label for="hotelSearchInput">Hotel Name</label>
-                        <div class="search-input-container">
-                            <input type="text" id="hotelSearchInput" class="form-input" placeholder="Enter hotel name..." required>
-                            <button type="button" id="fetchHotelDetailsBtn" class="btn-search">🔍 Fetch Hotel Details</button>
+                        <label for="hotelName">Hotel Name *</label>
+                        <input type="text" id="hotelName" class="form-input" placeholder="Enter hotel name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hotelWebsite">Hotel Website/Booking Link</label>
+                        <input type="url" id="hotelWebsite" class="form-input" placeholder="Hotel website or booking link (e.g. Booking.com, Agoda, etc.)">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hotelCategory">Category (Optional)</label>
+                            <select id="hotelCategory" class="form-input">
+                                <option value="">Select category...</option>
+                                <option value="Luxury">Luxury</option>
+                                <option value="Business">Business</option>
+                                <option value="Mid-Range">Mid-Range</option>
+                                <option value="Budget">Budget</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hotelPhone">Phone (Optional)</label>
+                            <input type="tel" id="hotelPhone" class="form-input" placeholder="Contact number">
                         </div>
                     </div>
                     
-                    <!-- Search Results -->
-                    <div id="hotelSearchResults" class="hotel-search-results hidden">
-                        <h5>Hotel Search Results:</h5>
-                        <div id="hotelResultsList" class="hotel-results-list">
-                            <!-- Results will be populated here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Manual Entry Section -->
-                    <div id="manualEntrySection" class="manual-entry-section hidden">
-                        <div class="manual-entry-header">
-                            <h5>🏨 Add Hotel Details Manually</h5>
-                            <p>Enter hotel information manually since we couldn't find it online. Only hotel name is required:</p>
-                        </div>
-                        <div class="manual-entry-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="manualHotelName">Hotel Name *</label>
-                                    <input type="text" id="manualHotelName" class="form-input" placeholder="Enter hotel name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="manualHotelWebsite">Hotel Website/Link</label>
-                                    <input type="url" id="manualHotelWebsite" class="form-input" placeholder="Hotel website or booking link">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="manualHotelCategory">Category (Optional)</label>
-                                    <select id="manualHotelCategory" class="form-input">
-                                        <option value="">Select category...</option>
-                                        <option value="Luxury">Luxury</option>
-                                        <option value="Business">Business</option>
-                                        <option value="Mid-Range">Mid-Range</option>
-                                        <option value="Budget">Budget</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="manualHotelPhone">Phone (Optional)</label>
-                                    <input type="tel" id="manualHotelPhone" class="form-input" placeholder="Contact number">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="manualHotelAddress">Address (Optional)</label>
-                                    <input type="text" id="manualHotelAddress" class="form-input" placeholder="Hotel address">
-                                </div>
-                                <div class="form-group">
-                                    <label for="manualHotelEmail">Email (Optional)</label>
-                                    <input type="email" id="manualHotelEmail" class="form-input" placeholder="Hotel email">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="manualHotelNotes">Additional Notes (Optional)</label>
-                                <textarea id="manualHotelNotes" class="form-input" rows="2" placeholder="Any additional information about the hotel..."></textarea>
-                            </div>
-                            <div class="manual-entry-actions">
-                                <button type="button" id="confirmManualHotelBtn" class="btn-primary">✓ Confirm</button>
-                                <button type="button" id="cancelManualEntryBtn" class="btn-secondary">✗ Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Selected Hotel Details -->
-                    <div id="hotelDetails" class="hotel-details hidden">
-                        <div class="hotel-confirmation">
-                            <h5>Confirm Hotel Details:</h5>
-                            <div class="hotel-info">
-                                <h4 id="selectedHotelName"></h4>
-                                <p id="selectedHotelLocation"></p>
-                                <div class="hotel-rating">
-                                    <span class="rating-stars" id="selectedHotelRating"></span>
-                                    <span class="rating-text" id="selectedHotelRatingText"></span>
-                                </div>
-                                <p id="selectedHotelCategory"></p>
-                                <div id="selectedHotelDetails" class="hotel-additional-details">
-                                    <!-- Additional details will be shown here -->
-                                </div>
-                            </div>
-                            <div class="confirmation-actions">
-                                <button type="button" id="confirmHotelBtn" class="btn-primary">✓ Confirm Hotel</button>
-                                <button type="button" id="changeHotelBtn" class="btn-secondary">↩ Change Selection</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Confirmed Hotel Display -->
-                    <div id="confirmedHotelDisplay" class="confirmed-hotel hidden">
-                        <div class="confirmed-hotel-info">
-                            <h5>Selected Hotel:</h5>
-                            <div class="hotel-summary">
-                                <div class="hotel-summary-details">
-                                    <strong id="confirmedHotelName"></strong>
-                                    <p id="confirmedHotelDetails"></p>
-                                </div>
-                                <button type="button" id="editHotelBtn" class="btn-secondary">✏️ Change Hotel</button>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="hotelAddress">Address (Optional)</label>
+                        <input type="text" id="hotelAddress" class="form-input" placeholder="Hotel address">
                     </div>
 
                     <div class="form-row">
