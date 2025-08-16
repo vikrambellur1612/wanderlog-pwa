@@ -1310,6 +1310,13 @@ select.form-input {
 
 /* ===== TRIP DETAIL ENHANCEMENTS ===== */
 
+.trip-sections {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 .trip-section {
     margin-bottom: var(--spacing-3xl);
     background-color: var(--white);
@@ -1317,6 +1324,8 @@ select.form-input {
     padding: var(--spacing-xl);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .section-header {
@@ -3061,6 +3070,16 @@ select.form-input {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Trip Detail Container */
+.trip-detail {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
 }
 
 /* Trip Detail Header Date Badges */
@@ -3161,6 +3180,34 @@ select.form-input {
     .trip-detail-name {
         font-size: 1.5rem;
     }
+
+    /* Ensure consistent responsive layout for all sections */
+    .trip-detail {
+        padding: var(--spacing-sm);
+    }
+    
+    .trip-sections {
+        padding: 0;
+    }
+    
+    .trip-section,
+    .explore-section {
+        margin-left: 0;
+        margin-right: 0;
+        padding: var(--spacing-lg);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+    }
 }
 
 .explore-section {
@@ -3172,8 +3219,6 @@ select.form-input {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    margin-left: var(--spacing-lg);
-    margin-right: var(--spacing-lg);
 }
 
 /* New Accommodation Card Design */
