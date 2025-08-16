@@ -2249,23 +2249,18 @@ class TripUI {
 
     const isHotel = accommodation.type === 'hotel' && accommodation.hotelData;
     const isCustom = accommodation.type === 'custom' && accommodation.customDetails;
-    const hasWebsite = (isHotel && accommodation.hotelData.website && accommodation.hotelData.website !== 'Not provided') ||
-                      (isCustom && accommodation.customDetails.website && accommodation.customDetails.website !== 'Not provided');
 
-    // Get location info with safe fallbacks
+    // Get clean location info
     const getLocationInfo = () => {
       if (isHotel && accommodation.location) {
         const parts = [];
-        if (accommodation.hotelData?.area && accommodation.hotelData.area !== 'undefined') {
-          parts.push(accommodation.hotelData.area);
-        }
         if (accommodation.location.city && accommodation.location.city !== 'undefined') {
           parts.push(accommodation.location.city);
         }
         if (accommodation.location.state && accommodation.location.state !== 'undefined') {
           parts.push(accommodation.location.state);
         }
-        return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+        return parts.length > 0 ? parts.join(', ') : '';
       }
       
       if (isCustom && accommodation.location) {
@@ -2276,110 +2271,72 @@ class TripUI {
         if (accommodation.location.state && accommodation.location.state !== 'undefined') {
           parts.push(accommodation.location.state);
         }
-        return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+        return parts.length > 0 ? parts.join(', ') : '';
       }
       
-      return 'Location not specified';
+      return '';
     };
 
-    // Get rating info with safe fallbacks
-    const getRatingInfo = () => {
+    // Get rating stars
+    const getRatingStars = () => {
       if (isHotel && accommodation.hotelData?.rating && accommodation.hotelData.rating !== 'N/A') {
         const rating = parseFloat(accommodation.hotelData.rating);
         if (!isNaN(rating) && rating > 0) {
-          return {
-            stars: '★'.repeat(Math.floor(rating)),
-            text: `${rating}/5`
-          };
+          return '★'.repeat(Math.floor(rating));
         }
       }
-      return null;
+      return '';
     };
 
     const locationInfo = getLocationInfo();
-    const ratingInfo = getRatingInfo();
+    const ratingStars = getRatingStars();
 
     return `
-      <div class="accommodation-card modern-card">
-        <div class="accommodation-header">
-          <div class="accommodation-title-section">
-            <h4 class="accommodation-name">${accommodation.name}</h4>
-            <span class="accommodation-location">📍 ${locationInfo}</span>
+      <div class="accommodation-card-new">
+        <div class="accommodation-main">
+          <div class="accommodation-info">
+            <div class="accommodation-header-new">
+              <h3 class="hotel-name">${accommodation.name}</h3>
+              ${ratingStars ? `<span class="hotel-rating">${ratingStars}</span>` : ''}
+            </div>
+            ${locationInfo ? `<p class="hotel-location">📍 ${locationInfo}</p>` : ''}
+            <span class="hotel-type">${isHotel ? '🏨 Hotel' : '🏡 ' + (accommodation.customDetails?.category || 'Accommodation')}</span>
           </div>
-          <span class="accommodation-type-badge ${isHotel ? 'hotel-badge' : 'custom-badge'}">
-            ${isHotel ? '🏨 Hotel' : '🏡 Custom'}
-          </span>
+          
+          <div class="accommodation-actions-new">
+            <button class="action-btn edit-btn-new" onclick="editAccommodation(${accommodation.id})" title="Edit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="m18.5 2.5 a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button class="action-btn delete-btn-new" onclick="removeAccommodation(${accommodation.id})" title="Delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"></polyline>
+                <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+              </svg>
+            </button>
+          </div>
         </div>
         
-        ${ratingInfo ? `
-          <div class="accommodation-rating">
-            <span class="rating-stars">${ratingInfo.stars}</span>
-            <span class="rating-text">${ratingInfo.text}</span>
+        <div class="accommodation-dates-new">
+          <div class="date-item check-in-new">
+            <span class="date-label-new">Check In</span>
+            <span class="date-value-new">${checkInDate}</span>
+          </div>
+          <div class="date-separator-new">→</div>
+          <div class="date-item check-out-new">
+            <span class="date-label-new">Check Out</span>
+            <span class="date-value-new">${checkOutDate}</span>
+          </div>
+        </div>
+        
+        ${accommodation.notes ? `
+          <div class="accommodation-notes-new">
+            <span class="notes-icon">📝</span>
+            <span class="notes-text">${accommodation.notes}</span>
           </div>
         ` : ''}
-        
-        <div class="accommodation-details">
-          ${isHotel && accommodation.hotelData?.category ? `
-            <div class="accommodation-category">
-              <span class="category-label">Category:</span>
-              <span class="category-value">${accommodation.hotelData.category}</span>
-            </div>
-          ` : ''}
-          
-          ${isCustom && accommodation.customDetails?.category ? `
-            <div class="accommodation-category">
-              <span class="category-label">Type:</span>
-              <span class="category-value">${accommodation.customDetails.category}</span>
-            </div>
-          ` : ''}
-          
-          ${accommodation.customDetails?.address ? `
-            <div class="accommodation-address">
-              <span class="address-label">Address:</span>
-              <span class="address-value">${accommodation.customDetails.address}</span>
-            </div>
-          ` : ''}
-          
-          ${hasWebsite ? `
-            <div class="accommodation-website">
-              <a href="${(isHotel ? accommodation.hotelData.website : accommodation.customDetails.website).match(/^https?:\/\//) ? 
-                         (isHotel ? accommodation.hotelData.website : accommodation.customDetails.website) : 
-                         'https://' + (isHotel ? accommodation.hotelData.website : accommodation.customDetails.website)}" 
-                 target="_blank" rel="noopener" class="website-link">
-                🔗 View Details
-              </a>
-            </div>
-          ` : ''}
-          
-          ${accommodation.notes ? `
-            <div class="accommodation-notes">
-              <span class="notes-label">Notes:</span>
-              <span class="notes-value">${accommodation.notes}</span>
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="accommodation-dates-section">
-          <div class="date-badges">
-            <div class="date-badge check-in">
-              <span class="date-label">Check In</span>
-              <span class="date-value">${checkInDate}</span>
-            </div>
-            <div class="date-badge check-out">
-              <span class="date-label">Check Out</span>
-              <span class="date-value">${checkOutDate}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="accommodation-actions">
-          <button class="btn-action edit-btn" onclick="editAccommodation(${accommodation.id})" title="Edit accommodation">
-            ✏️ Edit
-          </button>
-          <button class="btn-action remove-btn" onclick="removeAccommodation(${accommodation.id})" title="Delete accommodation">
-            🗑️ Delete
-          </button>
-        </div>
       </div>
     `;
   }
