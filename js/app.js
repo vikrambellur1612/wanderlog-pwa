@@ -12,7 +12,7 @@ window.formatDate = function(dateString) {
 };
 
 // WanderLog PWA - Main Application Logic
-// Version: 1.7.0
+// Version: 1.9.0
 
 class WanderLogApp {
   constructor() {

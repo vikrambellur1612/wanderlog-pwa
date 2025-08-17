@@ -1,9 +1,9 @@
 // WanderLog PWA Service Worker
-// Version: 1.7.0
+// Version: 1.9.0
 
-const CACHE_NAME = 'wanderlog-v1.7.0';
-const STATIC_CACHE = 'wanderlog-static-v1.7.0';
-const DYNAMIC_CACHE = 'wanderlog-dynamic-v1.7.0';
+const CACHE_NAME = 'wanderlog-v1.9.0';
+const STATIC_CACHE = 'wanderlog-static-v1.9.0';
+const DYNAMIC_CACHE = 'wanderlog-dynamic-v1.9.0';
 
 // Files to cache immediately (App Shell)
 const STATIC_ASSETS = [
@@ -12,12 +12,17 @@ const STATIC_ASSETS = [
   './manifest.json',
   './css/styles.css',
   './js/app.js',
-  './js/sw-register.js',
-  './icons/favicon.svg',
-  './icons/favicon.png',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
-  './icons/apple-touch-icon.png'
+  './js/trip-ui.js',
+  './js/trip-manager.js',
+  './js/hotels-data.js',
+  './js/web-hotel-search.js',
+  './js/map-manager.js',
+  './js/attraction-details.js',
+  './js/api-config.js',
+  './Wanderlog.jpeg',
+  './icon-192x192.png',
+  './icon-512x512.png',
+  './apple-touch-icon.png'
 ];
 
 // Routes that should always go to the network first

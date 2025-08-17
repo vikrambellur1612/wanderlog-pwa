@@ -1,5 +1,5 @@
 // Trip UI Component
-// Version: 1.4.0
+// Version: 1.9.0
 
 class TripUI {
   constructor() {

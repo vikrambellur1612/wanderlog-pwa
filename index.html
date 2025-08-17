@@ -434,7 +434,7 @@
                         <div class="about-section">
                             <h3>📱 PWA Version</h3>
                             <div class="version-info">
-                                <span class="version-badge">v1.8.0</span>
+                                <span class="version-badge">v1.9.0</span>
                                 <p>This is a Progressive Web App (PWA) that works seamlessly across all devices. Install it on your home screen for the best experience!</p>
                             </div>
                         </div>
@@ -672,5 +672,31 @@
     <script src="./js/attraction-details.js"></script>
     <script src="./js/trip-ui.js"></script>
     <script src="./js/app.js" type="module"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content available, prompt user to refresh
+                                    if (confirm('New version available! Refresh to update?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(registration => console.log('SW registration failed: ', registration));
+            });
+        }
+    </script>
 </body>
 </html>
