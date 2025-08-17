@@ -25,7 +25,7 @@ class WanderLogApp {
   }
 
   async init() {
-    console.log('Initializing WanderLog PWA v1.7.0');
+    console.log('Initializing WanderLog PWA v1.9.0');
     
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {

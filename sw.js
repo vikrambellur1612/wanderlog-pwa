@@ -306,7 +306,7 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: '1.4.0' });
+    event.ports[0].postMessage({ version: '1.9.0' });
   }
 });
 
@@ -321,4 +321,4 @@ self.addEventListener('unhandledrejection', (event) => {
   event.preventDefault();
 });
 
-console.log('WanderLog Service Worker v1.3.0 loaded');
+console.log('WanderLog Service Worker v1.9.0 loaded');
