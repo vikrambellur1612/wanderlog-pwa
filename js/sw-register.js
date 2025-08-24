@@ -1,5 +1,5 @@
 // Service Worker Registration - WanderLog PWA
-// Version: 1.4.0
+// Version: 1.10.0
 
 let deferredPrompt;
 let updateAvailable = false;
@@ -12,16 +12,13 @@ if ('serviceWorker' in navigator && isProduction) {
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./sw.js');
-      console.log('ServiceWorker registered:', registration.scope);
       
       // Handle updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
-        console.log('New service worker found, installing...');
         
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('New service worker installed, showing update notification');
             showUpdateNotification();
           }
         });
@@ -34,7 +31,6 @@ if ('serviceWorker' in navigator && isProduction) {
 
       // Listen for controller change (when new SW takes control)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('New service worker took control, reloading page');
         // Add a small delay to prevent rapid reloading
         setTimeout(() => {
           window.location.reload();
@@ -46,7 +42,7 @@ if ('serviceWorker' in navigator && isProduction) {
     }
   });
 } else if ('serviceWorker' in navigator && !isProduction) {
-  console.log('Service Worker registration skipped in development mode');
+  // Service Worker registration skipped in development mode
 }
 
 // PWA Install Prompt Handler

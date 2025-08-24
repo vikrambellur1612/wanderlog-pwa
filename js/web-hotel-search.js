@@ -25,13 +25,11 @@ class WebHotelSearchService {
   // Main search function that tries internet search first, then allows manual entry
   async searchHotelDetails(hotelName, location) {
     try {
-      console.log(`🔍 Searching for "${hotelName}" in ${location.city}, ${location.state}`);
       
       // Step 1: Try to search using simulated web search for the specific location
       const webResults = await this.simulateWebSearch(hotelName, location);
       
       if (webResults && webResults.length > 0) {
-        console.log('✅ Found results from web search');
         return {
           success: true,
           source: 'web',
@@ -41,9 +39,7 @@ class WebHotelSearchService {
       }
       
       // Step 2: No results found, allow manual entry
-      console.log('⚠️ No hotels found online, allowing manual entry');
       // Step 2: No results found, allow manual entry
-      console.log('❌ No hotels found online, allowing manual entry');
       return {
         success: false,
         source: 'none',

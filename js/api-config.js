@@ -1,5 +1,5 @@
 // API Configuration for WanderLog Trip Management
-// Version: 1.4.0
+// Version: 1.10.0
 
 /**
  * API Configuration for external travel data sources

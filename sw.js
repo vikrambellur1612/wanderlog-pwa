@@ -1,9 +1,9 @@
 // WanderLog PWA Service Worker
-// Version: 1.9.0
+// Version: 1.10.0
 
-const CACHE_NAME = 'wanderlog-v1.9.0';
-const STATIC_CACHE = 'wanderlog-static-v1.9.0';
-const DYNAMIC_CACHE = 'wanderlog-dynamic-v1.9.0';
+const CACHE_NAME = 'wanderlog-v1.10.0';
+const STATIC_CACHE = 'wanderlog-static-v1.10.0';
+const DYNAMIC_CACHE = 'wanderlog-dynamic-v1.10.0';
 
 // Files to cache immediately (App Shell)
 const STATIC_ASSETS = [
@@ -306,7 +306,7 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: '1.9.0' });
+    event.ports[0].postMessage({ version: '1.10.0' });
   }
 });
 
@@ -321,4 +321,4 @@ self.addEventListener('unhandledrejection', (event) => {
   event.preventDefault();
 });
 
-console.log('WanderLog Service Worker v1.9.0 loaded');
+console.log('WanderLog Service Worker v1.10.0 loaded');

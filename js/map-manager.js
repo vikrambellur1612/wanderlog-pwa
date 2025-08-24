@@ -112,12 +112,10 @@ class MapManager {
   setupMapInteractions() {
     // Interactions are now handled through onclick attributes in the HTML
     // No need for additional event listeners since we're using clickable cards and dropdown
-    console.log('Map interactions setup complete - using direct onclick handlers');
   }
 
   // Handle state click - show places modal
   handleStateClick(stateName) {
-    console.log(`State clicked: ${stateName}`);
     
     // Get places for this state
     const placesInState = this.getPlacesForState(stateName);
@@ -571,7 +569,6 @@ class MapManager {
   clearMapHighlights() {
     // This method is no longer needed with the new card-based interface
     // Highlighting is now handled by updateDestinationCards method
-    console.log('Clear map highlights - handled by destination cards');
   }
 
   // Set places data from TripManager

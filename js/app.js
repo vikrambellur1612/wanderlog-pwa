@@ -12,7 +12,7 @@ window.formatDate = function(dateString) {
 };
 
 // WanderLog PWA - Main Application Logic
-// Version: 1.9.0
+// Version: 1.10.0
 
 class WanderLogApp {
   constructor() {
@@ -25,7 +25,6 @@ class WanderLogApp {
   }
 
   async init() {
-    console.log('Initializing WanderLog PWA v1.9.0');
     
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
@@ -41,7 +40,6 @@ class WanderLogApp {
     this.hideLoadingScreen();
     this.renderCurrentView();
     
-    console.log('WanderLog app initialized successfully');
   }
 
   setupEventListeners() {
@@ -154,7 +152,6 @@ class WanderLogApp {
     }
     window.history.pushState({}, '', url);
     
-    console.log(`Navigated to view: ${viewName}`);
   }
 
   renderCurrentView() {
@@ -180,7 +177,6 @@ class WanderLogApp {
 
   renderHomeView() {
     // Home view is mostly static, but we can add dynamic content here
-    console.log('Rendering home view');
     
     // Load and display trips on home page
     this.loadHomePageTrips();
@@ -199,7 +195,6 @@ class WanderLogApp {
         // Fallback initialization
         if (typeof window.TripUI === 'function') {
           window.tripUI = new window.TripUI();
-          console.log('TripUI initialized for home page');
         }
       }
     }, 100);
@@ -223,7 +218,6 @@ class WanderLogApp {
     if (!window.tripManager || typeof window.tripManager.getAllTrips !== 'function') {
       if (typeof TripManager === 'function') {
         window.tripManager = new TripManager();
-        console.log('TripManager re-initialized in loadHomePageTrips');
       } else {
         console.error('TripManager class not available');
         return;
@@ -406,7 +400,6 @@ class WanderLogApp {
 
   renderTripsView() {
     // Trip view content is handled by TripUI class
-    console.log('Rendering trips view');
     
     // Ensure TripUI is initialized when we navigate to trips view
     setTimeout(() => {
@@ -416,7 +409,6 @@ class WanderLogApp {
         // Fallback initialization
         if (typeof window.TripUI === 'function') {
           window.tripUI = new window.TripUI();
-          console.log('TripUI initialized via fallback');
         }
       }
     }, 100); // Small delay to ensure DOM is ready
@@ -428,7 +420,6 @@ class WanderLogApp {
       window.tripUI.initializeExploreMap();
     }
 
-    console.log('Rendered explore view with destinations browser and custom place form');
   }
 
   // Add custom place functionality
@@ -531,7 +522,6 @@ class WanderLogApp {
 
   renderLogView() {
     // Log view form is static, but we can add validation or dynamic elements
-    console.log('Rendering log view');
   }
 
   renderFavoritesView() {
@@ -564,17 +554,14 @@ class WanderLogApp {
       `).join('');
     }
 
-    console.log(`Rendered favorites view with ${favorites.length} items`);
   }
 
   handleSearch(query) {
-    console.log('Search query:', query);
     
     // In a real app, this would make an API call
     // For now, we'll just filter the sample data
     if (query.length > 2) {
       // Implement search logic here
-      console.log('Searching for:', query);
     }
   }
 
@@ -619,7 +606,6 @@ class WanderLogApp {
 
     this.showToast('Entry logged successfully!', 'success');
     
-    console.log('Log entry saved:', logEntry);
   }
 
   saveLogEntry(entry) {
@@ -728,7 +714,6 @@ class WanderLogApp {
 
   toggleMenu() {
     // Implement menu toggle functionality
-    console.log('Menu toggle clicked');
     this.showToast('Menu functionality coming soon!', 'info');
   }
 
@@ -887,12 +872,10 @@ window.addEventListener('popstate', () => {
 // Handle network status changes
 window.addEventListener('online', () => {
   app.isOnline = true;
-  console.log('App is online');
 });
 
 window.addEventListener('offline', () => {
   app.isOnline = false;
-  console.log('App is offline');
 });
 
 // PWA Installation Support
@@ -900,7 +883,6 @@ let deferredPrompt;
 
 // Listen for the beforeinstallprompt event
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('PWA: beforeinstallprompt event fired');
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
   // Stash the event so it can be triggered later
@@ -913,7 +895,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // Function to show install prompt
 function showInstallPrompt() {
   // You can add a custom install button here
-  console.log('PWA can be installed');
   
   // Optional: Show a custom install banner
   if (app && typeof app.showToast === 'function') {
@@ -923,7 +904,6 @@ function showInstallPrompt() {
 
 // Handle the app installed event
 window.addEventListener('appinstalled', (evt) => {
-  console.log('PWA: App was installed successfully');
   if (app && typeof app.showToast === 'function') {
     app.showToast('WanderLog installed successfully! Welcome to your travel companion.', 'success');
   }
@@ -939,15 +919,12 @@ window.installPWA = async function() {
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
-      console.log('User accepted the PWA install prompt');
     } else {
-      console.log('User dismissed the PWA install prompt');
     }
     
     // Clear the deferred prompt
     deferredPrompt = null;
   } else {
-    console.log('PWA install prompt not available');
     if (app && typeof app.showToast === 'function') {
       app.showToast('To install WanderLog, look for "Add to Home Screen" or "Install" in your browser menu.', 'info');
     }

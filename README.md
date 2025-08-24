@@ -1,144 +1,95 @@
-# WanderLog PWA
+# WanderLog - Travel Planning PWA
 
-A Progressive Web App for travel logging and exploration.
+## Overview
+WanderLog is a modern Progressive Web Application for travel planning and logging, built with vanilla JavaScript and optimized for offline usage.
 
 ## Features
+- 🗺️ **Interactive Trip Planning**: Create and manage trips with detailed itineraries
+- 📱 **PWA Support**: Install as a native app on mobile and desktop
+- 🌐 **Offline Mode**: Full functionality without internet connection
+- ⭐ **Favorites System**: Save and organize favorite destinations
+- 🏨 **Hotel Search**: Integrated hotel search for major Indian destinations
+- 📖 **Travel Log**: Document your travel experiences
+- 🎯 **Attraction Details**: Rich information about tourist attractions
 
-- 🌍 **Explore Places**: Discover new locations and attractions
-- 📝 **Log Journeys**: Record your travel experiences with notes and ratings
-- ⭐ **Favorites**: Save and organize your favorite places
-- 📱 **PWA Ready**: Install on any device, works offline
-- 🎨 **Modern Design**: Beautiful, responsive interface following Material Design principles
-
-## Tech Stack
-
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Build Tool**: Vite
-- **PWA**: Service Worker, Web App Manifest
-- **Hosting**: Netlify
-- **Version**: 1.4.0
-
-## Getting Started
+## Quick Start
 
 ### Prerequisites
-
-- Node.js 18+ 
+- Node.js (v16 or higher)
 - npm or yarn
 
 ### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/vikrambellur1612/wanderlog-pwa.git
-   cd wanderlog-pwa
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open your browser to `http://localhost:3000`
-
-### Building for Production
-
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd wanderlog-pwa
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
 npm run build
-```
 
-### Preview Production Build
-
-```bash
+# Preview production build
 npm run preview
 ```
 
-## PWA Features
-
-- ✅ **Service Worker**: Caches resources for offline access
-- ✅ **Web App Manifest**: Enables installation on devices
-- ✅ **Responsive Design**: Works on mobile, tablet, and desktop
-- ✅ **Offline Support**: Core functionality works without internet
-- ✅ **Install Prompts**: Encourages users to install the app
-- ✅ **Update Notifications**: Alerts users when new versions are available
-
 ## Project Structure
-
 ```
 wanderlog-pwa/
-├── index.html              # Main app entry point
-├── manifest.json           # PWA manifest
-├── sw.js                   # Service worker
-├── netlify.toml            # Netlify configuration
-├── package.json            # Dependencies & scripts
-├── vite.config.js          # Vite configuration
-├── css/
-│   └── styles.css          # Main styles
-├── js/
-│   ├── app.js              # Main application logic
-│   └── sw-register.js      # Service worker registration
-└── icons/                  # PWA icons
-    ├── favicon.svg
-    ├── favicon.png
-    ├── icon-192x192.png
-    ├── icon-512x512.png
-    └── apple-touch-icon.png
+├── css/                 # Stylesheets
+├── js/                  # JavaScript modules
+│   ├── app.js          # Main application logic
+│   ├── trip-manager.js # Trip management
+│   ├── trip-ui.js      # Trip user interface
+│   ├── map-manager.js  # Map integration
+│   └── ...
+├── icons/              # App icons
+├── dist/               # Production build
+├── manifest.json       # PWA manifest
+└── sw.js              # Service worker
 ```
 
-## Development Guidelines
+## API Configuration
+The app supports external APIs for dynamic content. See `js/api-config.js` for setup instructions.
 
-### Version Management
-- Version format: `X.Y.Z` (Major.Minor.Patch)
-- Auto-increment minor versions unless major changes
-- Update version in: `package.json`, `manifest.json`, service worker
+## Technologies Used
+- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
+- **Build Tool**: Vite
+- **PWA**: Service Worker, Web App Manifest
+- **Storage**: LocalStorage
+- **Maps**: Leaflet (when API enabled)
 
-### Workflow
-1. Make changes locally
-2. Test with `npm run dev`
-3. Verify PWA features work
-4. Build and test production version
-5. Commit and push to GitHub
-6. Netlify auto-deploys
-
-### Testing Checklist
-- [ ] App loads correctly
-- [ ] Navigation works on all views
-- [ ] Forms submit properly
-- [ ] PWA install prompt appears
-- [ ] Service worker caches resources
-- [ ] App works offline
-- [ ] Responsive on mobile/tablet/desktop
+## Development
+- **Development Server**: `npm run dev`
+- **Hot Reload**: Enabled during development
+- **Production Build**: `npm run build`
+- **Code Linting**: ESLint configuration available
 
 ## Deployment
+The app is optimized for deployment on:
+- Netlify (primary)
+- Vercel
+- GitHub Pages
+- Any static hosting service
 
-The app is automatically deployed to Netlify when changes are pushed to the main branch.
-
-**Live URL**: [Will be provided after deployment]
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## Browser Support
+- Chrome/Edge 80+
+- Firefox 75+
+- Safari 13+
+- Mobile browsers with PWA support
 
 ## License
-
 MIT License - see LICENSE file for details
 
-## Version History
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Make changes and test thoroughly
+4. Submit a pull request
 
-- **v1.4.0** - Enhanced explore page with trip selection, fixed image loading issues, improved home page refresh
-- **v1.3.0** - Enhanced trip management with comprehensive UI improvements
-- **v1.2.0** - Added interactive map and attraction details
-- **v1.1.0** - Trip creation and management features
-- **v1.0.0** - Initial release with core PWA features
-
----
-
-**Built with ❤️ for travelers everywhere**
+## Support
+For issues and feature requests, please use the GitHub issues page.

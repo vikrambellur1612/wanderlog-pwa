@@ -1,5 +1,5 @@
 // Trip UI Component
-// Version: 1.9.0
+// Version: 1.10.0
 
 class TripUI {
   constructor() {
@@ -72,7 +72,6 @@ class TripUI {
       ).join('');
     }
 
-    console.log(`Rendered home page trips: ${upcomingTrips.length} upcoming, ${completedTrips.length} completed`);
   }
 
   // Render trip card for home page
@@ -1441,7 +1440,6 @@ class TripUI {
       this.showAddToTripBanner();
     }, 100);
     
-    console.log('Navigated to explore page from trip:', this.currentTripId);
   }
 
   // Add back navigation to explore view
@@ -1494,19 +1492,16 @@ class TripUI {
 
   // Initialize map for explore page
   initializeExploreMap() {
-    console.log('Initializing explore destinations browser...');
     
     setTimeout(() => {
       const mapContainer = document.getElementById('explore-map');
       
       // Ensure mapManager is initialized
       if (!this.mapManager && window.MapManager) {
-        console.log('Reinitializing mapManager for explore page');
         this.initializeMapManager();
       }
       
       if (mapContainer && this.mapManager) {
-        console.log('Setting up destinations browser in explore map container');
         
         // Clear existing content
         mapContainer.innerHTML = '';
@@ -1524,7 +1519,6 @@ class TripUI {
           this.showAddToTripBanner();
         }
         
-        console.log('Destinations browser initialized successfully');
       } else {
         console.error('Failed to initialize destinations browser:', {
           mapContainer: !!mapContainer,
@@ -3678,7 +3672,6 @@ Object.assign(TripUI.prototype, {
 // Initialize trip UI when DOM is loaded or when needed
 document.addEventListener('DOMContentLoaded', () => {
   // Don't auto-initialize, let the app handle it
-  console.log('TripUI module loaded');
 });
 
 // Export for global access
@@ -3687,10 +3680,8 @@ window.TripUI = TripUI;
 // Function to initialize TripUI when needed
 window.initializeTripUI = function() {
   if (!window.tripUI && document.getElementById('trip-list')) {
-    console.log('Initializing TripUI...');
     try {
       window.tripUI = new TripUI();
-      console.log('TripUI initialized successfully');
     } catch (error) {
       console.error('Error initializing TripUI:', error);
     }

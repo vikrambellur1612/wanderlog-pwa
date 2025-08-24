@@ -533,7 +533,6 @@ class TripManager {
     const uniqueAttractions = [...new Set(allAttractions)];
     const finalAttractions = uniqueAttractions.slice(0, 8); // Limit to 8 attractions for UI
     
-    console.log(`Final attractions for ${place.city}:`, finalAttractions);
     return finalAttractions;
   }
 
@@ -1247,7 +1246,6 @@ class TripManager {
   // Fetch dynamic attractions from external APIs
   async fetchDynamicAttractions(place) {
     try {
-      console.log(`Fetching attractions for ${place.city}, ${place.state}...`);
       
       // Try multiple API sources for comprehensive data
       const attractions = await Promise.allSettled([
@@ -1262,7 +1260,6 @@ class TripManager {
       attractions.forEach((result, index) => {
         const apiNames = ['TripAdvisor', 'Wikipedia', 'OpenTripMap'];
         if (result.status === 'fulfilled' && result.value.length > 0) {
-          console.log(`${apiNames[index]} API returned ${result.value.length} attractions for ${place.city}`);
           validAttractions.push(...result.value);
         } else if (result.status === 'rejected') {
           console.warn(`${apiNames[index]} API failed for ${place.city}:`, result.reason);
@@ -1273,9 +1270,7 @@ class TripManager {
       const uniqueAttractions = [...new Set(validAttractions)];
       
       if (uniqueAttractions.length > 0) {
-        console.log(`Successfully fetched ${uniqueAttractions.length} unique attractions for ${place.city}`);
       } else {
-        console.log(`No dynamic attractions found for ${place.city}, will use static data`);
       }
       
       return uniqueAttractions;
