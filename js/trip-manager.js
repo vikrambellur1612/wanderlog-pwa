@@ -37,6 +37,7 @@ class TripManager {
       name: tripData.name,
       startDate: tripData.startDate,
       endDate: tripData.endDate,
+      description: tripData.description || '',
       places: [],
       itinerary: [], // Array of daily itinerary objects
       accommodations: [], // Array of accommodation bookings
@@ -45,7 +46,16 @@ class TripManager {
     };
 
     this.trips.push(trip);
-    this.saveTrips();
+    
+    // Save immediately and verify save was successful
+    const saveSuccessful = this.saveTrips();
+    if (!saveSuccessful) {
+      // Remove trip from memory if save failed
+      this.trips.pop();
+      throw new Error('Failed to save trip data');
+    }
+    
+    console.log('Trip created successfully:', trip.name, 'ID:', trip.id);
     return trip;
   }
 

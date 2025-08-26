@@ -11,8 +11,20 @@ window.formatDate = function(dateString) {
   return `${day}-${month}-${year}`;
 };
 
-// WanderLog PWA - Main Application Logic
-// Version: 1.10.0
+/*
+    WanderLog PWA - Main Application Module
+    
+    This module manages the core application functionality including:
+    - Navigation and view management
+    - UI state management
+    - User interactions
+    - Local storage management
+    - Service Worker communication
+    
+    Author: WanderLog Team
+    Date: 2024
+    Version: 1.11.0
+*/
 
 class WanderLogApp {
   constructor() {

@@ -1,5 +1,5 @@
 // Service Worker Registration - WanderLog PWA
-// Version: 1.10.0
+// Version: 1.11.0
 
 let deferredPrompt;
 let updateAvailable = false;

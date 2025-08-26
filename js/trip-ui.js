@@ -1,5 +1,5 @@
 // Trip UI Component
-// Version: 1.10.0
+// Version: 1.11.0
 
 class TripUI {
   constructor() {
@@ -40,6 +40,8 @@ class TripUI {
     
     if (!upcomingContainer || !completedContainer) return;
 
+    // Reload trips from storage to ensure we have the latest data
+    this.tripManager.trips = this.tripManager.loadTrips();
     const trips = this.tripManager.getAllTrips();
     const currentDate = new Date();
     
@@ -277,7 +279,8 @@ class TripUI {
     const container = document.getElementById('trip-list');
     if (!container) return;
 
-    // Get all trips
+    // Reload trips from storage to ensure we have the latest data
+    this.tripManager.trips = this.tripManager.loadTrips();
     const trips = this.tripManager.getAllTrips();
     
     // If no trips exist, show empty state with options
@@ -786,13 +789,14 @@ class TripUI {
     // Use event delegation for dynamically created elements
     document.addEventListener('click', (e) => {
       // Only handle Add Trip button from home page now
-      if (e.target.id === 'addTripBtn') {
+      if (e.target.id === 'addTripBtn' || e.target.closest('#addTripBtn')) {
+        e.preventDefault();
         // Handle new Add Trip button from home page
         this.showAddTripModal();
       } else if (e.target.id === 'closeAddTripModal' || e.target.id === 'cancelTripBtn') {
+        e.preventDefault();
         this.hideAddTripModal();
       }
-      // Remove create-trip-btn handler as it's no longer used
     });
 
     document.addEventListener('submit', (e) => {
@@ -800,7 +804,6 @@ class TripUI {
         e.preventDefault();
         this.saveAddTripForm();
       }
-      // Remove trip-form handler as it's no longer used
     });
 
     document.addEventListener('change', (e) => {
@@ -810,6 +813,27 @@ class TripUI {
         this.updateAddPlaceButton();
       }
     });
+
+    // Add mobile-specific touch event handling
+    if (this.isMobileDevice()) {
+      this.setupMobileTouchEvents();
+    }
+  }
+
+  // Check if device is mobile
+  isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  // Setup mobile-specific touch events
+  setupMobileTouchEvents() {
+    // Prevent zoom on double-tap for form inputs
+    document.addEventListener('touchend', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+        e.preventDefault();
+        e.target.focus();
+      }
+    }, { passive: false });
   }
 
   // Show add trip modal (new home page modal)
@@ -817,10 +841,57 @@ class TripUI {
     const modal = document.getElementById('addTripModal');
     if (modal) {
       modal.classList.remove('hidden');
-      // Set minimum date to today
+      
+      // Set minimum date to today for both fields
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('tripStartDate').min = today;
-      document.getElementById('tripEndDate').min = today;
+      const startDateInput = document.getElementById('tripStartDate');
+      const endDateInput = document.getElementById('tripEndDate');
+      
+      if (startDateInput && endDateInput) {
+        startDateInput.min = today;
+        endDateInput.min = today;
+        
+        // Clear any existing values to prevent confusion
+        startDateInput.value = '';
+        endDateInput.value = '';
+        
+        // Add event listener for start date changes to update end date minimum
+        startDateInput.removeEventListener('change', this.handleStartDateChange);
+        startDateInput.addEventListener('change', this.handleStartDateChange);
+        
+        // Add event listener for end date changes to validate
+        endDateInput.removeEventListener('change', this.handleEndDateChange); 
+        endDateInput.addEventListener('change', this.handleEndDateChange);
+      }
+    }
+  }
+
+  // Handle start date change to update end date minimum
+  handleStartDateChange(event) {
+    const startDate = event.target.value;
+    const endDateInput = document.getElementById('tripEndDate');
+    
+    if (startDate && endDateInput) {
+      // Set minimum end date to start date (same day is allowed)
+      endDateInput.min = startDate;
+      
+      // Clear end date if it's before the new start date
+      if (endDateInput.value && endDateInput.value < startDate) {
+        endDateInput.value = '';
+      }
+    }
+  }
+
+  // Handle end date change to validate
+  handleEndDateChange(event) {
+    const endDate = event.target.value;
+    const startDateInput = document.getElementById('tripStartDate');
+    
+    if (startDateInput && startDateInput.value && endDate) {
+      if (endDate < startDateInput.value) {
+        alert('End date cannot be before start date');
+        event.target.value = '';
+      }
     }
   }
 
@@ -830,6 +901,20 @@ class TripUI {
     if (modal) {
       modal.classList.add('hidden');
       this.clearAddTripForm();
+      
+      // Reset current trip ID to ensure we're not in edit mode
+      this.currentTripId = null;
+      
+      // Remove event listeners to prevent memory leaks
+      const startDateInput = document.getElementById('tripStartDate');
+      const endDateInput = document.getElementById('tripEndDate');
+      
+      if (startDateInput) {
+        startDateInput.removeEventListener('change', this.handleStartDateChange);
+      }
+      if (endDateInput) {
+        endDateInput.removeEventListener('change', this.handleEndDateChange);
+      }
     }
   }
 
@@ -838,6 +923,19 @@ class TripUI {
     const form = document.getElementById('addTripForm');
     if (form) {
       form.reset();
+      
+      // Also clear min/max attributes
+      const startDateInput = document.getElementById('tripStartDate');
+      const endDateInput = document.getElementById('tripEndDate');
+      
+      if (startDateInput) {
+        startDateInput.removeAttribute('min');
+        startDateInput.removeAttribute('max');
+      }
+      if (endDateInput) {
+        endDateInput.removeAttribute('min'); 
+        endDateInput.removeAttribute('max');
+      }
     }
   }
 
@@ -862,19 +960,28 @@ class TripUI {
     }
 
     try {
+      let result;
       if (this.currentTripId) {
         // Update existing trip
-        this.tripManager.updateTrip(this.currentTripId, tripData);
+        result = this.tripManager.updateTrip(this.currentTripId, tripData);
         this.showNotification('Trip updated successfully!', 'success');
       } else {
         // Create new trip
-        this.tripManager.createTrip(tripData);
+        result = this.tripManager.createTrip(tripData);
         this.showNotification('Trip created successfully!', 'success');
       }
       
       // Hide modal and refresh display
       this.hideAddTripModal();
-      this.renderHomePageTrips();
+      
+      // Force refresh of home page trips with a small delay to ensure data is saved
+      setTimeout(() => {
+        this.renderHomePageTrips();
+        // Also refresh the main trips list if we're in trips view
+        if (document.getElementById('tripsView').classList.contains('active')) {
+          this.createTripListView();
+        }
+      }, 100);
       
     } catch (error) {
       console.error('Error saving trip:', error);
@@ -2563,6 +2670,16 @@ function openAccommodationModal(accommodationId = null) {
   }
   
   modal.classList.remove('hidden');
+  
+  // Trigger mobile date handler event
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('accommodationModalOpened'));
+    
+    // Also manually setup mobile fixes if handler exists
+    if (window.mobileDateHandler) {
+      window.mobileDateHandler.fixAccommodationModalDates();
+    }
+  }, 100);
 }
 
 // Close accommodation modal
@@ -2570,10 +2687,30 @@ function closeAccommodationModal() {
   const modal = document.getElementById('accommodationModal');
   if (modal) {
     modal.classList.add('hidden');
+    
     // Clear global state and editing ID
     selectedHotelData = null;
     confirmedHotelData = null;
     document.getElementById('accommodationForm').dataset.editingId = '';
+    
+    // Reset the form completely
+    document.getElementById('accommodationForm').reset();
+    
+    // Clear date restrictions and event listeners
+    const checkInInput = document.getElementById('accommodationCheckIn');
+    const checkOutInput = document.getElementById('accommodationCheckOut');
+    
+    if (checkInInput) {
+      checkInInput.removeAttribute('min');
+      checkInInput.removeAttribute('max');
+      checkInInput.removeEventListener('change', handleCheckInChange);
+    }
+    
+    if (checkOutInput) {
+      checkOutInput.removeAttribute('min');
+      checkOutInput.removeAttribute('max');
+      checkOutInput.removeEventListener('change', handleCheckOutChange);
+    }
   }
 }
 
@@ -2608,55 +2745,84 @@ function setAccommodationDateRestrictions() {
   
   if (!checkInInput || !checkOutInput) return;
   
-  // Set trip date boundaries
+  // Set trip date boundaries - restrict to trip dates only
   checkInInput.min = trip.startDate;
   checkInInput.max = trip.endDate;
   checkOutInput.min = trip.startDate;
   checkOutInput.max = trip.endDate;
   
-  // Get existing accommodations to prevent overlaps
-  const existingAccommodations = window.tripUI.tripManager.getAccommodations(window.tripUI.currentTripId) || [];
-  const currentEditingId = document.getElementById('accommodationForm').dataset.editingId;
+  // Clear any existing values that might be outside trip range
+  if (checkInInput.value && (checkInInput.value < trip.startDate || checkInInput.value > trip.endDate)) {
+    checkInInput.value = '';
+  }
+  if (checkOutInput.value && (checkOutInput.value < trip.startDate || checkOutInput.value > trip.endDate)) {
+    checkOutInput.value = '';
+  }
   
-  // Create a list of blocked dates
-  const blockedDates = new Set();
-  
-  existingAccommodations.forEach(accommodation => {
-    // Skip if we're editing the same accommodation
-    if (currentEditingId && accommodation.id === parseInt(currentEditingId)) {
-      return;
-    }
-    
-    const checkIn = new Date(accommodation.checkIn || accommodation.checkInDate);
-    const checkOut = new Date(accommodation.checkOut || accommodation.checkOutDate);
-    
-    // Add all dates in the range to blocked dates (excluding checkout date)
-    const currentDate = new Date(checkIn);
-    while (currentDate < checkOut) {
-      blockedDates.add(currentDate.toISOString().split('T')[0]);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-  });
+  // Remove existing event listeners to prevent duplicates
+  checkInInput.removeEventListener('change', handleCheckInChange);
+  checkOutInput.removeEventListener('change', handleCheckOutChange);
   
   // Add event listeners for date validation
-  checkInInput.addEventListener('change', function() {
-    validateAccommodationDates();
-    updateCheckOutMinDate();
-    
-    // Check if selected check-in date is blocked
-    if (this.value && blockedDates.has(this.value)) {
-      alert('This date is already booked by another accommodation. Please select a different date.');
-      this.value = '';
-      return;
-    }
-    
-    // Update checkout options based on blocked dates
-    updateCheckOutOptions(blockedDates);
-  });
+  checkInInput.addEventListener('change', handleCheckInChange);
+  checkOutInput.addEventListener('change', handleCheckOutChange);
+}
+
+// Handle check-in date changes
+function handleCheckInChange() {
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  const trip = window.tripUI ? window.tripUI.getCurrentTrip() : null;
   
-  checkOutInput.addEventListener('change', function() {
-    validateAccommodationDates();
-  });
+  if (!checkInInput.value || !trip) return;
+  
+  // Validate check-in is within trip dates
+  if (checkInInput.value < trip.startDate || checkInInput.value > trip.endDate) {
+    alert(`Check-in date must be between ${trip.startDate} and ${trip.endDate}`);
+    checkInInput.value = '';
+    return;
+  }
+  
+  // Set minimum check-out date (day after check-in)
+  const checkInDate = new Date(checkInInput.value);
+  checkInDate.setDate(checkInDate.getDate() + 1);
+  const nextDay = checkInDate.toISOString().split('T')[0];
+  
+  // Set check-out minimum and maximum
+  checkOutInput.min = nextDay;
+  checkOutInput.max = trip.endDate;
+  
+  // Clear check-out if it's invalid
+  if (checkOutInput.value && (checkOutInput.value <= checkInInput.value || checkOutInput.value > trip.endDate)) {
+    checkOutInput.value = '';
+  }
+  
+  validateAccommodationDates();
+}
+
+// Handle check-out date changes  
+function handleCheckOutChange() {
+  const checkInInput = document.getElementById('accommodationCheckIn');
+  const checkOutInput = document.getElementById('accommodationCheckOut');
+  const trip = window.tripUI ? window.tripUI.getCurrentTrip() : null;
+  
+  if (!checkOutInput.value || !trip) return;
+  
+  // Validate check-out is within trip dates
+  if (checkOutInput.value < trip.startDate || checkOutInput.value > trip.endDate) {
+    alert(`Check-out date must be between ${trip.startDate} and ${trip.endDate}`);
+    checkOutInput.value = '';
+    return;
+  }
+  
+  // Validate check-out is after check-in
+  if (checkInInput.value && checkOutInput.value <= checkInInput.value) {
+    alert('Check-out date must be after check-in date');
+    checkOutInput.value = '';
+    return;
+  }
+  
+  validateAccommodationDates();
 }
 
 // Update checkout date options based on blocked dates
