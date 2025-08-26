@@ -217,6 +217,38 @@
         </div>
     </div>
 
+    <!-- Hidden Debug Panel for Development -->
+    <div id="debugModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛠️ Developer Debug Panel</h3>
+                <button class="close-btn" onclick="closeDebugModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="debug-section">
+                    <h4>Cache Management</h4>
+                    <p>Clear all application data and caches (useful for testing fresh installs)</p>
+                    <button class="btn btn-danger" onclick="confirmClearCache()">🧹 Clear All Cache & Data</button>
+                </div>
+                
+                <div class="debug-section">
+                    <h4>Storage Information</h4>
+                    <div id="storageInfo">
+                        <p>Loading storage info...</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshStorageInfo()">🔄 Refresh Info</button>
+                </div>
+                
+                <div class="debug-section">
+                    <h4>App Information</h4>
+                    <p><strong>Version:</strong> 1.11.0</p>
+                    <p><strong>Environment:</strong> <span id="envInfo">Loading...</span></p>
+                    <p><strong>User Agent:</strong> <span id="userAgentInfo">Loading...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- App Shell -->
     <div id="app" class="app-shell hidden">
         <!-- Header -->
@@ -434,7 +466,7 @@
                         <div class="about-section">
                             <h3>📱 PWA Version</h3>
                             <div class="version-info">
-                                <span class="version-badge">v1.11.0</span>
+                                <span class="version-badge" id="versionBadge" onclick="handleVersionTap()">v1.11.0</span>
                                 <p>This is a Progressive Web App (PWA) that works seamlessly across all devices. Install it on your home screen for the best experience!</p>
                             </div>
                         </div>
@@ -671,8 +703,84 @@
     <script src="./js/map-manager.js"></script>
     <script src="./js/attraction-details.js"></script>
     <script src="./js/mobile-date-fix.js"></script>
+    <script src="./js/cache-cleaner.js"></script>
     <script src="./js/trip-ui.js"></script>
     <script src="./js/app.js" type="module"></script>
+    
+    <!-- Debug Panel JavaScript -->
+    <script>
+        // Debug Panel Functions
+        let versionTapCount = 0;
+        let versionTapTimer;
+
+        function handleVersionTap() {
+            versionTapCount++;
+            clearTimeout(versionTapTimer);
+            
+            if (versionTapCount >= 7) {
+                // Show debug panel after 7 taps
+                showDebugModal();
+                versionTapCount = 0;
+            } else {
+                // Reset counter after 2 seconds
+                versionTapTimer = setTimeout(() => {
+                    versionTapCount = 0;
+                }, 2000);
+            }
+        }
+
+        function showDebugModal() {
+            const modal = document.getElementById('debugModal');
+            modal.style.display = 'flex';
+            refreshStorageInfo();
+            updateDebugInfo();
+        }
+
+        function closeDebugModal() {
+            const modal = document.getElementById('debugModal');
+            modal.style.display = 'none';
+        }
+
+        function confirmClearCache() {
+            if (confirm('⚠️ This will clear ALL app data and reload the page. Continue?')) {
+                if (window.clearAllCache) {
+                    window.clearAllCache();
+                } else {
+                    alert('Cache cleaner not available. Please use browser developer console.');
+                }
+            }
+        }
+
+        async function refreshStorageInfo() {
+            const infoElement = document.getElementById('storageInfo');
+            
+            try {
+                if (window.getStorageInfo) {
+                    const info = await window.getStorageInfo();
+                    infoElement.innerHTML = `
+                        <p><strong>localStorage:</strong> ${info.localStorage} items</p>
+                        <p><strong>sessionStorage:</strong> ${info.sessionStorage} items</p>
+                        <p><strong>Service Worker Caches:</strong> ${info.caches}</p>
+                        <p><strong>Service Workers:</strong> ${info.serviceWorkers}</p>
+                        ${info.storageUsage ? `<p><strong>Storage Used:</strong> ${info.storageUsage}</p>` : ''}
+                        ${info.storageQuota ? `<p><strong>Storage Quota:</strong> ${info.storageQuota}</p>` : ''}
+                    `;
+                } else {
+                    infoElement.innerHTML = '<p>Storage info not available</p>';
+                }
+            } catch (error) {
+                infoElement.innerHTML = `<p>Error loading storage info: ${error.message}</p>`;
+            }
+        }
+
+        function updateDebugInfo() {
+            document.getElementById('envInfo').textContent = 
+                window.location.protocol === 'https:' ? 'Production/HTTPS' : 'Development/HTTP';
+            
+            document.getElementById('userAgentInfo').textContent = 
+                /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+        }
+    </script>
     
     <!-- Service Worker Registration -->
     <script>
