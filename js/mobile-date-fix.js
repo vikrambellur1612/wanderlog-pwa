@@ -52,42 +52,44 @@ class MobileDateHandler {
     input.setAttribute('pattern', '\\d{4}-\\d{2}-\\d{2}');
     input.setAttribute('placeholder', 'YYYY-MM-DD');
 
-    // Ensure proper validation on mobile
-    input.addEventListener('input', (e) => {
-      this.validateDateInput(e.target);
-    });
-
+    // Only validate when user actually changes the value
     input.addEventListener('change', (e) => {
       this.validateDateInput(e.target);
     });
 
-    // Force revalidation when min/max attributes change
-    const observer = new MutationObserver(() => {
-      this.validateDateInput(input);
-    });
-    
-    observer.observe(input, {
-      attributes: true,
-      attributeFilter: ['min', 'max']
+    // Also validate on blur to catch manual typing
+    input.addEventListener('blur', (e) => {
+      if (e.target.value && e.target.value.trim() !== '') {
+        this.validateDateInput(e.target);
+      }
     });
   }
 
   validateDateInput(input) {
-    if (!input.value) return;
+    // Only validate if the input actually has a value
+    if (!input.value || input.value.trim() === '') return;
 
     const inputDate = new Date(input.value);
     const minDate = input.min ? new Date(input.min) : null;
     const maxDate = input.max ? new Date(input.max) : null;
 
+    // Skip validation if dates are invalid
+    if (isNaN(inputDate.getTime())) return;
+
     let isValid = true;
     let errorMessage = '';
 
-    if (minDate && inputDate < minDate) {
+    if (minDate && !isNaN(minDate.getTime()) && inputDate < minDate) {
       isValid = false;
-      errorMessage = `Date cannot be before ${this.formatDate(minDate)}`;
+      const minFormatted = this.formatDate(minDate);
+      if (input.id === 'tripEndDate') {
+        errorMessage = `End date must be on or after ${minFormatted}`;
+      } else {
+        errorMessage = `Date cannot be before ${minFormatted}`;
+      }
     }
 
-    if (maxDate && inputDate > maxDate) {
+    if (maxDate && !isNaN(maxDate.getTime()) && inputDate > maxDate) {
       isValid = false;
       errorMessage = `Date cannot be after ${this.formatDate(maxDate)}`;
     }
@@ -96,10 +98,10 @@ class MobileDateHandler {
       input.style.borderColor = '#e53e3e';
       input.style.backgroundColor = '#fee';
       
-      // Show error message
+      // Show error message briefly
       this.showDateError(input, errorMessage);
       
-      // Clear the invalid value after a short delay
+      // Clear the invalid value after showing the error briefly
       setTimeout(() => {
         input.value = '';
         input.style.borderColor = '';

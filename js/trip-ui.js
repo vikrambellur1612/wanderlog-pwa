@@ -889,8 +889,20 @@ class TripUI {
     
     if (startDateInput && startDateInput.value && endDate) {
       if (endDate < startDateInput.value) {
-        alert('End date cannot be before start date');
-        event.target.value = '';
+        // Instead of immediately showing alert, give visual feedback
+        event.target.style.borderColor = '#e53e3e';
+        event.target.style.backgroundColor = '#fee';
+        
+        // Clear the invalid value after a brief moment
+        setTimeout(() => {
+          event.target.value = '';
+          event.target.style.borderColor = '';
+          event.target.style.backgroundColor = '';
+        }, 1500);
+      } else {
+        // Clear any previous error styling
+        event.target.style.borderColor = '';
+        event.target.style.backgroundColor = '';
       }
     }
   }
