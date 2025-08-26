@@ -35,18 +35,25 @@ class TripUI {
 
   // Render trips on home page (upcoming and completed)
   renderHomePageTrips() {
+    console.log('Rendering home page trips...');
+    
     const upcomingContainer = document.getElementById('upcomingTripsList');
     const completedContainer = document.getElementById('completedTripsList');
     
     if (!upcomingContainer || !completedContainer) return;
 
-    // Reload trips from storage to ensure we have the latest data
+    // Force reload trips from storage to ensure we have the latest data
     this.tripManager.trips = this.tripManager.loadTrips();
     const trips = this.tripManager.getAllTrips();
+    
+    console.log('Loaded trips for home page:', trips.length, trips.map(t => ({id: t.id, name: t.name, places: t.places?.length || 0})));
+    
     const currentDate = new Date();
     
     const upcomingTrips = trips.filter(trip => new Date(trip.endDate) >= currentDate);
     const completedTrips = trips.filter(trip => new Date(trip.endDate) < currentDate);
+
+    console.log('Upcoming trips:', upcomingTrips.length, 'Completed trips:', completedTrips.length);
 
     // Render upcoming trips
     if (upcomingTrips.length === 0) {
@@ -74,6 +81,7 @@ class TripUI {
       ).join('');
     }
 
+    console.log('Home page trips rendered successfully');
   }
 
   // Render trip card for home page
@@ -978,22 +986,32 @@ class TripUI {
         result = this.tripManager.updateTrip(this.currentTripId, tripData);
         this.showNotification('Trip updated successfully!', 'success');
       } else {
-        // Create new trip
+        // Create new trip - force fresh data reload first
+        console.log('Creating new trip with data:', tripData);
+        this.tripManager.trips = this.tripManager.loadTrips();
         result = this.tripManager.createTrip(tripData);
-        this.showNotification('Trip created successfully!', 'success');
+        if (result) {
+          this.showNotification('Trip created successfully!', 'success');
+          console.log('New trip created:', result.id, result.name);
+        } else {
+          throw new Error('Failed to create trip');
+        }
       }
       
       // Hide modal and refresh display
       this.hideAddTripModal();
       
-      // Force refresh of home page trips with a small delay to ensure data is saved
+      // Force refresh of home page trips with longer delay to ensure data persistence on mobile
       setTimeout(() => {
+        console.log('Refreshing UI after trip save...');
+        // Force reload data before rendering
+        this.tripManager.trips = this.tripManager.loadTrips();
         this.renderHomePageTrips();
         // Also refresh the main trips list if we're in trips view
         if (document.getElementById('tripsView').classList.contains('active')) {
           this.createTripListView();
         }
-      }, 100);
+      }, 300);
       
     } catch (error) {
       console.error('Error saving trip:', error);

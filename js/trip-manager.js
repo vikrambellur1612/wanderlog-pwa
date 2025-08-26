@@ -12,17 +12,38 @@ class TripManager {
   loadTrips() {
     try {
       const trips = localStorage.getItem('wanderlog_trips');
-      return trips ? JSON.parse(trips) : [];
+      const parsedTrips = trips ? JSON.parse(trips) : [];
+      
+      // Deep clone to ensure no reference issues
+      return JSON.parse(JSON.stringify(parsedTrips));
     } catch (error) {
       console.error('Error loading trips:', error);
       return [];
     }
   }
 
-  // Save trips to localStorage
+  // Save trips to localStorage with enhanced error handling and validation
   saveTrips() {
     try {
-      localStorage.setItem('wanderlog_trips', JSON.stringify(this.trips));
+      // Create a deep clone to avoid reference issues
+      const tripsToSave = JSON.parse(JSON.stringify(this.trips));
+      
+      // Validate data structure before saving
+      if (!Array.isArray(tripsToSave)) {
+        console.error('Invalid trips data structure:', tripsToSave);
+        return false;
+      }
+      
+      // Validate each trip has required fields
+      for (const trip of tripsToSave) {
+        if (!trip.id || !trip.name || !trip.startDate || !trip.endDate) {
+          console.error('Invalid trip data:', trip);
+          return false;
+        }
+      }
+      
+      localStorage.setItem('wanderlog_trips', JSON.stringify(tripsToSave));
+      console.log('Trips saved successfully:', tripsToSave.length, 'trips');
       return true;
     } catch (error) {
       console.error('Error saving trips:', error);
@@ -30,10 +51,15 @@ class TripManager {
     }
   }
 
-  // Create a new trip
+  // Create a new trip with enhanced data integrity
   createTrip(tripData) {
+    console.log('Creating new trip:', tripData);
+    
+    // Force reload trips from storage to ensure we have latest data
+    this.trips = this.loadTrips();
+    
     const trip = {
-      id: Date.now(),
+      id: Date.now() + Math.random(), // More unique ID to avoid conflicts
       name: tripData.name,
       startDate: tripData.startDate,
       endDate: tripData.endDate,
@@ -50,27 +76,40 @@ class TripManager {
     // Save immediately and verify save was successful
     const saveSuccessful = this.saveTrips();
     if (!saveSuccessful) {
-      // Remove trip from memory if save failed
+      console.error('Failed to save new trip:', tripData);
+      // Remove the trip from memory if save failed
       this.trips.pop();
-      throw new Error('Failed to save trip data');
+      return null;
     }
     
-    console.log('Trip created successfully:', trip.name, 'ID:', trip.id);
-    return trip;
+    console.log('Trip created successfully:', trip.id, 'Total trips:', this.trips.length);
+    return JSON.parse(JSON.stringify(trip)); // Return a clean copy
   }
 
-  // Update existing trip
+  // Update existing trip with enhanced data integrity
   updateTrip(tripId, updates) {
     const tripIndex = this.trips.findIndex(trip => trip.id === tripId);
     if (tripIndex !== -1) {
+      // Create a deep clone of the existing trip to avoid reference issues
+      const existingTrip = JSON.parse(JSON.stringify(this.trips[tripIndex]));
+      const updatesClone = JSON.parse(JSON.stringify(updates));
+      
       this.trips[tripIndex] = {
-        ...this.trips[tripIndex],
-        ...updates,
+        ...existingTrip,
+        ...updatesClone,
         updatedAt: new Date().toISOString()
       };
-      this.saveTrips();
-      return this.trips[tripIndex];
+      
+      const saveSuccess = this.saveTrips();
+      if (!saveSuccess) {
+        console.error('Failed to save trip update for tripId:', tripId);
+        return null;
+      }
+      
+      console.log('Trip updated successfully:', tripId, 'New data:', this.trips[tripIndex]);
+      return JSON.parse(JSON.stringify(this.trips[tripIndex])); // Return a clean copy
     }
+    console.error('Trip not found for update:', tripId);
     return null;
   }
 
@@ -95,30 +134,48 @@ class TripManager {
     return this.trips;
   }
 
-  // Add place to trip
+  // Add place to trip with enhanced data integrity
   async addPlaceToTrip(tripId, placeInfo) {
+    console.log('Adding place to trip:', tripId, placeInfo);
+    
+    // Force reload trips from storage to ensure we have latest data
+    this.trips = this.loadTrips();
+    
     const trip = this.getTrip(tripId);
-    if (!trip) return null;
+    if (!trip) {
+      console.error('Trip not found for addPlaceToTrip:', tripId);
+      return null;
+    }
 
     // Get detailed place information
     const placeDetails = await this.getPlaceDetails(placeInfo);
     
     const place = {
-      id: Date.now(),
+      id: Date.now() + Math.random(), // More unique ID to avoid conflicts
       ...placeDetails,
       addedAt: new Date().toISOString()
     };
 
-    trip.places.push(place);
-    this.updateTrip(tripId, { places: trip.places });
+    // Create a deep copy of places array to avoid reference issues
+    const updatedPlaces = [...trip.places, place];
     
-    // Trigger home page refresh if tripUI is available
-    if (window.tripUI && window.tripUI.renderHomePageTrips) {
-      setTimeout(() => {
-        window.tripUI.renderHomePageTrips();
-      }, 100);
+    const updateResult = this.updateTrip(tripId, { places: updatedPlaces });
+    
+    if (!updateResult) {
+      console.error('Failed to update trip with new place');
+      return null;
     }
     
+    // Trigger home page refresh with delay and force data reload
+    if (window.tripUI && window.tripUI.renderHomePageTrips) {
+      setTimeout(() => {
+        // Force reload of trip data before rendering
+        window.tripUI.tripManager.trips = window.tripUI.tripManager.loadTrips();
+        window.tripUI.renderHomePageTrips();
+      }, 200);
+    }
+    
+    console.log('Place added successfully to trip:', tripId, place);
     return place;
   }
 
